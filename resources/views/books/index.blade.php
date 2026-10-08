@@ -13,6 +13,10 @@
         <div class="space-x-4 text-sm font-medium">
             <a href="/dashboard" class="hover:text-indigo-200">Dashboard</a>
             <a href="/books" class="underline underline-offset-4 decoration-2 decoration-indigo-400">Books Catalog</a>
+            <a href="{{ route('patrons.index') }}" class="hover:text-indigo-200">Patrons</a>
+            <a href="{{ route('loans.create') }}" class="hover:text-indigo-200">Issue Book</a>
+            <a href="{{ route('loans.return.form') }}" class="hover:text-indigo-200">Return Book</a>
+            <a href="{{ route('loans.index') }}" class="hover:text-indigo-200">Loans</a>
         </div>
     </nav>
 
@@ -30,6 +34,12 @@
         @if(session('success'))
             <div class="mb-6 p-4 bg-emerald-100 border border-emerald-400 text-emerald-800 rounded-lg shadow-sm">
                 {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-6 p-4 bg-rose-100 border border-rose-400 text-rose-700 rounded-lg shadow-sm">
+                {{ session('error') }}
             </div>
         @endif
 

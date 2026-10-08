@@ -13,6 +13,10 @@
         <div class="space-x-4 text-sm font-medium">
             <a href="/dashboard" class="hover:text-indigo-200">Dashboard</a>
             <a href="{{ route('books.index') }}" class="hover:text-indigo-200">Books Catalog</a>
+            <a href="{{ route('patrons.index') }}" class="hover:text-indigo-200">Patrons</a>
+            <a href="{{ route('loans.create') }}" class="hover:text-indigo-200">Issue Book</a>
+            <a href="{{ route('loans.return.form') }}" class="hover:text-indigo-200">Return Book</a>
+            <a href="{{ route('loans.index') }}" class="hover:text-indigo-200">Loans</a>
         </div>
     </nav>
 

@@ -70,6 +70,12 @@ class BookController extends Controller
 
     public function destroy(Book $book)
     {
+        // Circulation module: keep borrowing history intact.
+        if ($book->loans()->exists()) {
+            return redirect()->route('books.index')
+                ->with('error', 'This book has borrowing records and cannot be deleted.');
+        }
+
         $book->delete();
 
         return redirect()->route('books.index')->with('success', 'Book deleted successfully!');

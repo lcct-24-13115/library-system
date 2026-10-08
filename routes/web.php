@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\LoanController;
+use App\Http\Controllers\PatronController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +21,14 @@ Route::middleware('auth')->group(function () {
 
     // Books Resource Routes
     Route::resource('books', BookController::class);
+
+    // Patrons (borrowers)
+    Route::resource('patrons', PatronController::class)->except(['show']);
+
+    // Circulation: Issue Book & Return Book
+    Route::get('/circulation/return', [LoanController::class, 'returnForm'])->name('loans.return.form');
+    Route::post('/loans/{loan}/return', [LoanController::class, 'markReturned'])->name('loans.return');
+    Route::resource('loans', LoanController::class)->only(['index', 'create', 'store']);
 });
 
 require __DIR__.'/auth.php';
