@@ -15,19 +15,20 @@
             : 'hover:text-indigo-200';
     @endphp
 
-    <nav class="bg-indigo-900 text-white px-6 py-4 flex flex-col md:flex-row md:justify-between md:items-center gap-3 shadow-md">
+    <nav class="print:hidden bg-indigo-900 text-white px-6 py-4 flex flex-col md:flex-row md:justify-between md:items-center gap-3 shadow-md">
         <h1 class="text-xl font-bold tracking-wide">📚 SALRC Library System</h1>
         <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm font-medium">
-            <a href="/dashboard" class="hover:text-indigo-200">Dashboard</a>
+            <a href="{{ route('dashboard') }}" class="{{ $link(request()->routeIs('dashboard')) }}">Dashboard</a>
             <a href="{{ route('books.index') }}" class="{{ $link(request()->routeIs('books.*')) }}">Books Catalog</a>
             <a href="{{ route('patrons.index') }}" class="{{ $link(request()->routeIs('patrons.*')) }}">Patrons</a>
             <a href="{{ route('loans.create') }}" class="{{ $link(request()->routeIs('loans.create')) }}">Issue Book</a>
             <a href="{{ route('loans.return.form') }}" class="{{ $link(request()->routeIs('loans.return.form')) }}">Return Book</a>
             <a href="{{ route('loans.index') }}" class="{{ $link(request()->routeIs('loans.index')) }}">Loans</a>
+            <a href="{{ route('reports.index') }}" class="{{ $link(request()->routeIs('reports.*')) }}">Reports</a>
         </div>
     </nav>
 
-    <div class="@yield('width', 'max-w-6xl') mx-auto py-10 px-4">
+    <div class="@yield('width', 'max-w-6xl') mx-auto py-10 px-4 print:py-0">
         @if(session('success'))
             <div class="mb-6 p-4 bg-emerald-100 border border-emerald-400 text-emerald-800 rounded-lg shadow-sm">
                 {{ session('success') }}

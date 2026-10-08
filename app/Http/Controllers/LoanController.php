@@ -176,6 +176,54 @@ class LoanController extends Controller
         return back()->with('success', $message);
     }
 
+    /**
+     * Renew (extend) a loan that is still out.
+     * New due date = later of (current due date, today) + the days entered.
+     * Renewals are never blocked by overdue status or fines; only an
+     * optional cap (config library.max_renewals) can stop them.
+     */
+    public function renew(Request $request, Loan $loan)
+    {
+        $validated = $request->validate([
+            'days'    => ['required', 'integer', 'min:1', 'max:365'],
+            'remarks' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $loan = DB::transaction(function () use ($loan, $validated) {
+            $loan = Loan::whereKey($loan->id)->lockForUpdate()->firstOrFail();
+
+            if ($loan->isReturned()) {
+                throw ValidationException::withMessages([
+                    'loan' => 'This book was already returned and cannot be renewed.',
+                ]);
+            }
+
+            $max = config('library.max_renewals');
+
+            if ($max !== null && $loan->renewal_count >= $max) {
+                throw ValidationException::withMessages([
+                    'loan' => "This loan has reached the maximum of {$max} renewals.",
+                ]);
+            }
+
+            $base = $loan->due_date->gt(today()) ? $loan->due_date->copy() : today();
+
+            $loan->update([
+                'original_due_date' => $loan->original_due_date ?? $loan->due_date,
+                'due_date'          => $base->addDays((int) $validated['days']),
+                'renewal_count'     => $loan->renewal_count + 1,
+                'last_renewed_at'   => now(),
+                'remarks'           => filled($validated['remarks'] ?? null) ? $validated['remarks'] : $loan->remarks,
+            ]);
+
+            return $loan;
+        });
+
+        $loan->load('book', 'patron');
+
+        return back()->with('success', "Renewed \"{$loan->book->title}\" for {$loan->patron->name}. New due date: {$loan->due_date->format('M d, Y')}.");
+    }
+
     /** Search by book title/accession no. or patron name/ID number. */
     private function applySearch($query, string $search)
     {

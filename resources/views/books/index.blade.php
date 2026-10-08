@@ -17,6 +17,7 @@
             <a href="{{ route('loans.create') }}" class="hover:text-indigo-200">Issue Book</a>
             <a href="{{ route('loans.return.form') }}" class="hover:text-indigo-200">Return Book</a>
             <a href="{{ route('loans.index') }}" class="hover:text-indigo-200">Loans</a>
+            <a href="{{ route('reports.index') }}" class="hover:text-indigo-200">Reports</a>
         </div>
     </nav>
 
@@ -50,7 +51,7 @@
                     type="text" 
                     name="search" 
                     value="{{ request('search') }}" 
-                    placeholder="Search by Title, Author, Category, or Accession No..." 
+                    placeholder="Search by Title, Author, Subject, Call No., Publisher, ISBN or Accession No..." 
                     class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500"
                 >
                 <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-5 py-2 rounded-lg text-sm transition">
@@ -81,7 +82,15 @@
                     @forelse($books as $book)
                         <tr class="hover:bg-slate-50 transition">
                             <td class="p-4 font-bold text-indigo-900">{{ $book->accession_number }}</td>
-                            <td class="p-4 font-medium text-slate-800">{{ $book->title }}</td>
+                            <td class="p-4 font-medium text-slate-800">
+                                <a href="{{ route('books.show', $book->id) }}" class="hover:text-indigo-700 hover:underline">{{ $book->title }}</a>
+                                @if($book->subtitle)<span class="text-slate-500 font-normal">: {{ $book->subtitle }}</span>@endif
+                                @if($book->call_number || $book->media_type)
+                                    <div class="text-xs text-slate-500 font-normal mt-0.5">
+                                        {{ $book->call_number }}@if($book->call_number && $book->media_type) &middot; @endif{{ $book->media_type ? ucfirst($book->media_type) : '' }}
+                                    </div>
+                                @endif
+                            </td>
                             <td class="p-4 text-slate-600">{{ $book->author }}</td>
                             <td class="p-4">
                                 <span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-semibold">
@@ -90,6 +99,9 @@
                             </td>
                             <td class="p-4 font-semibold text-slate-700">{{ $book->available_copies }} / {{ $book->total_copies }}</td>
                             <td class="p-4 text-center space-x-2">
+                                <a href="{{ route('books.show', $book->id) }}" class="inline-block bg-slate-700 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-slate-800 shadow-sm transition">
+                                    View
+                                </a>
                                 <a href="{{ route('books.edit', $book->id) }}" class="inline-block bg-amber-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-amber-600 shadow-sm transition">
                                     Edit
                                 </a>

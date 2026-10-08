@@ -26,12 +26,17 @@ class Loan extends Model
         'due_date',
         'returned_at',
         'remarks',
+        'renewal_count',
+        'original_due_date',
+        'last_renewed_at',
     ];
 
     protected $casts = [
         'issued_at'   => 'datetime',
         'due_date'    => 'date',
         'returned_at' => 'datetime',
+        'original_due_date' => 'date',
+        'last_renewed_at'   => 'datetime',
     ];
 
     /* ---------------------------------------------------------------

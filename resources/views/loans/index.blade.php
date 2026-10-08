@@ -75,18 +75,32 @@
                             <div class="text-xs text-indigo-900 font-bold">{{ $loan->book->accession_number }}</div>
                         </td>
                         <td class="p-4 text-slate-600">{{ $loan->issued_at->format('M d, Y') }}</td>
-                        <td class="p-4 text-slate-600">{{ $loan->due_date->format('M d, Y') }}</td>
+                        <td class="p-4 text-slate-600">
+                            {{ $loan->due_date->format('M d, Y') }}
+                            @if($loan->renewal_count > 0)
+                                <div class="text-xs text-indigo-600">Renewed {{ $loan->renewal_count }}&times;</div>
+                            @endif
+                        </td>
                         <td class="p-4 text-slate-600">{{ $loan->returned_at?->format('M d, Y') ?? '—' }}</td>
                         <td class="p-4">@include('loans._status', ['loan' => $loan])</td>
                         <td class="p-4 text-slate-600 max-w-xs truncate" title="{{ $loan->remarks }}">{{ $loan->remarks ?? '—' }}</td>
                         <td class="p-4 text-center">
                             @unless($loan->isReturned())
-                                <form action="{{ route('loans.return', $loan) }}" method="POST" onsubmit="return confirm('Mark this book as returned?');">
-                                    @csrf
-                                    <button type="submit" class="bg-emerald-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-emerald-700 shadow-sm transition">
-                                        Return
-                                    </button>
-                                </form>
+                                <div class="flex gap-1 justify-center">
+                                    <form action="{{ route('loans.renew', $loan) }}" method="POST" onsubmit="return confirm('Renew for {{ config('library.loan_days', 7) }} more days?');">
+                                        @csrf
+                                        <input type="hidden" name="days" value="{{ config('library.loan_days', 7) }}">
+                                        <button type="submit" class="bg-indigo-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-indigo-700 shadow-sm transition">
+                                            Renew
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('loans.return', $loan) }}" method="POST" onsubmit="return confirm('Mark this book as returned?');">
+                                        @csrf
+                                        <button type="submit" class="bg-emerald-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-emerald-700 shadow-sm transition">
+                                            Return
+                                        </button>
+                                    </form>
+                                </div>
                             @endunless
                         </td>
                     </tr>

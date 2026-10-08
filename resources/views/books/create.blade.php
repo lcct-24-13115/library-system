@@ -17,10 +17,11 @@
             <a href="{{ route('loans.create') }}" class="hover:text-indigo-200">Issue Book</a>
             <a href="{{ route('loans.return.form') }}" class="hover:text-indigo-200">Return Book</a>
             <a href="{{ route('loans.index') }}" class="hover:text-indigo-200">Loans</a>
+            <a href="{{ route('reports.index') }}" class="hover:text-indigo-200">Reports</a>
         </div>
     </nav>
 
-    <div class="max-w-3xl mx-auto py-10 px-4">
+    <div class="max-w-4xl mx-auto py-10 px-4">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-extrabold text-slate-900">Add New Book Record</h2>
             <a href="{{ route('books.index') }}" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
@@ -42,37 +43,7 @@
             <form action="{{ route('books.store') }}" method="POST" class="space-y-4">
                 @csrf
 
-                <div>
-                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Accession Number</label>
-                    <input type="text" name="accession_number" required placeholder="e.g. ACC-2026-001" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Book Title</label>
-                    <input type="text" name="title" required placeholder="e.g. Introduction to Information Technology" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Author</label>
-                        <input type="text" name="author" required placeholder="Author name" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">ISBN (Optional)</label>
-                        <input type="text" name="isbn" placeholder="978-3-16-148410-0" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Category</label>
-                        <input type="text" name="category" placeholder="e.g. Technology, Science, Fiction" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Total Copies</label>
-                        <input type="number" name="total_copies" min="1" value="1" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                    </div>
-                </div>
+                @include('books._form')
 
                 <div class="pt-4 flex justify-end space-x-3">
                     <a href="{{ route('books.index') }}" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm hover:bg-slate-50 font-medium">Cancel</a>
