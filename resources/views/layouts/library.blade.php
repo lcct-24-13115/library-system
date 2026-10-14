@@ -27,6 +27,9 @@
             <a href="{{ route('reservations.index') }}" class="{{ $link(request()->routeIs('reservations.*')) }}">Reservations</a>
             <a href="{{ route('attendance.index') }}" class="{{ $link(request()->routeIs('attendance.*')) }}">Attendance</a>
             <a href="{{ route('reports.index') }}" class="{{ $link(request()->routeIs('reports.*')) }}">Reports</a>
+            @if(auth()->check() && auth()->user()->isAdmin())
+                <a href="{{ route('users.index') }}" class="{{ $link(request()->routeIs('users.*')) }}">Users</a>
+            @endif
         </div>
     </nav>
 

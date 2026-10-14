@@ -50,6 +50,15 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Correct credentials, but the account has been deactivated by an admin.
+        if (! Auth::user()->is_active) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'This account has been deactivated. Please contact the library administrator.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

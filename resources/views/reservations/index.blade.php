@@ -92,10 +92,12 @@
                                     @csrf
                                     <button type="submit" class="bg-emerald-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-emerald-700 shadow-sm transition">Mark Fulfilled</button>
                                 </form>
-                                <form action="{{ route('reservations.cancel', $r) }}" method="POST" class="inline-block" onsubmit="return confirm('Cancel this reservation?');">
-                                    @csrf
-                                    <button type="submit" class="bg-rose-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-rose-700 shadow-sm transition">Cancel</button>
-                                </form>
+                                @if(auth()->user()->canManage())
+                                    <form action="{{ route('reservations.cancel', $r) }}" method="POST" class="inline-block" onsubmit="return confirm('Cancel this reservation?');">
+                                        @csrf
+                                        <button type="submit" class="bg-rose-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-rose-700 shadow-sm transition">Cancel</button>
+                                    </form>
+                                @endif
                             @else
                                 <span class="text-slate-300">&mdash;</span>
                             @endif

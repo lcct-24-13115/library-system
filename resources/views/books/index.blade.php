@@ -27,9 +27,11 @@
                 <h2 class="text-3xl font-extrabold text-slate-900">Book Catalog</h2>
                 <p class="text-slate-500 text-sm">Manage and track library book inventory</p>
             </div>
-            <a href="{{ route('books.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition text-center">
-                + Add New Book
-            </a>
+            @if(auth()->user()->canManage())
+                <a href="{{ route('books.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition text-center">
+                    + Add New Book
+                </a>
+            @endif
         </div>
 
         @if(session('success'))
@@ -102,16 +104,18 @@
                                 <a href="{{ route('books.show', $book->id) }}" class="inline-block bg-slate-700 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-slate-800 shadow-sm transition">
                                     View
                                 </a>
-                                <a href="{{ route('books.edit', $book->id) }}" class="inline-block bg-amber-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-amber-600 shadow-sm transition">
-                                    Edit
-                                </a>
-                                <form action="{{ route('books.destroy', $book->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this book?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="bg-rose-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-rose-700 shadow-sm transition">
-                                        Delete
-                                    </button>
-                                </form>
+                                @if(auth()->user()->canManage())
+                                    <a href="{{ route('books.edit', $book->id) }}" class="inline-block bg-amber-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-amber-600 shadow-sm transition">
+                                        Edit
+                                    </a>
+                                    <form action="{{ route('books.destroy', $book->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this book?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="bg-rose-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-rose-700 shadow-sm transition">
+                                            Delete
+                                        </button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @empty

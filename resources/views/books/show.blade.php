@@ -17,7 +17,9 @@
         <div class="flex gap-2 print:hidden">
             <a href="{{ route('books.index') }}" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm hover:bg-slate-50 font-medium">&larr; Catalog</a>
             <a href="{{ route('reservations.create', ['accession_number' => $book->accession_number]) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 shadow-sm">Reserve</a>
-            <a href="{{ route('books.edit', $book->id) }}" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-semibold hover:bg-amber-600 shadow-sm">Edit</a>
+            @if(auth()->user()->canManage())
+                <a href="{{ route('books.edit', $book->id) }}" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-semibold hover:bg-amber-600 shadow-sm">Edit</a>
+            @endif
             <button onclick="window.print()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-900 shadow-sm">Print</button>
         </div>
     </div>

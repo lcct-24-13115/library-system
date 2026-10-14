@@ -8,7 +8,9 @@
             <h2 class="text-3xl font-extrabold text-slate-900">Patrons</h2>
             <p class="text-slate-500 text-sm">Registered borrowers</p>
         </div>
-        <a href="{{ route('patrons.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition text-center">+ Add New Patron</a>
+        @if(auth()->user()->canManage())
+            <a href="{{ route('patrons.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition text-center">+ Add New Patron</a>
+        @endif
     </div>
 
     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6">
@@ -54,12 +56,14 @@
                         </td>
                         <td class="p-4 text-center space-x-2 whitespace-nowrap">
                             <a href="{{ route('patrons.show', $patron) }}" class="inline-block bg-indigo-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-indigo-700 shadow-sm transition">Profile</a>
-                            <a href="{{ route('patrons.edit', $patron) }}" class="inline-block bg-amber-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-amber-600 shadow-sm transition">Edit</a>
-                            <form action="{{ route('patrons.destroy', $patron) }}" method="POST" class="inline-block" onsubmit="return confirm('Delete this patron?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="bg-rose-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-rose-700 shadow-sm transition">Delete</button>
-                            </form>
+                            @if(auth()->user()->canManage())
+                                <a href="{{ route('patrons.edit', $patron) }}" class="inline-block bg-amber-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-amber-600 shadow-sm transition">Edit</a>
+                                <form action="{{ route('patrons.destroy', $patron) }}" method="POST" class="inline-block" onsubmit="return confirm('Delete this patron?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="bg-rose-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-rose-700 shadow-sm transition">Delete</button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                 @empty

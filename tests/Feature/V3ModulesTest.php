@@ -41,7 +41,7 @@ class V3ModulesTest extends TestCase
 
     private function login(): User
     {
-        $user = User::factory()->create();
+        $user = User::factory()->librarian()->create();
         $this->actingAs($user);
 
         return $user;

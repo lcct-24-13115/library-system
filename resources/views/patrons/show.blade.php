@@ -22,7 +22,9 @@
             <a href="{{ route('patrons.index') }}" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm hover:bg-slate-50 font-medium">&larr; Patrons</a>
             <a href="{{ route('loans.create', ['patron_id_number' => $patron->id_number]) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 shadow-sm">Issue Book</a>
             <a href="{{ route('reservations.create', ['patron_id_number' => $patron->id_number]) }}" class="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-lg text-sm font-semibold hover:bg-indigo-200 shadow-sm">Reserve Book</a>
-            <a href="{{ route('patrons.edit', $patron) }}" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-semibold hover:bg-amber-600 shadow-sm">Edit</a>
+            @if(auth()->user()->canManage())
+                <a href="{{ route('patrons.edit', $patron) }}" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-semibold hover:bg-amber-600 shadow-sm">Edit</a>
+            @endif
             <button onclick="window.print()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-900 shadow-sm">Print</button>
         </div>
     </div>

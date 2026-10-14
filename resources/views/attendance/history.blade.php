@@ -57,11 +57,13 @@
                         <td class="p-4">{{ $v->patron->patron_type }}</td>
                         <td class="p-4 text-slate-500">{{ $v->remarks ?? '—' }}</td>
                         <td class="p-4 text-right print:hidden">
-                            <form action="{{ route('attendance.destroy', $v) }}" method="POST" onsubmit="return confirm('Remove this visit entry?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-rose-600 hover:text-rose-800 text-xs font-semibold">Remove</button>
-                            </form>
+                            @if(auth()->user()->canManage())
+                                <form action="{{ route('attendance.destroy', $v) }}" method="POST" onsubmit="return confirm('Remove this visit entry?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-rose-600 hover:text-rose-800 text-xs font-semibold">Remove</button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                 @empty
