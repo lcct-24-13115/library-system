@@ -39,7 +39,7 @@
                 @forelse($patrons as $patron)
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-4 font-bold text-indigo-900">{{ $patron->id_number }}</td>
-                        <td class="p-4 font-medium text-slate-800">{{ $patron->name }}</td>
+                        <td class="p-4 font-medium text-slate-800"><a href="{{ route('patrons.show', $patron) }}" class="hover:text-indigo-700 hover:underline">{{ $patron->name }}</a></td>
                         <td class="p-4">
                             <span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-semibold">{{ $patron->patron_type }}</span>
                         </td>
@@ -53,6 +53,7 @@
                             @endif
                         </td>
                         <td class="p-4 text-center space-x-2 whitespace-nowrap">
+                            <a href="{{ route('patrons.show', $patron) }}" class="inline-block bg-indigo-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-indigo-700 shadow-sm transition">Profile</a>
                             <a href="{{ route('patrons.edit', $patron) }}" class="inline-block bg-amber-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-amber-600 shadow-sm transition">Edit</a>
                             <form action="{{ route('patrons.destroy', $patron) }}" method="POST" class="inline-block" onsubmit="return confirm('Delete this patron?');">
                                 @csrf

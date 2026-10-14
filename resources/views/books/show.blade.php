@@ -16,6 +16,7 @@
         </div>
         <div class="flex gap-2 print:hidden">
             <a href="{{ route('books.index') }}" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm hover:bg-slate-50 font-medium">&larr; Catalog</a>
+            <a href="{{ route('reservations.create', ['accession_number' => $book->accession_number]) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 shadow-sm">Reserve</a>
             <a href="{{ route('books.edit', $book->id) }}" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-semibold hover:bg-amber-600 shadow-sm">Edit</a>
             <button onclick="window.print()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-900 shadow-sm">Print</button>
         </div>
@@ -95,6 +96,12 @@
                 <p class="text-3xl font-extrabold {{ $book->available_copies > 0 ? 'text-emerald-600' : 'text-rose-600' }}">
                     {{ $book->available_copies }} <span class="text-base text-slate-500 font-semibold">of {{ $book->total_copies }} available</span>
                 </p>
+                @php $pendingReservations = $book->reservations()->pending()->count(); @endphp
+                @if($pendingReservations > 0)
+                    <p class="mt-2 text-sm text-indigo-700 font-semibold">
+                        <a href="{{ route('reservations.index', ['search' => $book->accession_number]) }}" class="hover:underline">{{ $pendingReservations }} pending {{ \Illuminate\Support\Str::plural('reservation', $pendingReservations) }}</a>
+                    </p>
+                @endif
                 <dl class="grid grid-cols-3 gap-y-2 text-sm mt-4">
                     @foreach($rows([
                         'Library' => $book->library,

@@ -21,17 +21,20 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Patron ID Number</label>
-                    <input type="text" name="patron_id_number" value="{{ old('patron_id_number') }}" required autofocus autocomplete="off"
+                    <input type="text" name="patron_id_number" value="{{ old('patron_id_number', request('patron_id_number')) }}" required autofocus autocomplete="off"
                            placeholder="e.g. 2026-0001"
                            class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Book Accession Number</label>
-                    <input type="text" name="accession_number" value="{{ old('accession_number') }}" required autocomplete="off"
+                    <input type="text" name="accession_number" value="{{ old('accession_number', request('accession_number')) }}" required autocomplete="off"
                            placeholder="e.g. ACC-2026-001"
                            class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
                 </div>
             </div>
+
+            {{-- v3: live patron / book preview (AJAX) --}}
+            @include('partials.lookup-preview', ['mode' => 'issue'])
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

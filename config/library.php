@@ -25,4 +25,16 @@ return [
     */
     'max_renewals' => env('LIBRARY_MAX_RENEWALS') !== null ? (int) env('LIBRARY_MAX_RENEWALS') : null,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Attendance: duplicate-scan window (minutes)
+    |--------------------------------------------------------------------------
+    |
+    | Barcode scanners sometimes read a card twice. A second scan of the same
+    | patron within this many minutes is ignored (reported as "already logged").
+    | Set LIBRARY_ATTENDANCE_DUPLICATE_MINUTES=0 to log every single scan.
+    |
+    */
+    'attendance_duplicate_minutes' => (int) env('LIBRARY_ATTENDANCE_DUPLICATE_MINUTES', 5),
+
 ];

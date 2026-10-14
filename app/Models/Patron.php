@@ -26,6 +26,16 @@ class Patron extends Model
         return $this->hasMany(Loan::class);
     }
 
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active';

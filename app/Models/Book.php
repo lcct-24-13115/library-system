@@ -60,6 +60,11 @@ class Book extends Model
         return $this->hasMany(Loan::class);
     }
 
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
     /** Subjects as an array (stored semicolon-separated). */
     public function subjectList(): array
     {

@@ -53,10 +53,10 @@ class PatronController extends Controller
 
     public function destroy(Patron $patron)
     {
-        // Keep borrowing history intact: patrons with loan records can't be deleted.
-        if ($patron->loans()->exists()) {
+        // Keep history intact: patrons with loan, attendance or reservation records can't be deleted.
+        if ($patron->loans()->exists() || $patron->attendances()->exists() || $patron->reservations()->exists()) {
             return back()->withErrors([
-                'delete' => "{$patron->name} has borrowing records and can't be deleted. Set the patron to Inactive instead.",
+                'delete' => "{$patron->name} has borrowing, attendance or reservation records and can't be deleted. Set the patron to Inactive instead.",
             ]);
         }
 
