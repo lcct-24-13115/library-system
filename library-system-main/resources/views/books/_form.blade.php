@@ -134,10 +134,49 @@
 <h3 class="text-sm font-extrabold text-indigo-900 uppercase tracking-wider border-b border-slate-200 pb-2 pt-4">Classification &amp; Subjects</h3>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    @php
+        // Split a stored call number into an optional legacy prefix + the rest (no DB column; recombined on submit).
+        $callPrefixes = config('legacy_lists.call_prefixes');
+        $fullCall = (string) $val('call_number');
+        $selPrefix = '';
+        $callRest = $fullCall;
+        $sorted = $callPrefixes;
+        usort($sorted, fn ($a, $b2) => strlen($b2) <=> strlen($a));
+        foreach ($sorted as $pfx) {
+            if (str_starts_with($fullCall, $pfx . ' ')) {
+                $selPrefix = $pfx;
+                $callRest = substr($fullCall, strlen($pfx) + 1);
+                break;
+            }
+        }
+    @endphp
     <div>
         <label class="{{ $lbl }}">Call Number</label>
-        <input type="text" name="call_number" value="{{ $val('call_number') }}" placeholder="e.g. 688.725 D767l" class="{{ $in }}">
+        <div class="flex gap-2">
+            <select id="call_prefix" aria-label="Prefix" class="border border-slate-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                <option value="">Prefix</option>
+                @foreach($callPrefixes as $pfx)
+                    <option value="{{ $pfx }}" @selected($selPrefix === $pfx)>{{ $pfx }}</option>
+                @endforeach
+            </select>
+            <input type="text" id="call_number_main" value="{{ $callRest }}" placeholder="e.g. 688.725 D767l" class="{{ $in }}">
+        </div>
+        <input type="hidden" name="call_number" id="call_number_full" value="{{ $fullCall }}">
     </div>
+    <script>
+        (function () {
+            var sel = document.getElementById('call_prefix');
+            var main = document.getElementById('call_number_main');
+            var full = document.getElementById('call_number_full');
+            function sync() {
+                var rest = main.value.trim();
+                full.value = sel.value ? (sel.value + (rest ? ' ' + rest : '')) : rest;
+            }
+            sel.addEventListener('change', sync);
+            main.addEventListener('input', sync);
+            sync();
+        })();
+    </script>
     <div>
         <label class="{{ $lbl }}">Genre / Form</label>
         <select name="genre" class="{{ $in }}">
@@ -200,7 +239,12 @@
     </div>
     <div>
         <label class="{{ $lbl }}">Dealer / Donor</label>
-        <input type="text" name="dealer_donor" value="{{ $val('dealer_donor') }}" class="{{ $in }}">
+        <input type="text" name="dealer_donor" value="{{ $val('dealer_donor') }}" list="dealer-list" class="{{ $in }}">
+        <datalist id="dealer-list">
+            @foreach(config('legacy_lists.dealers') as $opt)
+                <option value="{{ $opt }}">
+            @endforeach
+        </datalist>
     </div>
     <div>
         <label class="{{ $lbl }}">Price</label>
