@@ -17,7 +17,7 @@
 
 @php
     // Customize here — logo and background are editable in one place.
-    $logo = asset('images/salrc-logo.svg');
+    $logo = asset('images/salrc-logo-full.png');
 @endphp
 
 <body class="login-page">
@@ -48,7 +48,7 @@
                 <div class="lf-field">
                     <label for="email">Email</label>
                     <input id="email" name="email" type="email" value="{{ old('email') }}"
-                           placeholder="salrc@college.edu" required autofocus autocomplete="username">
+                           placeholder="salrc@lcctanauan.edu.ph" required autofocus autocomplete="username">
                     @error('email')
                         <p class="err">{{ $message }}</p>
                     @enderror

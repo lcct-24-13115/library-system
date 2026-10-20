@@ -30,7 +30,7 @@
 
 <aside class="sidebar print:hidden">
     <a href="{{ route('dashboard') }}" class="brand" aria-label="SALRC Library System home">
-        <div class="brand-mark"><x-icon name="library" :size="20" /></div>
+        <img src="{{ asset('images/salrc-logo-full.png') }}" alt="Saint Augustine Learning Resource Center" style="width:56px;height:56px;object-fit:contain;flex-shrink:0;">
         <div>
             <div class="brand-title">SALRC</div>
             <div class="brand-sub">Library System</div>
