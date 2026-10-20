@@ -25,6 +25,7 @@ class Loan extends Model
         'issued_at',
         'due_date',
         'returned_at',
+        'outcome',
         'remarks',
         'renewal_count',
         'original_due_date',
@@ -111,6 +112,22 @@ class Loan extends Model
         $returnDay = $this->returned_at->copy()->startOfDay();
 
         return $this->due_date->lt($returnDay) ? (int) $this->due_date->diffInDays($returnDay) : 0;
+    }
+
+    /** Phase 3: how a closed loan ended. NULL (older rows) counts as 'returned'. */
+    public const OUTCOME_RETURNED = 'returned';
+    public const OUTCOME_LOST     = 'lost';
+    public const OUTCOME_DAMAGED  = 'damaged';
+
+    public function outcomeKey(): string
+    {
+        return $this->outcome ?: self::OUTCOME_RETURNED;
+    }
+
+    /** Returned | Lost | Damaged (display only). */
+    public function getOutcomeLabelAttribute(): string
+    {
+        return ucfirst($this->outcomeKey());
     }
 
     /** returned | overdue | active */

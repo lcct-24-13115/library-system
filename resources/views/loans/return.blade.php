@@ -99,6 +99,34 @@
                                     <span class="text-xs text-indigo-600">Renewed {{ $loan->renewal_count }}&times;</span>
                                 @endif
                             </form>
+                            {{-- Phase 3: lost / damaged. A remark is required; no amounts, replacement is offline. --}}
+                            <details class="mt-2">
+                                <summary class="text-xs font-semibold text-rose-700 cursor-pointer">Lost / Damaged&hellip;</summary>
+                                <form action="{{ route('loans.lost', $loan) }}" method="POST" class="flex gap-2 items-center mt-2"
+                                      onsubmit="return confirm('Mark this copy as LOST? One copy will be removed from the collection.');">
+                                    @csrf
+                                    <input type="text" name="remarks" maxlength="500" required
+                                           placeholder="Remark (required)"
+                                           class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-rose-500">
+                                    <button type="submit" class="bg-rose-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold hover:bg-rose-700 shadow-sm transition whitespace-nowrap">
+                                        Mark as Lost
+                                    </button>
+                                </form>
+                                <form action="{{ route('loans.damaged', $loan) }}" method="POST" class="flex gap-2 items-center mt-2"
+                                      onsubmit="return confirm('Mark this copy as DAMAGED?');">
+                                    @csrf
+                                    <input type="text" name="remarks" maxlength="500" required
+                                           placeholder="Remark (required)"
+                                           class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-orange-500">
+                                    <select name="restock" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-orange-500">
+                                        <option value="1">Put back on shelf</option>
+                                        <option value="0">No longer usable</option>
+                                    </select>
+                                    <button type="submit" class="bg-orange-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold hover:bg-orange-700 shadow-sm transition whitespace-nowrap">
+                                        Mark as Damaged
+                                    </button>
+                                </form>
+                            </details>
                         </td>
                     </tr>
                 @empty
@@ -135,7 +163,9 @@
                             <span class="text-xs text-indigo-900 font-bold">{{ $r->book->accession_number }}</span>
                         </td>
                         <td class="p-3">
-                            @if($r->daysLateAtReturn() > 0)
+                            @if(in_array($r->outcome, ['lost', 'damaged'], true))
+                                @include('loans._status', ['loan' => $r])
+                            @elseif($r->daysLateAtReturn() > 0)
                                 <span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-semibold">
                                     {{ $r->daysLateAtReturn() }} {{ \Illuminate\Support\Str::plural('day', $r->daysLateAtReturn()) }} late
                                 </span>

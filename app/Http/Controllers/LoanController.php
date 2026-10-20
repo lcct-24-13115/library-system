@@ -203,6 +203,41 @@ class LoanController extends Controller
     }
 
     /**
+     * Phase 3: the copy was lost. The loan is closed with outcome 'lost', the catalog
+     * loses one copy (total_copies - 1) and available_copies is NOT increased.
+     * A remark is required. No amount, no payment: replacement is settled offline.
+     */
+    public function markLost(Request $request, Loan $loan)
+    {
+        $validated = $request->validate([
+            'remarks' => ['required', 'string', 'max:500'],
+        ]);
+
+        [$loan, $daysLate] = $this->closeLoan($loan, $validated, $request, Loan::OUTCOME_LOST, false);
+
+        return back()->with($this->returnFlash($loan, $daysLate, Loan::OUTCOME_LOST, false));
+    }
+
+    /**
+     * Phase 3: the copy came back damaged. `restock` = 1 puts it back on the shelf
+     * (same copy counts as a normal return); `restock` = 0 means it can no longer be
+     * lent, so the counts change exactly like a lost copy. A remark is required.
+     */
+    public function markDamaged(Request $request, Loan $loan)
+    {
+        $validated = $request->validate([
+            'remarks' => ['required', 'string', 'max:500'],
+            'restock' => ['required', 'in:0,1'],
+        ]);
+
+        $restock = $validated['restock'] === '1';
+
+        [$loan, $daysLate] = $this->closeLoan($loan, $validated, $request, Loan::OUTCOME_DAMAGED, $restock);
+
+        return back()->with($this->returnFlash($loan, $daysLate, Loan::OUTCOME_DAMAGED, $restock));
+    }
+
+    /**
      * Scan-first return: the librarian scans the book's accession number and the
      * active loan for that book is returned right away.
      *
@@ -252,15 +287,23 @@ class LoanController extends Controller
     }
 
     /**
-     * Shared by both return paths: close the loan and put the copy back.
+     * Shared by every way of closing a loan (return, scan, lost, damaged).
+     * $restock = true  -> the copy goes back on the shelf (available_copies + 1).
+     * $restock = false -> the copy leaves the collection (total_copies - 1, available
+     *                     is not increased). Neither count can go below zero.
      *
-     * @return array{0: Loan, 1: int} the returned loan and how many days late it was
+     * @return array{0: Loan, 1: int} the closed loan and how many days late it was
      */
-    private function closeLoan(Loan $loan, array $validated, Request $request): array
-    {
+    private function closeLoan(
+        Loan $loan,
+        array $validated,
+        Request $request,
+        string $outcome = Loan::OUTCOME_RETURNED,
+        bool $restock = true
+    ): array {
         $daysLate = 0;
 
-        $loan = DB::transaction(function () use ($loan, $validated, $request, &$daysLate) {
+        $loan = DB::transaction(function () use ($loan, $validated, $request, $outcome, $restock, &$daysLate) {
             $loan = Loan::whereKey($loan->id)->lockForUpdate()->firstOrFail();
 
             if ($loan->isReturned()) {
@@ -273,16 +316,33 @@ class LoanController extends Controller
 
             $daysLate = $loan->daysOverdue();
 
+            if ($outcome === Loan::OUTCOME_RETURNED) {
+                // Only overwrite remarks if the librarian typed something new.
+                $remarks = filled($validated['remarks'] ?? null) ? $validated['remarks'] : $loan->remarks;
+            } else {
+                // Lost / damaged: keep the earlier remark and add the new one after it.
+                $remarks = $this->appendRemark($loan->remarks, strtoupper($outcome) . ': ' . $validated['remarks']);
+            }
+
             $loan->update([
                 'returned_at' => now(),
+                'outcome'     => $outcome,
                 'received_by' => $request->user()?->id,
-                // Only overwrite remarks if the librarian typed something new.
-                'remarks'     => filled($validated['remarks'] ?? null) ? $validated['remarks'] : $loan->remarks,
+                'remarks'     => $remarks,
             ]);
 
-            // Never exceed total copies (guards against manual catalog edits).
-            if ($book->available_copies < $book->total_copies) {
-                $book->increment('available_copies');
+            if ($restock) {
+                // Never exceed total copies (guards against manual catalog edits).
+                if ($book->available_copies < $book->total_copies) {
+                    $book->increment('available_copies');
+                }
+            } else {
+                // The copy is gone: one fewer in the collection, never below zero,
+                // and available can never be higher than the new total.
+                $newTotal = max(0, (int) $book->total_copies - 1);
+                $book->total_copies     = $newTotal;
+                $book->available_copies = max(0, min((int) $book->available_copies, $newTotal));
+                $book->save();
             }
 
             return $loan;
@@ -293,16 +353,49 @@ class LoanController extends Controller
         return [$loan, $daysLate];
     }
 
-    /** Flash messages shown after a return. The notices are information only. */
-    private function returnFlash(Loan $loan, int $daysLate): array
+    /** Add a new remark after the old one, within the 500-character column (oldest text is trimmed first). */
+    private function appendRemark(?string $old, string $new): string
     {
+        $new = Str::limit($new, 500, '');
+
+        if (! filled($old)) {
+            return $new;
+        }
+
+        $room = 500 - mb_strlen($new) - 3;
+
+        return $room > 0
+            ? Str::limit($old, $room, '') . ' | ' . $new
+            : $new;
+    }
+
+    /** Flash messages shown after a return. The notices are information only. */
+    private function returnFlash(Loan $loan, int $daysLate, string $outcome = Loan::OUTCOME_RETURNED, bool $restocked = true): array
+    {
+        $title  = $loan->book->title;
+        $patron = $loan->patron->name;
+
         $flash = [
-            'success' => "Returned \"{$loan->book->title}\" from {$loan->patron->name}.",
+            'success' => match (true) {
+                $outcome === Loan::OUTCOME_LOST
+                    => "Marked \"{$title}\" ({$patron}) as LOST. One copy was removed from the collection. Replacement is settled offline.",
+                $outcome === Loan::OUTCOME_DAMAGED && $restocked
+                    => "Marked \"{$title}\" ({$patron}) as DAMAGED. The copy is back on the shelf.",
+                $outcome === Loan::OUTCOME_DAMAGED
+                    => "Marked \"{$title}\" ({$patron}) as DAMAGED and withdrawn. One copy was removed from the collection.",
+                default
+                    => "Returned \"{$title}\" from {$patron}.",
+            },
         ];
 
         if ($daysLate > 0) {
             $flash['overdue_notice'] = "{$daysLate} " . Str::plural('day', $daysLate)
                 . ' overdue. Collect any fine offline.';
+        }
+
+        // No copy came back to the shelf, so there is nothing to hold aside.
+        if (! $restocked) {
+            return $flash;
         }
 
         $next = $loan->book->reservations()
