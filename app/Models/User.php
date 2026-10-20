@@ -7,10 +7,11 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'user_type', 'library', 'is_active'])]
+#[Fillable(['name', 'email', 'password', 'role', 'user_type', 'library', 'patron_id', 'is_active'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -18,6 +19,18 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const ROLES = ['admin', 'librarian', 'staff'];
+
+    /** Student / Faculty portal accounts (read-only access to their own loans). Not in ROLES: created from the patron page. */
+    public const PATRON_ROLE = 'patron';
+
+    /** Tabs on the login page: key => label. */
+    public const PORTALS = [
+        'student'       => 'Student',
+        'faculty'       => 'Faculty',
+        'librarian'     => 'Librarian',
+        'administrator' => 'Administrator',
+        'staff'         => 'Staff',
+    ];
 
     /** The only groups that may have an account (client requirement). */
     public const USER_TYPES = [
@@ -40,6 +53,29 @@ class User extends Authenticatable
         'role'      => 'staff',
         'is_active' => true,
     ];
+
+    public function patron(): BelongsTo
+    {
+        return $this->belongsTo(Patron::class);
+    }
+
+    public function isPatron(): bool
+    {
+        return $this->role === self::PATRON_ROLE;
+    }
+
+    /** Does this account belong to the login tab that was chosen? */
+    public function matchesPortal(string $portal): bool
+    {
+        return match ($portal) {
+            'administrator' => $this->role === 'admin',
+            'librarian'     => $this->role === 'librarian',
+            'staff'         => $this->role === 'staff',
+            'student'       => $this->isPatron() && $this->patron?->patron_type === 'Student',
+            'faculty'       => $this->isPatron() && $this->patron !== null && $this->patron->patron_type !== 'Student',
+            default         => false,
+        };
+    }
 
     public function libraryLabel(): string
     {

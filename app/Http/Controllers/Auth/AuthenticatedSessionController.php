@@ -28,6 +28,10 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        if ($request->user()->isPatron()) {
+            return redirect()->route('portal.index');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

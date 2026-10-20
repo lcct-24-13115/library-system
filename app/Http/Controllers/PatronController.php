@@ -60,6 +60,7 @@ class PatronController extends Controller
             ]);
         }
 
+        $patron->account?->delete(); // portal login, if any
         $patron->delete();
 
         return redirect()->route('patrons.index')->with('success', 'Patron deleted successfully!');

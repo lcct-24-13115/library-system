@@ -2,11 +2,14 @@
 
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LookupController;
+use App\Http\Controllers\PatronAccountController;
 use App\Http\Controllers\PatronController;
 use App\Http\Controllers\PatronProfileController;
+use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
@@ -16,6 +19,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('login');
+});
+
+// Public catalog (OPAC): search books without an account. Read only, no patron data.
+Route::get('/catalog', [CatalogController::class, 'index'])->middleware('throttle:60,1')->name('catalog.index');
+
+// Student / Faculty portal: their own loans, due dates and reservations (read only).
+Route::middleware(['auth', 'role:patron'])->prefix('my-library')->name('portal.')->group(function () {
+    Route::get('/', [PortalController::class, 'index'])->name('index');
 });
 
 Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified', 'role:admin,librarian,staff'])->name('dashboard');
@@ -57,6 +68,9 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
         Route::delete('/attendance/{attendance}', [AttendanceController::class, 'destroy'])->name('attendance.destroy');
         Route::post('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
         Route::post('/loans/{loan}/void', [LoanController::class, 'void'])->name('loans.void');
+        // Student / Faculty portal login for a patron
+        Route::post('/patrons/{patron}/account', [PatronAccountController::class, 'store'])->whereNumber('patron')->name('patrons.account.store');
+        Route::post('/patrons/{patron}/account/toggle', [PatronAccountController::class, 'toggle'])->whereNumber('patron')->name('patrons.account.toggle');
     });
 
     // Everyone: view books and patrons

@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\Patron;
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
@@ -28,8 +31,11 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            // Staff sign in with their email; students / faculty may use their ID number too.
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
+            // Optional login tab (Student / Faculty / Librarian / Administrator / Staff).
+            'portal' => ['nullable', Rule::in(array_keys(User::PORTALS))],
         ];
     }
 
@@ -42,7 +48,9 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $credentials = ['email' => $this->resolveLogin(), 'password' => $this->input('password')];
+
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -59,7 +67,44 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // The chosen tab must match the account (only checked when a tab was chosen).
+        $portal = $this->input('portal');
+
+        if ($portal && ! Auth::user()->matchesPortal($portal)) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'This is not a ' . User::PORTALS[$portal] . ' account. Please choose the correct tab.',
+            ]);
+        }
+
+        // A student / faculty login only works while the library card is active.
+        if (Auth::user()->isPatron() && ! Auth::user()->patron?->isActive()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'This library card is inactive. Please see the librarian.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /** An ID number (no "@") is translated to the email of that patron's portal account. */
+    private function resolveLogin(): string
+    {
+        $login = trim((string) $this->input('email'));
+
+        if ($login !== '' && ! str_contains($login, '@')) {
+            $patron = Patron::where('id_number', $login)->first();
+            $account = $patron ? User::where('patron_id', $patron->id)->first() : null;
+
+            if ($account) {
+                return $account->email;
+            }
+        }
+
+        return $login;
     }
 
     /**

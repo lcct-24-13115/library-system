@@ -36,7 +36,7 @@
             </div>
 
             <h1 id="signin-title">Welcome back</h1>
-            <p class="sub">Sign in to the library staff portal.</p>
+            <p class="sub">Sign in to your library account.</p>
 
             @if (session('status'))
                 <div class="lf-notice" role="status">{{ session('status') }}</div>
@@ -45,10 +45,21 @@
             <form method="POST" action="{{ route('login') }}" class="login-form">
                 @csrf
 
+                {{-- Optional: choose the type of account you are signing in with --}}
+                @php $portal = old('portal', request('portal')); @endphp
+                <div class="role-tabs" role="radiogroup" aria-label="Sign in as">
+                    @foreach(\App\Models\User::PORTALS as $key => $label)
+                        <label class="role-tab">
+                            <input type="radio" name="portal" value="{{ $key }}" @checked($portal === $key)>
+                            <span>{{ $label }}</span>
+                        </label>
+                    @endforeach
+                </div>
+
                 <div class="lf-field">
-                    <label for="email">Email</label>
-                    <input id="email" name="email" type="email" value="{{ old('email') }}"
-                           placeholder="salrc@lcctanauan.edu.ph" required autofocus autocomplete="username">
+                    <label for="email">Email or ID number</label>
+                    <input id="email" name="email" type="text" value="{{ old('email') }}"
+                           placeholder="salrc@lcctanauan.edu.ph or ID number" required autofocus autocomplete="username">
                     @error('email')
                         <p class="err">{{ $message }}</p>
                     @enderror
@@ -69,6 +80,10 @@
                 <button type="submit" class="lf-submit">Sign in</button>
             </form>
 
+            <p class="login-links">
+                <a href="{{ route('catalog.index') }}">Search the catalog without an account</a>
+            </p>
+
             @if (Route::has('password.request'))
                 <p class="login-links">
                     <a href="{{ route('password.request') }}">Forgot your password?</a>
@@ -78,7 +93,7 @@
     </main>
 
     <footer class="login-foot">
-        Saint Augustine Learning Resource Center · Staff portal · Secure access
+        Saint Augustine Learning Resource Center · Secure access
     </footer>
 
 <script>

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Patron extends Model
 {
@@ -20,6 +21,12 @@ class Patron extends Model
         'contact_no',
         'status',
     ];
+
+    /** Student / Faculty portal login (role 'patron'), if one was created. */
+    public function account(): HasOne
+    {
+        return $this->hasOne(User::class, 'patron_id');
+    }
 
     public function loans(): HasMany
     {

@@ -20,6 +20,7 @@ class UserController extends Controller
         $userType = (string) $request->query('user_type', '');
 
         $users = User::query()
+            ->where('role', '!=', User::PATRON_ROLE)
             ->when(in_array($userType, User::USER_TYPES, true), fn ($q) => $q->where('user_type', $userType))
             ->orderBy('name')
             ->paginate(20)
@@ -66,11 +67,15 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        abort_if($user->isPatron(), 404); // portal accounts are managed on the patron page
+
         return view('users.edit', compact('user'));
     }
 
     public function update(Request $request, User $user)
     {
+        abort_if($user->isPatron(), 404); // portal accounts are managed on the patron page
+
         $data = $request->validate([
             'name'      => ['required', 'string', 'max:255'],
             'email'     => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
@@ -97,6 +102,8 @@ class UserController extends Controller
 
     public function deactivate(Request $request, User $user)
     {
+        abort_if($user->isPatron(), 404); // portal accounts are managed on the patron page
+
         if ($user->is($request->user())) {
             return back()->with('error', 'You cannot deactivate your own account.');
         }
@@ -108,6 +115,8 @@ class UserController extends Controller
 
     public function activate(User $user)
     {
+        abort_if($user->isPatron(), 404); // portal accounts are managed on the patron page
+
         $user->update(['is_active' => true]);
 
         return back()->with('success', "{$user->name} has been reactivated.");

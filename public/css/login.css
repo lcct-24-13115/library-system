@@ -233,3 +233,32 @@ body.login-page {
   .login-card { animation: none; }
   .lf-submit, .lf-field input { transition: none; }
 }
+
+/* ---------- Account type tabs ---------- */
+.role-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  padding: 4px;
+  background: var(--blue-50);
+  border: 1px solid var(--blue-100);
+  border-radius: 12px;
+}
+.role-tab { position: relative; cursor: pointer; }
+.role-tab input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.role-tab span {
+  display: block;
+  text-align: center;
+  padding: 9px 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  border-radius: 8px;
+}
+.role-tab input:checked + span {
+  background: #fff;
+  color: var(--blue-700);
+  box-shadow: 0 1px 3px rgba(30, 58, 138, .18);
+}
+.role-tab input:focus-visible + span { outline: 2px solid var(--blue-600); }
+@media (max-width: 420px) { .role-tab span { font-size: 10.5px; } }

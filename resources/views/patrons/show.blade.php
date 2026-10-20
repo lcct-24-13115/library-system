@@ -29,6 +29,51 @@
         </div>
     </div>
 
+    {{-- Student / Faculty portal login (admin + librarian) --}}
+    @if(auth()->user()->canManage())
+        @php $account = $patron->account; @endphp
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6 print:hidden">
+            <h3 class="text-sm font-extrabold text-indigo-900 uppercase tracking-wider border-b border-slate-200 pb-2 mb-3">Portal Login (Student / Faculty)</h3>
+
+            @if($patron->patron_type === 'Outside User' || ! $patron->isActive())
+                <p class="text-sm text-slate-500">Only active students, faculty and staff can have a portal login.</p>
+            @else
+                @if($account)
+                    <p class="text-sm text-slate-700 mb-3">
+                        Signs in with ID number <strong>{{ $patron->id_number }}</strong> or email <strong>{{ $account->email }}</strong>.
+                        @if($account->is_active)
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">Active</span>
+                        @else
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-200 text-slate-600">Deactivated</span>
+                        @endif
+                    </p>
+                @else
+                    <p class="text-sm text-slate-500 mb-3">No portal login yet. They can see their own loans, due dates and reservations (read only).</p>
+                @endif
+
+                <form action="{{ route('patrons.account.store', $patron) }}" method="POST" class="flex flex-col md:flex-row gap-3 md:items-end">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">{{ $account ? 'New password' : 'Password' }}</label>
+                        <input type="password" name="password" required autocomplete="new-password" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Confirm password</label>
+                        <input type="password" name="password_confirmation" required autocomplete="new-password" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2 rounded-lg text-sm transition">{{ $account ? 'Reset password' : 'Create login' }}</button>
+                </form>
+
+                @if($account)
+                    <form action="{{ route('patrons.account.toggle', $patron) }}" method="POST" class="mt-3">
+                        @csrf
+                        <button type="submit" class="{{ $account->is_active ? 'bg-rose-600 hover:bg-rose-700' : 'bg-emerald-600 hover:bg-emerald-700' }} text-white font-semibold px-4 py-2 rounded-lg text-sm transition">{{ $account->is_active ? 'Deactivate login' : 'Reactivate login' }}</button>
+                    </form>
+                @endif
+            @endif
+        </div>
+    @endif
+
     {{-- Summary cards --}}
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         @foreach([
