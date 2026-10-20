@@ -52,6 +52,7 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
 
     // Circulation: Issue Book & Return Book
     Route::get('/circulation/return', [LoanController::class, 'returnForm'])->name('loans.return.form');
+    Route::post('/circulation/return/scan', [LoanController::class, 'scanReturn'])->name('loans.return.scan');
     Route::post('/loans/{loan}/return', [LoanController::class, 'markReturned'])->name('loans.return');
     Route::post('/loans/{loan}/renew', [LoanController::class, 'renew'])->name('loans.renew');
     Route::resource('loans', LoanController::class)->only(['index', 'create', 'store']);

@@ -16,6 +16,12 @@ These rules are fixed. Do not change or work around them.
 - Admin/librarian may override the limit on one issue (remark required). Staff cannot.
 - Renewing requires only that the loan has not been returned (plus the optional `LIBRARY_MAX_RENEWALS` cap, which is off by default).
 
+## Returning
+- Returning is scan-first: scan the accession number and the active loan is returned.
+- Overdue NEVER blocks a return. It only shows "N days overdue. Collect any fine offline." (no amount).
+- If the same accession is out with several patrons, the system never guesses; staff pick the loan.
+- If someone has reserved the book, a "hold aside" notice is shown. The reservation is not changed.
+
 ## History
 - KEEP borrowing history: the `loans` table, the Loan History report, and the borrowing history on the book page.
 

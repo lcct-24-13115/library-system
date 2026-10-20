@@ -7,6 +7,7 @@ use App\Models\Loan;
 use App\Models\Patron;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -177,7 +178,16 @@ class LoanController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('loans.return', compact('loans', 'search'));
+        // Handy for the scan screen: what was returned today (latest first).
+        $recentReturns = Loan::returned()
+            ->with(['book', 'patron'])
+            ->whereDate('returned_at', today())
+            ->latest('returned_at')
+            ->latest('id')
+            ->take(10)
+            ->get();
+
+        return view('loans.return', compact('loans', 'search', 'recentReturns'));
     }
 
     /** Mark a loan as returned and put the copy back on the shelf. */
@@ -187,7 +197,70 @@ class LoanController extends Controller
             'remarks' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $loan = DB::transaction(function () use ($loan, $validated, $request) {
+        [$loan, $daysLate] = $this->closeLoan($loan, $validated, $request);
+
+        return back()->with($this->returnFlash($loan, $daysLate));
+    }
+
+    /**
+     * Scan-first return: the librarian scans the book's accession number and the
+     * active loan for that book is returned right away.
+     *
+     * If the same accession is out with more than one patron (several copies),
+     * we never guess: we show the matching loans so staff can pick the right one.
+     * Overdue never blocks a return; it only adds an "collect offline" notice.
+     */
+    public function scanReturn(Request $request)
+    {
+        $data = $request->validate([
+            'accession_number' => ['required', 'string', 'max:255'],
+            'remarks'          => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $accession = trim($data['accession_number']);
+        $book      = Book::where('accession_number', $accession)->first();
+
+        if (! $book) {
+            throw ValidationException::withMessages([
+                'accession_number' => 'No book found with that accession number.',
+            ]);
+        }
+
+        $loans = Loan::active()
+            ->where('book_id', $book->id)
+            ->orderBy('due_date')
+            ->orderBy('id')
+            ->get();
+
+        if ($loans->isEmpty()) {
+            throw ValidationException::withMessages([
+                'accession_number' => "\"{$book->title}\" has no active loan, so there is nothing to return.",
+            ]);
+        }
+
+        if ($loans->count() > 1) {
+            return redirect()
+                ->route('loans.return.form', ['search' => $accession])
+                ->with('error', "More than one patron has \"{$book->title}\" on loan. Pick the right one below and click Return.");
+        }
+
+        [$loan, $daysLate] = $this->closeLoan($loans->first(), $data, $request);
+
+        return redirect()
+            ->route('loans.return.form')
+            ->with($this->returnFlash($loan, $daysLate));
+    }
+
+    /**
+     * Shared by both return paths: close the loan and put the copy back.
+     *
+     * @return array{0: Loan, 1: int} the returned loan and how many days late it was
+     */
+    private function closeLoan(Loan $loan, array $validated, Request $request): array
+    {
+        $daysLate = 0;
+
+        $loan = DB::transaction(function () use ($loan, $validated, $request, &$daysLate) {
             $loan = Loan::whereKey($loan->id)->lockForUpdate()->firstOrFail();
 
             if ($loan->isReturned()) {
@@ -197,6 +270,8 @@ class LoanController extends Controller
             }
 
             $book = Book::whereKey($loan->book_id)->lockForUpdate()->firstOrFail();
+
+            $daysLate = $loan->daysOverdue();
 
             $loan->update([
                 'returned_at' => now(),
@@ -215,9 +290,33 @@ class LoanController extends Controller
 
         $loan->load('book', 'patron');
 
-        $message = "Returned \"{$loan->book->title}\" from {$loan->patron->name}.";
+        return [$loan, $daysLate];
+    }
 
-        return back()->with('success', $message);
+    /** Flash messages shown after a return. The notices are information only. */
+    private function returnFlash(Loan $loan, int $daysLate): array
+    {
+        $flash = [
+            'success' => "Returned \"{$loan->book->title}\" from {$loan->patron->name}.",
+        ];
+
+        if ($daysLate > 0) {
+            $flash['overdue_notice'] = "{$daysLate} " . Str::plural('day', $daysLate)
+                . ' overdue. Collect any fine offline.';
+        }
+
+        $next = $loan->book->reservations()
+            ->pending()
+            ->with('patron')
+            ->orderBy('reserved_at')
+            ->orderBy('id')
+            ->first();
+
+        if ($next) {
+            $flash['reservation_notice'] = "Reserved for {$next->patron->name} (first in queue). Hold this copy aside.";
+        }
+
+        return $flash;
     }
 
     /**

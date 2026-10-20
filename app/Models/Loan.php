@@ -101,6 +101,18 @@ class Loan extends Model
         return $this->isOverdue() ? (int) $this->due_date->diffInDays(today()) : 0;
     }
 
+    /** Days late when it was returned (0 if on time or still out). Display only. */
+    public function daysLateAtReturn(): int
+    {
+        if (! $this->isReturned()) {
+            return 0;
+        }
+
+        $returnDay = $this->returned_at->copy()->startOfDay();
+
+        return $this->due_date->lt($returnDay) ? (int) $this->due_date->diffInDays($returnDay) : 0;
+    }
+
     /** returned | overdue | active */
     public function getStatusAttribute(): string
     {
