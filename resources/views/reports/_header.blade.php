@@ -4,5 +4,5 @@
     @isset($subtitle)
         <p class="text-slate-600 text-sm">{{ $subtitle }}</p>
     @endisset
-    <p class="text-slate-400 text-xs hidden print:block">SALRC Library System &middot; Printed {{ now()->format('M d, Y h:i A') }}</p>
+    <p class="text-slate-400 text-xs hidden print:block">{{ app(\App\Support\LibrarySettings::class)->reportHeading() ?? 'SALRC Library System' }} &middot; Printed {{ now()->format('M d, Y h:i A') }}</p>
 </div>

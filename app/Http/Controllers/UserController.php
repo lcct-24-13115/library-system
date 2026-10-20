@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
@@ -24,7 +25,19 @@ class UserController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('users.index', compact('users', 'userType'));
+        // "Current user" = has an active session in the last 5 minutes (needs SESSION_DRIVER=database).
+        $onlineIds = [];
+        if (config('session.driver') === 'database') {
+            $onlineIds = DB::table(config('session.table', 'sessions'))
+                ->whereNotNull('user_id')
+                ->where('last_activity', '>=', now()->subMinutes(5)->timestamp)
+                ->pluck('user_id')
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->all();
+        }
+
+        return view('users.index', compact('users', 'userType', 'onlineIds'));
     }
 
     public function create()
@@ -40,8 +53,10 @@ class UserController extends Controller
             'password'  => ['required', 'confirmed', Password::defaults()],
             'role'      => ['required', Rule::in(User::ROLES)],
             'user_type' => ['required', Rule::in(User::USER_TYPES)],
+            'library'   => ['nullable', Rule::in(User::LIBRARIES)],
         ]);
 
+        $data['library'] = $data['library'] ?? null;
         $data['is_active'] = true;
 
         User::create($data);
@@ -62,11 +77,14 @@ class UserController extends Controller
             'password'  => ['nullable', 'confirmed', Password::defaults()],
             'role'      => ['required', Rule::in(User::ROLES)],
             'user_type' => ['required', Rule::in(User::USER_TYPES)],
+            'library'   => ['nullable', Rule::in(User::LIBRARIES)],
         ]);
 
         if ($user->is($request->user()) && $data['role'] !== $user->role) {
             throw ValidationException::withMessages(['role' => 'You cannot change your own role.']);
         }
+
+        $data['library'] = $data['library'] ?? null;
 
         if (blank($data['password'] ?? null)) {
             unset($data['password']);

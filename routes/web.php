@@ -10,6 +10,7 @@ use App\Http\Controllers\PatronProfileController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,17 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
         Route::put('/{user}', [UserController::class, 'update'])->name('update');
         Route::post('/{user}/deactivate', [UserController::class, 'deactivate'])->name('deactivate');
         Route::post('/{user}/activate', [UserController::class, 'activate'])->name('activate');
+    });
+
+    // Admin only: Settings (excluded days, report heading, holidays / suspensions, loan policy)
+    Route::middleware('role:admin')->prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [SettingsController::class, 'index'])->name('index');
+        Route::put('/', [SettingsController::class, 'update'])->name('update');
+        Route::post('/holidays', [SettingsController::class, 'holidayStore'])->name('holidays.store');
+        Route::post('/holidays/empty', [SettingsController::class, 'holidayEmpty'])->name('holidays.empty');
+        Route::delete('/holidays/{holiday}', [SettingsController::class, 'holidayDestroy'])->name('holidays.destroy');
+        Route::get('/policy', [SettingsController::class, 'policy'])->name('policy');
+        Route::put('/policy', [SettingsController::class, 'policyUpdate'])->name('policy.update');
     });
 
     // Admin + librarian only: create / edit / delete books and patrons, remove visit

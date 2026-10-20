@@ -62,7 +62,7 @@ class LoanController extends Controller
 
         return view('loans.create', [
             'recent'        => $recent,
-            'loanDays'      => config('library.loan_days', 7),
+            'loanDays'      => app(\App\Support\LibrarySettings::class)->loanDays(),
             'sessionPatron' => $sessionPatron,
             'sessionLoans'  => $sessionLoans,
         ]);

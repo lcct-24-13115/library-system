@@ -37,6 +37,16 @@
     </div>
 </div>
 
+<div>
+    <label class="block text-sm font-semibold text-slate-700 mb-1">Library</label>
+    <select name="library" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
+        <option value="">All libraries</option>
+        @foreach(\App\Models\User::LIBRARIES as $lib)
+            <option value="{{ $lib }}" @selected(old('library', $user->library ?? '') === $lib)>{{ $lib }}</option>
+        @endforeach
+    </select>
+</div>
+
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div>
         <label class="block text-sm font-semibold text-slate-700 mb-1">Password @if($editing)<span class="text-slate-400 font-normal">(leave blank to keep)</span>@endif</label>

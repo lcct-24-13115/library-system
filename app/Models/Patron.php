@@ -39,9 +39,7 @@ class Patron extends Model
     /** Max books this patron may have on loan at once (see config/library.php). */
     public function maxLoans(): int
     {
-        $limits = config('library.max_loans', []);
-
-        return (int) ($limits[$this->patron_type] ?? $limits['default'] ?? 3);
+        return app(\App\Support\LibrarySettings::class)->maxLoans($this->patron_type);
     }
 
     public function isActive(): bool

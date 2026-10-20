@@ -89,7 +89,7 @@
                             <form action="{{ route('loans.renew', $loan) }}" method="POST" class="flex gap-2 items-center mt-2">
                                 @csrf
                                 <label class="text-xs text-slate-500 whitespace-nowrap">Renew for</label>
-                                <input type="number" name="days" min="1" max="365" value="{{ config('library.loan_days', 7) }}"
+                                <input type="number" name="days" min="1" max="365" value="{{ app(\App\Support\LibrarySettings::class)->loanDays() }}"
                                        class="w-20 border border-slate-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-indigo-500">
                                 <span class="text-xs text-slate-500">days</span>
                                 <button type="submit" class="bg-indigo-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold hover:bg-indigo-700 shadow-sm transition">

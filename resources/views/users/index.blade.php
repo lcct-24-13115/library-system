@@ -6,7 +6,7 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
             <h2 class="text-3xl font-extrabold text-slate-900">Users</h2>
-            <p class="text-slate-500 text-sm">Library system accounts (admin only)</p>
+            <p class="text-slate-500 text-sm">Library system accounts (admin only). “Online” = active in the last 5 minutes. Accounts are deactivated, never deleted.</p>
         </div>
         <a href="{{ route('users.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition text-center">+ Add New User</a>
     </div>
@@ -33,7 +33,9 @@
                     <th class="p-4">Name</th>
                     <th class="p-4">Email</th>
                     <th class="p-4">User Type</th>
-                    <th class="p-4">Role</th>
+                    <th class="p-4">Access Right</th>
+                    <th class="p-4">Library</th>
+                    <th class="p-4">Current User</th>
                     <th class="p-4">Status</th>
                     <th class="p-4 text-center">Actions</th>
                 </tr>
@@ -45,6 +47,12 @@
                         <td class="p-4 text-slate-600">{{ $u->email }}</td>
                         <td class="p-4">{{ $u->user_type ?? '—' }}</td>
                         <td class="p-4 capitalize">{{ $u->role }}</td>
+                        <td class="p-4">{{ $u->libraryLabel() }}</td>
+                        <td class="p-4">
+                            @if(in_array($u->id, $onlineIds, true) || $u->is(auth()->user()))
+                                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-100 text-sky-700">Online</span>
+                            @endif
+                        </td>
                         <td class="p-4">
                             @if($u->is_active)
                                 <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">Active</span>
@@ -68,7 +76,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="p-8 text-center text-slate-500">No users found.</td></tr>
+                    <tr><td colspan="8" class="p-8 text-center text-slate-500">No users found.</td></tr>
                 @endforelse
             </tbody>
         </table>

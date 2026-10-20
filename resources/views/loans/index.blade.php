@@ -87,9 +87,9 @@
                         <td class="p-4 text-center">
                             @unless($loan->isReturned() || $loan->isVoided())
                                 <div class="flex gap-1 justify-center">
-                                    <form action="{{ route('loans.renew', $loan) }}" method="POST" onsubmit="return confirm('Renew for {{ config('library.loan_days', 7) }} more days?');">
+                                    <form action="{{ route('loans.renew', $loan) }}" method="POST" onsubmit="return confirm('Renew for {{ app(\App\Support\LibrarySettings::class)->loanDays() }} more days?');">
                                         @csrf
-                                        <input type="hidden" name="days" value="{{ config('library.loan_days', 7) }}">
+                                        <input type="hidden" name="days" value="{{ app(\App\Support\LibrarySettings::class)->loanDays() }}">
                                         <button type="submit" class="bg-indigo-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-indigo-700 shadow-sm transition">
                                             Renew
                                         </button>

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Support\LibrarySettings;
 
 /**
  * A single borrowing transaction (one copy of one book to one patron).
@@ -126,7 +127,8 @@ class Loan extends Model
 
     public function daysOverdue(): int
     {
-        return $this->isOverdue() ? (int) $this->due_date->diffInDays(today()) : 0;
+        // Settings page: excluded weekdays and holidays are not counted (display only).
+        return $this->isOverdue() ? app(LibrarySettings::class)->countDays($this->due_date, today()) : 0;
     }
 
     /** Days late when it was returned (0 if on time or still out). Display only. */
@@ -138,7 +140,7 @@ class Loan extends Model
 
         $returnDay = $this->returned_at->copy()->startOfDay();
 
-        return $this->due_date->lt($returnDay) ? (int) $this->due_date->diffInDays($returnDay) : 0;
+        return $this->due_date->lt($returnDay) ? app(LibrarySettings::class)->countDays($this->due_date, $returnDay) : 0;
     }
 
     /** Phase 3: how a closed loan ended. NULL (older rows) counts as 'returned'. */

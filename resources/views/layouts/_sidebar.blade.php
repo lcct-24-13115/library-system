@@ -24,6 +24,7 @@
     if ($user && $user->isAdmin()) {
         $groups[] = ['Admin', [
             ['Users', 'admin', route('users.index'), request()->routeIs('users.*')],
+            ['Settings', 'settings', route('settings.index'), request()->routeIs('settings.*')],
         ]];
     }
 @endphp

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'user_type', 'is_active'])]
+#[Fillable(['name', 'email', 'password', 'role', 'user_type', 'library', 'is_active'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -28,10 +28,23 @@ class User extends Authenticatable
         'Non-Teaching Personnel',
     ];
 
+    /** Libraries an account can be assigned to. Blank (NULL) = all libraries. */
+    public const LIBRARIES = [
+        'Grade School Library',
+        'Junior High School Library',
+        'Senior High School Library',
+        'College Library',
+    ];
+
     protected $attributes = [
         'role'      => 'staff',
         'is_active' => true,
     ];
+
+    public function libraryLabel(): string
+    {
+        return $this->library ?: 'All libraries';
+    }
 
     public function isAdmin(): bool
     {
