@@ -20,28 +20,35 @@
                     mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
                 },
                 colors: (function () {
-                    var warm = {
-                        50: '#f8f6ef', 100: '#f2eee3', 200: '#e4ded2', 300: '#d6cfc0', 400: '#8d9694',
-                        500: '#66726f', 600: '#4f5d61', 700: '#3b4a52', 800: '#2b3d46', 900: '#1f2f3a', 950: '#16222b'
+                    // Blue & white scheme. The existing views use indigo / emerald / slate / gray
+                    // utility classes, so re-mapping those scales recolours every page at once.
+                    var cool = {
+                        50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8',
+                        500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a', 950: '#020617'
+                    };
+                    var blue = {
+                        50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa',
+                        500: '#2563eb', 600: '#1d4ed8', 700: '#1e40af', 800: '#1e3a8a', 900: '#16307a', 950: '#0b1b4a'
+                    };
+                    var sky = {
+                        50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc', 400: '#38bdf8',
+                        500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 800: '#075985', 900: '#0c4a6e'
+                    };
+                    var rose = {
+                        50: '#fcf1ee', 100: '#f9e6e1', 200: '#f1d0c9', 300: '#e5aaa0', 400: '#d4796c',
+                        500: '#c4574b', 600: '#b3453d', 700: '#a33b35', 800: '#842f2a', 900: '#6b2723'
                     };
                     return {
-                        slate: warm,
-                        gray: warm,
-                        indigo: {
-                            50: '#eef4ef', 100: '#e1ede4', 200: '#c5dccb', 300: '#9cc2aa', 400: '#6fa389',
-                            500: '#4d8a70', 600: '#28634f', 700: '#1e513f', 800: '#1b4335', 900: '#233643', 950: '#1a2832'
-                        },
-                        emerald: {
-                            50: '#eff6f0', 100: '#e4f0e6', 200: '#c9e0cf', 300: '#9fc7ac', 400: '#6fa88a',
-                            500: '#4d8a70', 600: '#2f7a5c', 700: '#286249', 800: '#214f3c', 900: '#1c3f31'
-                        },
+                        slate: cool,
+                        gray: cool,
+                        indigo: blue,
+                        emerald: sky,   // "available / returned / success" = light blue
+                        green: sky,
+                        red: rose,
+                        rose: rose,     // errors and overdue stay red on purpose
                         amber: {
-                            50: '#fdf6ea', 100: '#f8edda', 200: '#f0d9b0', 300: '#e6c07f', 400: '#dda45c',
-                            500: '#d79a52', 600: '#c0822f', 700: '#9a6521', 800: '#7d5019', 900: '#5f3d14'
-                        },
-                        rose: {
-                            50: '#fcf1ee', 100: '#f9e6e1', 200: '#f1d0c9', 300: '#e5aaa0', 400: '#d4796c',
-                            500: '#c4574b', 600: '#b3453d', 700: '#a33b35', 800: '#842f2a', 900: '#6b2723'
+                            50: '#fffbeb', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d', 400: '#fbbf24',
+                            500: '#f59e0b', 600: '#d97706', 700: '#b45309', 800: '#92400e', 900: '#78350f'
                         }
                     };
                 })()

@@ -12,5 +12,5 @@
         Overdue {{ $loan->daysOverdue() }} {{ \Illuminate\Support\Str::plural('day', $loan->daysOverdue()) }}
     </span>
 @else
-    <span class="bg-[#e7eff4] text-[#426987] px-2.5 py-1 rounded-full text-xs font-semibold">On loan</span>
+    <span class="bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-full text-xs font-semibold">On loan</span>
 @endif
