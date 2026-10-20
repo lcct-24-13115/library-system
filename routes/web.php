@@ -116,3 +116,6 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Library Assistant chatbot
+Route::post('/chatbot/message', [\App\Http\Controllers\ChatbotController::class, 'message'])->middleware('throttle:30,1')->name('chatbot.message');

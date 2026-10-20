@@ -41,5 +41,6 @@
     </main>
 
     <footer class="text-center text-xs text-slate-400 pb-8">Saint Augustine Learning Resource Center</footer>
+    @include('partials.chatbot')
 </body>
 </html>
