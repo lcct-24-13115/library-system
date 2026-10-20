@@ -24,6 +24,7 @@
             <a href="{{ route('loans.create') }}" class="{{ $link(request()->routeIs('loans.create')) }}">Issue Book</a>
             <a href="{{ route('loans.return.form') }}" class="{{ $link(request()->routeIs('loans.return.form')) }}">Return Book</a>
             <a href="{{ route('loans.index') }}" class="{{ $link(request()->routeIs('loans.index')) }}">Loans</a>
+            <a href="{{ route('loans.overdue') }}" class="{{ $link(request()->routeIs('loans.overdue')) }}">Overdue</a>
             <a href="{{ route('reservations.index') }}" class="{{ $link(request()->routeIs('reservations.*')) }}">Reservations</a>
             <a href="{{ route('attendance.index') }}" class="{{ $link(request()->routeIs('attendance.*')) }}">Attendance</a>
             <a href="{{ route('reports.index') }}" class="{{ $link(request()->routeIs('reports.*')) }}">Reports</a>

@@ -58,6 +58,9 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
     Route::post('/loans/{loan}/lost', [LoanController::class, 'markLost'])->name('loans.lost');
     Route::post('/loans/{loan}/damaged', [LoanController::class, 'markDamaged'])->name('loans.damaged');
     Route::post('/loans/{loan}/renew', [LoanController::class, 'renew'])->name('loans.renew');
+    // Phase 5: end of a multi-book issue session, and the overdue follow-up list (display only)
+    Route::post('/circulation/issue/done', [LoanController::class, 'issueDone'])->name('loans.issue.done');
+    Route::get('/circulation/overdue', [LoanController::class, 'overdue'])->name('loans.overdue');
     Route::resource('loans', LoanController::class)->only(['index', 'create', 'store']);
 
     // v3: Patron profile (defined after the patrons resource so /patrons/create still wins)

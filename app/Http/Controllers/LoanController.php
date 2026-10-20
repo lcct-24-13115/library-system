@@ -57,10 +57,42 @@ class LoanController extends Controller
             ->take(5)
             ->get();
 
+        // Phase 5: books already issued to the current patron in this multi-book session.
+        [$sessionPatron, $sessionLoans] = $this->issueSession();
+
         return view('loans.create', [
-            'recent'   => $recent,
-            'loanDays' => config('library.loan_days', 7),
+            'recent'        => $recent,
+            'loanDays'      => config('library.loan_days', 7),
+            'sessionPatron' => $sessionPatron,
+            'sessionLoans'  => $sessionLoans,
         ]);
+    }
+
+    /**
+     * Phase 5: "Done" - the patron is finished, clear the multi-book session so the
+     * next patron starts with an empty screen. Nothing is saved or changed in the database.
+     */
+    public function issueDone(Request $request)
+    {
+        $request->session()->forget(self::ISSUE_SESSION_KEY);
+
+        return redirect()->route('loans.create');
+    }
+
+    /**
+     * Phase 5: overdue list for offline follow-up by staff. Display only
+     * (patron, book, due date, days overdue, contact). Print with the browser.
+     * Voided and returned loans are not in it (Loan::overdue()). Overdue never blocks anything.
+     */
+    public function overdue()
+    {
+        $loans = Loan::overdue()
+            ->with(['book', 'patron'])
+            ->orderBy('due_date')
+            ->orderBy('id')
+            ->get();
+
+        return view('loans.overdue', compact('loans'));
     }
 
     /** Issue a book to a patron. */
@@ -165,9 +197,70 @@ class LoanController extends Controller
 
         $loan->load('book', 'patron');
 
+        $this->rememberIssued($request, $loan);
+
         return redirect()
             ->route('loans.create')
             ->with('success', "Issued \"{$loan->book->title}\" to {$loan->patron->name}. Due on {$loan->due_date->format('M d, Y')}.");
+    }
+
+    /** Phase 5: session key and how long an idle multi-book session is kept (minutes). */
+    private const ISSUE_SESSION_KEY     = 'issue_session';
+    private const ISSUE_SESSION_MINUTES = 30;
+
+    /** Phase 5: keep the patron and add this loan to the "issued this session" list. */
+    private function rememberIssued(Request $request, Loan $loan): void
+    {
+        $previous = $request->session()->get(self::ISSUE_SESSION_KEY);
+
+        // A different patron starts a fresh list; the same patron keeps adding to it.
+        $ids = (is_array($previous) && (int) ($previous['patron_id'] ?? 0) === (int) $loan->patron_id)
+            ? ($previous['loan_ids'] ?? [])
+            : [];
+
+        $ids[] = $loan->id;
+
+        $request->session()->put(self::ISSUE_SESSION_KEY, [
+            'patron_id' => $loan->patron_id,
+            'loan_ids'  => $ids,
+            'at'        => now()->timestamp,
+        ]);
+    }
+
+    /**
+     * Phase 5: the patron and loans of the current multi-book session.
+     * An idle session (no issue for ISSUE_SESSION_MINUTES) is dropped so a forgotten
+     * patron ID never sits in the box for the next person.
+     *
+     * @return array{0: ?Patron, 1: \Illuminate\Support\Collection}
+     */
+    private function issueSession(): array
+    {
+        $data = session(self::ISSUE_SESSION_KEY);
+
+        if (! is_array($data) || empty($data['loan_ids'])) {
+            return [null, collect()];
+        }
+
+        if (now()->timestamp - (int) ($data['at'] ?? 0) > self::ISSUE_SESSION_MINUTES * 60) {
+            session()->forget(self::ISSUE_SESSION_KEY);
+
+            return [null, collect()];
+        }
+
+        $patron = Patron::find($data['patron_id'] ?? null);
+
+        if (! $patron) {
+            return [null, collect()];
+        }
+
+        $loans = Loan::with('book')
+            ->whereIn('id', $data['loan_ids'])
+            ->where('patron_id', $patron->id)
+            ->orderBy('id')
+            ->get();
+
+        return [$patron, $loans];
     }
 
     /** Return Book screen: lists books currently on loan, searchable. */
