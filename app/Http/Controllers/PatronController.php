@@ -12,7 +12,7 @@ class PatronController extends Controller
     {
         $search = trim((string) $request->input('search'));
 
-        $patrons = Patron::withCount(['loans as active_loans_count' => fn ($q) => $q->whereNull('returned_at')])
+        $patrons = Patron::withCount(['loans as active_loans_count' => fn ($q) => $q->active()])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")

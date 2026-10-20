@@ -141,7 +141,7 @@
                                 <td class="p-3">
                                     <a href="{{ route('books.show', $loan->book->id) }}" class="font-medium text-slate-800 hover:text-indigo-700">{{ $loan->book->title }}</a>
                                     <div class="text-xs text-slate-500">{{ $loan->book->accession_number }}</div>
-                                    @if($loan->remarks)<div class="text-xs text-slate-500 mt-0.5">{{ $loan->remarks }}</div>@endif
+                                    @if($loan->remarks || $loan->notes->isNotEmpty())<div class="mt-0.5">@include('loans._notes', ['loan' => $loan])</div>@endif
                                 </td>
                                 <td class="p-3 whitespace-nowrap">{{ $loan->issued_at->format('M d, Y') }}</td>
                                 <td class="p-3 whitespace-nowrap">{{ $loan->returned_at->format('M d, Y') }}</td>

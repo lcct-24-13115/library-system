@@ -27,11 +27,12 @@ class ReportController extends Controller
         [$from, $to] = $this->range($request);
         $status = $request->input('status', 'all');
 
-        $loans = Loan::with(['book', 'patron'])
+        $loans = Loan::with(['book', 'patron', 'notes.user', 'voidedBy'])
             ->whereBetween('issued_at', [$from, $to])
             ->when($status === 'active', fn ($q) => $q->active())
             ->when($status === 'overdue', fn ($q) => $q->overdue())
             ->when($status === 'returned', fn ($q) => $q->returned())
+            ->when($status === 'voided', fn ($q) => $q->voided())
             ->orderBy('issued_at')
             ->limit(3000)
             ->get();
@@ -44,7 +45,7 @@ class ReportController extends Controller
     {
         $scope = $request->input('scope', 'overdue');
 
-        $loans = Loan::with(['book', 'patron'])
+        $loans = Loan::with(['book', 'patron', 'notes.user'])
             ->when($scope === 'overdue', fn ($q) => $q->overdue(), fn ($q) => $q->active())
             ->orderBy('due_date')
             ->get();
@@ -57,7 +58,8 @@ class ReportController extends Controller
     {
         [$from, $to] = $this->range($request);
 
-        $base = fn () => Loan::whereBetween('issued_at', [$from, $to]);
+        // Voided loans were issued by mistake, so they are not counted as borrowing.
+        $base = fn () => Loan::whereNull('voided_at')->whereBetween('issued_at', [$from, $to]);
 
         $totals = [
             'issued'   => $base()->count(),
@@ -66,14 +68,15 @@ class ReportController extends Controller
             'patrons'  => $base()->distinct()->count('patron_id'),
         ];
 
-        $topBooks = Book::withCount(['loans as borrow_count' => fn ($q) => $q->whereBetween('issued_at', [$from, $to])])
-            ->whereHas('loans', fn ($q) => $q->whereBetween('issued_at', [$from, $to]))
+        $topBooks = Book::withCount(['loans as borrow_count' => fn ($q) => $q->whereNull('voided_at')->whereBetween('issued_at', [$from, $to])])
+            ->whereHas('loans', fn ($q) => $q->whereNull('voided_at')->whereBetween('issued_at', [$from, $to]))
             ->orderByDesc('borrow_count')
             ->orderBy('title')
             ->limit(20)
             ->get();
 
         $byPatronType = Loan::join('patrons', 'patrons.id', '=', 'loans.patron_id')
+            ->whereNull('loans.voided_at')
             ->whereBetween('loans.issued_at', [$from, $to])
             ->select('patrons.patron_type as label', DB::raw('COUNT(*) as total'))
             ->groupBy('patrons.patron_type')
@@ -81,6 +84,7 @@ class ReportController extends Controller
             ->get();
 
         $byCategory = Loan::join('books', 'books.id', '=', 'loans.book_id')
+            ->whereNull('loans.voided_at')
             ->whereBetween('loans.issued_at', [$from, $to])
             ->select(DB::raw("COALESCE(books.category, 'General') as label"), DB::raw('COUNT(*) as total'))
             ->groupBy(DB::raw("COALESCE(books.category, 'General')"))

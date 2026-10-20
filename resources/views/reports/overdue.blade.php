@@ -51,7 +51,7 @@
                         <td class="p-3 whitespace-nowrap">{{ $loan->issued_at->format('M d, Y') }}</td>
                         <td class="p-3 whitespace-nowrap">{{ $loan->due_date->format('M d, Y') }}</td>
                         <td class="p-3 font-semibold {{ $loan->isOverdue() ? 'text-amber-700' : 'text-slate-400' }}">{{ $loan->isOverdue() ? $loan->daysOverdue() : '—' }}</td>
-                        <td class="p-3">{{ $loan->remarks ?? '' }}</td>
+                        <td class="p-3">@include('loans._notes', ['loan' => $loan])</td>
                     </tr>
                 @empty
                     <tr><td colspan="10" class="p-10 text-center text-slate-400">Nothing to show. 🎉</td></tr>

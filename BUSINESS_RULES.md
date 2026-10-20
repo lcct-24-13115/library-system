@@ -30,6 +30,17 @@ These rules are fixed. Do not change or work around them.
 - A loan that is already closed cannot be marked Lost or Damaged. Older closed loans (no outcome) count as Returned.
 - Lost/Damaged loans stay in the loans table and show as Lost/Damaged in the Loan History report and on the book page.
 
+## Void (loan issued by mistake)
+- Only admin and librarian can void. A reason is required. Staff cannot.
+- Only a loan that is still out can be voided. The copy goes back on the shelf (`available_copies + 1`, never above `total_copies`).
+- The loan row is NEVER deleted. We record who voided it, when and why (`voided_by`, `voided_at`, `void_reason`).
+- A voided loan does not count toward the borrow limit and is not in the active, overdue or "returned" lists or counts. It stays in the Loan History report and on the book page with a "Voided" label.
+- A voided loan cannot be returned, renewed, or marked Lost / Damaged. Voided loans are not counted as borrowing in the Summary report.
+
+## Remarks history
+- Remarks are never overwritten. Every new remark (issue, return, scan, renew, lost, damaged) is saved as a dated note with the user's name (`loan_notes`).
+- The older `loans.remarks` text is kept and shown as the earlier remark. It is no longer written to.
+
 ## History
 - KEEP borrowing history: the `loans` table, the Loan History report, and the borrowing history on the book page.
 
@@ -45,5 +56,6 @@ These rules are fixed. Do not change or work around them.
 - Do only the current task. Do not start the next one unprompted.
 
 ## Guarded by tests
+`tests/Feature/VoidLoanTest.php` and `tests/Feature/LoanNotesTest.php` check the Void and Remarks rules above.
 `tests/Feature/LostDamagedTest.php` checks the Lost/Damaged rules above.
 `tests/Feature/OverdueDoesNotBlockTest.php` checks that a patron with an overdue loan can still borrow, and that an overdue loan can be renewed.

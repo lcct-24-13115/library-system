@@ -39,7 +39,7 @@
                         <td class="p-3 whitespace-nowrap">{{ $loan->returned_at?->format('M d, Y') ?? '—' }}</td>
                         <td class="p-3">{{ $loan->renewal_count ?: '—' }}</td>
                         <td class="p-3">@include('loans._status', ['loan' => $loan])</td>
-                        <td class="p-3">{{ $loan->remarks ?? '' }}</td>
+                        <td class="p-3">@include('loans._notes', ['loan' => $loan])</td>
                     </tr>
                 @empty
                     <tr><td colspan="10" class="p-10 text-center text-slate-400">No transactions in this period.</td></tr>

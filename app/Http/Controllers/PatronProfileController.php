@@ -23,7 +23,7 @@ class PatronProfileController extends Controller
 
         $history = $patron->loans()
             ->returned()
-            ->with('book')
+            ->with(['book', 'notes.user'])
             ->latest('returned_at')
             ->latest('id')
             ->take(15)

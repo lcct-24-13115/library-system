@@ -29,10 +29,11 @@ class LoanController extends Controller
         $search = trim((string) $request->input('search'));
         $status = $request->input('status', 'all');
 
-        $loans = Loan::with(['book', 'patron'])
+        $loans = Loan::with(['book', 'patron', 'notes.user', 'voidedBy'])
             ->when($status === 'active', fn ($q) => $q->active())
             ->when($status === 'overdue', fn ($q) => $q->overdue())
             ->when($status === 'returned', fn ($q) => $q->returned())
+            ->when($status === 'voided', fn ($q) => $q->voided())
             ->when($search !== '', fn ($q) => $this->applySearch($q, $search))
             ->latest('issued_at')
             ->latest('id')
@@ -148,14 +149,18 @@ class LoanController extends Controller
 
             $book->decrement('available_copies');
 
-            return Loan::create([
+            $newLoan = Loan::create([
                 'book_id'   => $book->id,
                 'patron_id' => $patron->id,
                 'issued_by' => $request->user()?->id,
                 'issued_at' => now(),
                 'due_date'  => today()->addDays((int) $data['loan_days']),
-                'remarks'   => $data['remarks'] ?? null,
             ]);
+
+            // Phase 4: the remark is kept as a dated note (with the user's name).
+            $this->addNote($newLoan, $data['remarks'] ?? null, $request);
+
+            return $newLoan;
         });
 
         $loan->load('book', 'patron');
@@ -238,6 +243,57 @@ class LoanController extends Controller
     }
 
     /**
+     * Phase 4: void a loan that was issued by mistake (admin / librarian only).
+     * Only a loan that is still out can be voided. The copy goes back on the shelf
+     * (never above total_copies) and we record who voided it and why. The loan row
+     * is NEVER deleted: it stays in the Loan History with a "Voided" label, and it no
+     * longer counts toward the borrow limit or the active / overdue lists.
+     */
+    public function void(Request $request, Loan $loan)
+    {
+        abort_unless($request->user()?->canManage(), 403, 'You do not have permission to do that.');
+
+        $data = $request->validate([
+            'reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        $loan = DB::transaction(function () use ($loan, $data, $request) {
+            $loan = Loan::whereKey($loan->id)->lockForUpdate()->firstOrFail();
+
+            if ($loan->isVoided()) {
+                throw ValidationException::withMessages([
+                    'loan' => 'This loan was already voided.',
+                ]);
+            }
+
+            if ($loan->isReturned()) {
+                throw ValidationException::withMessages([
+                    'loan' => 'Only a loan that is still out can be voided. This one is already closed.',
+                ]);
+            }
+
+            $book = Book::whereKey($loan->book_id)->lockForUpdate()->firstOrFail();
+
+            $loan->update([
+                'voided_at'   => now(),
+                'voided_by'   => $request->user()->id,
+                'void_reason' => trim($data['reason']),
+            ]);
+
+            // The copy never really left: put it back, never above total copies.
+            if ($book->available_copies < $book->total_copies) {
+                $book->increment('available_copies');
+            }
+
+            return $loan;
+        });
+
+        $loan->load('book', 'patron');
+
+        return back()->with('success', "Voided the loan of \"{$loan->book->title}\" to {$loan->patron->name}. The copy is back on the shelf.");
+    }
+
+    /**
      * Scan-first return: the librarian scans the book's accession number and the
      * active loan for that book is returned right away.
      *
@@ -306,6 +362,12 @@ class LoanController extends Controller
         $loan = DB::transaction(function () use ($loan, $validated, $request, $outcome, $restock, &$daysLate) {
             $loan = Loan::whereKey($loan->id)->lockForUpdate()->firstOrFail();
 
+            if ($loan->isVoided()) {
+                throw ValidationException::withMessages([
+                    'loan' => 'This loan was voided, so it cannot be returned.',
+                ]);
+            }
+
             if ($loan->isReturned()) {
                 throw ValidationException::withMessages([
                     'loan' => 'This book was already returned.',
@@ -316,20 +378,17 @@ class LoanController extends Controller
 
             $daysLate = $loan->daysOverdue();
 
-            if ($outcome === Loan::OUTCOME_RETURNED) {
-                // Only overwrite remarks if the librarian typed something new.
-                $remarks = filled($validated['remarks'] ?? null) ? $validated['remarks'] : $loan->remarks;
-            } else {
-                // Lost / damaged: keep the earlier remark and add the new one after it.
-                $remarks = $this->appendRemark($loan->remarks, strtoupper($outcome) . ': ' . $validated['remarks']);
-            }
-
             $loan->update([
                 'returned_at' => now(),
                 'outcome'     => $outcome,
                 'received_by' => $request->user()?->id,
-                'remarks'     => $remarks,
             ]);
+
+            // Phase 4: a typed remark is added as a dated note; earlier remarks are never overwritten.
+            $text = trim((string) ($validated['remarks'] ?? ''));
+            if ($text !== '') {
+                $this->addNote($loan, $outcome === Loan::OUTCOME_RETURNED ? $text : strtoupper($outcome) . ': ' . $text, $request);
+            }
 
             if ($restock) {
                 // Never exceed total copies (guards against manual catalog edits).
@@ -353,20 +412,19 @@ class LoanController extends Controller
         return [$loan, $daysLate];
     }
 
-    /** Add a new remark after the old one, within the 500-character column (oldest text is trimmed first). */
-    private function appendRemark(?string $old, string $new): string
+    /** Phase 4: add one dated note (with the user) to a loan. Blank text adds nothing. */
+    private function addNote(Loan $loan, ?string $text, Request $request): void
     {
-        $new = Str::limit($new, 500, '');
+        $text = trim((string) $text);
 
-        if (! filled($old)) {
-            return $new;
+        if ($text === '') {
+            return;
         }
 
-        $room = 500 - mb_strlen($new) - 3;
-
-        return $room > 0
-            ? Str::limit($old, $room, '') . ' | ' . $new
-            : $new;
+        $loan->notes()->create([
+            'user_id' => $request->user()?->id,
+            'note'    => $text,
+        ]);
     }
 
     /** Flash messages shown after a return. The notices are information only. */
@@ -425,8 +483,14 @@ class LoanController extends Controller
             'remarks' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $loan = DB::transaction(function () use ($loan, $validated) {
+        $loan = DB::transaction(function () use ($loan, $validated, $request) {
             $loan = Loan::whereKey($loan->id)->lockForUpdate()->firstOrFail();
+
+            if ($loan->isVoided()) {
+                throw ValidationException::withMessages([
+                    'loan' => 'This loan was voided and cannot be renewed.',
+                ]);
+            }
 
             if ($loan->isReturned()) {
                 throw ValidationException::withMessages([
@@ -449,8 +513,9 @@ class LoanController extends Controller
                 'due_date'          => $base->addDays((int) $validated['days']),
                 'renewal_count'     => $loan->renewal_count + 1,
                 'last_renewed_at'   => now(),
-                'remarks'           => filled($validated['remarks'] ?? null) ? $validated['remarks'] : $loan->remarks,
             ]);
+
+            $this->addNote($loan, $validated['remarks'] ?? null, $request);
 
             return $loan;
         });

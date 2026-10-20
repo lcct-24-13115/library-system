@@ -202,14 +202,20 @@ class LostDamagedTest extends TestCase
         $this->assertSame('lost', $loan->fresh()->outcome);
     }
 
-    public function test_the_earlier_remark_is_kept_and_the_new_one_is_added(): void
+    public function test_the_earlier_remark_is_kept_and_the_new_one_is_added_as_a_note(): void
     {
         $user = User::factory()->create();
         $loan = $this->loan($this->patron(), $this->book(), 0, 'Fine collected offline');
 
         $this->lost($user, $loan, ['remarks' => 'Patron reported lost']);
 
-        $this->assertSame('Fine collected offline | LOST: Patron reported lost', $loan->fresh()->remarks);
+        // Phase 4: the old remark is untouched; the new one is a dated note with the user.
+        $this->assertSame('Fine collected offline', $loan->fresh()->remarks);
+
+        $note = $loan->notes()->first();
+        $this->assertNotNull($note);
+        $this->assertSame('LOST: Patron reported lost', $note->note);
+        $this->assertSame($user->id, $note->user_id);
     }
 
     public function test_a_lost_copy_does_not_touch_reservations_or_show_a_hold_aside_notice(): void

@@ -79,7 +79,7 @@
                         <td class="p-4" colspan="2">
                             <form action="{{ route('loans.return', $loan) }}" method="POST" class="flex gap-2 items-center">
                                 @csrf
-                                <input type="text" name="remarks" maxlength="500" value="{{ $loan->remarks }}"
+                                <input type="text" name="remarks" maxlength="500" value=""
                                        placeholder="e.g. fine collected offline"
                                        class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-indigo-500">
                                 <button type="submit" class="bg-emerald-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold hover:bg-emerald-700 shadow-sm transition whitespace-nowrap">

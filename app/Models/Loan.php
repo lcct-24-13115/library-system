@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * A single borrowing transaction (one copy of one book to one patron).
@@ -26,6 +27,9 @@ class Loan extends Model
         'due_date',
         'returned_at',
         'outcome',
+        'voided_at',
+        'voided_by',
+        'void_reason',
         'remarks',
         'renewal_count',
         'original_due_date',
@@ -36,6 +40,7 @@ class Loan extends Model
         'issued_at'   => 'datetime',
         'due_date'    => 'date',
         'returned_at' => 'datetime',
+        'voided_at'   => 'datetime',
         'original_due_date' => 'date',
         'last_renewed_at'   => 'datetime',
     ];
@@ -64,13 +69,30 @@ class Loan extends Model
         return $this->belongsTo(User::class, 'received_by');
     }
 
+    public function voidedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'voided_by');
+    }
+
+    /** Phase 4: dated remarks history (oldest first). */
+    public function notes(): HasMany
+    {
+        return $this->hasMany(LoanNote::class)->orderBy('id');
+    }
+
     /* ---------------------------------------------------------------
      | Query scopes
      |---------------------------------------------------------------*/
 
     public function scopeActive(Builder $query): Builder
     {
-        return $query->whereNull('returned_at');
+        return $query->whereNull('returned_at')->whereNull('voided_at');
+    }
+
+    /** Phase 4: loans voided because they were issued by mistake. */
+    public function scopeVoided(Builder $query): Builder
+    {
+        return $query->whereNotNull('voided_at');
     }
 
     public function scopeReturned(Builder $query): Builder
@@ -80,7 +102,7 @@ class Loan extends Model
 
     public function scopeOverdue(Builder $query): Builder
     {
-        return $query->whereNull('returned_at')->whereDate('due_date', '<', today());
+        return $query->whereNull('returned_at')->whereNull('voided_at')->whereDate('due_date', '<', today());
     }
 
     /* ---------------------------------------------------------------
@@ -92,9 +114,14 @@ class Loan extends Model
         return $this->returned_at !== null;
     }
 
+    public function isVoided(): bool
+    {
+        return $this->voided_at !== null;
+    }
+
     public function isOverdue(): bool
     {
-        return ! $this->isReturned() && $this->due_date->lt(today());
+        return ! $this->isReturned() && ! $this->isVoided() && $this->due_date->lt(today());
     }
 
     public function daysOverdue(): int
@@ -130,9 +157,13 @@ class Loan extends Model
         return ucfirst($this->outcomeKey());
     }
 
-    /** returned | overdue | active */
+    /** voided | returned | overdue | active */
     public function getStatusAttribute(): string
     {
+        if ($this->isVoided()) {
+            return 'voided';
+        }
+
         if ($this->isReturned()) {
             return 'returned';
         }

@@ -175,11 +175,13 @@ class ScanReturnTest extends TestCase
         $user = User::factory()->create();
         $book = $this->book('ACC-9', 1, 0);
         $loan = $this->loan($this->patron(), $book);
-        $loan->update(['remarks' => 'Issued with cover torn']);
+        $loan->update(['remarks' => 'Issued with cover torn']); // older remark (read-only since Phase 4)
 
         $this->scan($user, 'ACC-9');
 
+        // A blank remark changes nothing and adds no note.
         $this->assertSame('Issued with cover torn', $loan->fresh()->remarks);
+        $this->assertSame(0, $loan->notes()->count());
     }
 
     public function test_return_page_shows_scan_box_and_todays_returns(): void

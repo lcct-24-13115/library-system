@@ -44,6 +44,7 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
         Route::resource('patrons', PatronController::class)->except(['index', 'show']);
         Route::delete('/attendance/{attendance}', [AttendanceController::class, 'destroy'])->name('attendance.destroy');
         Route::post('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
+        Route::post('/loans/{loan}/void', [LoanController::class, 'void'])->name('loans.void');
     });
 
     // Everyone: view books and patrons

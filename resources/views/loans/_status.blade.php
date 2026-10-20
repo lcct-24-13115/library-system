@@ -1,5 +1,7 @@
 @php $s = $loan->status; @endphp
-@if($s === 'returned' && $loan->outcome === 'lost')
+@if($s === 'voided')
+    <span class="bg-slate-200 text-slate-600 px-2.5 py-1 rounded-full text-xs font-semibold">Voided</span>
+@elseif($s === 'returned' && $loan->outcome === 'lost')
     <span class="bg-rose-100 text-rose-700 px-2.5 py-1 rounded-full text-xs font-semibold">Lost</span>
 @elseif($s === 'returned' && $loan->outcome === 'damaged')
     <span class="bg-orange-100 text-orange-800 px-2.5 py-1 rounded-full text-xs font-semibold">Damaged</span>

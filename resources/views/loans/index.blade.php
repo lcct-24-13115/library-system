@@ -37,7 +37,7 @@
                    placeholder="Search by patron name / ID, book title or accession no..."
                    class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
             <select name="status" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                @foreach(['all' => 'All', 'active' => 'On loan', 'overdue' => 'Overdue', 'returned' => 'Returned'] as $value => $label)
+                @foreach(['all' => 'All', 'active' => 'On loan', 'overdue' => 'Overdue', 'returned' => 'Returned', 'voided' => 'Voided'] as $value => $label)
                     <option value="{{ $value }}" @selected($status === $value)>{{ $label }}</option>
                 @endforeach
             </select>
@@ -83,9 +83,9 @@
                         </td>
                         <td class="p-4 text-slate-600">{{ $loan->returned_at?->format('M d, Y') ?? '—' }}</td>
                         <td class="p-4">@include('loans._status', ['loan' => $loan])</td>
-                        <td class="p-4 text-slate-600 max-w-xs truncate" title="{{ $loan->remarks }}">{{ $loan->remarks ?? '—' }}</td>
+                        <td class="p-4 text-slate-600 max-w-xs">@include('loans._notes', ['loan' => $loan])</td>
                         <td class="p-4 text-center">
-                            @unless($loan->isReturned())
+                            @unless($loan->isReturned() || $loan->isVoided())
                                 <div class="flex gap-1 justify-center">
                                     <form action="{{ route('loans.renew', $loan) }}" method="POST" onsubmit="return confirm('Renew for {{ config('library.loan_days', 7) }} more days?');">
                                         @csrf
@@ -100,6 +100,17 @@
                                             Return
                                         </button>
                                     </form>
+                                    @if(auth()->user()?->canManage())
+                                        {{-- Phase 4: void a loan issued by mistake (admin / librarian). Reason is required. --}}
+                                        <form action="{{ route('loans.void', $loan) }}" method="POST"
+                                              onsubmit="var r = prompt('Reason for voiding this loan (required):'); if (!r || !r.trim()) { return false; } this.reason.value = r.trim(); return true;">
+                                            @csrf
+                                            <input type="hidden" name="reason" value="">
+                                            <button type="submit" class="bg-slate-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-slate-700 shadow-sm transition">
+                                                Void
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             @endunless
                         </td>
