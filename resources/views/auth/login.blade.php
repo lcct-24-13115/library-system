@@ -1,67 +1,51 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    @include('layouts._head')
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sign in — {{ config('app.name', 'SALRC Library') }}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preload" as="image" href="{{ asset('images/login-bg.jpg') }}">
+
+    {{-- Login has its own self-contained blue & white stylesheet. --}}
+    <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ file_exists(public_path('css/login.css')) ? filemtime(public_path('css/login.css')) : 1 }}">
 </head>
 
 @php
-    // Customize here — logo path and copy are all editable in one place.
-    $logo        = asset('images/salrc-logo.svg'); // replace with images/salrc-logo.png if you have the PNG
-    $description = 'One place to access all library resources, track loans, and manage your learning journey, from start to finish.';
-    $features    = [
-        'Access digital collections and research databases',
-        'Request books and manage your loans online',
-        'Track all research help and service tickets',
-    ];
+    // Customize here — logo and background are editable in one place.
+    $logo = asset('images/salrc-logo.svg');
 @endphp
 
-<body class="salrc">
-<div class="landing">
+<body class="login-page">
+    {{-- Poster background: replace public/images/login-bg.jpg to change it --}}
+    <div class="login-bg" aria-hidden="true"></div>
 
-    <nav class="landing-nav">
-        <a href="{{ url('/') }}" class="landing-brand">
-            <div class="brand-mark"><x-icon name="library" :size="20" /></div>
-            <div>
-                <strong>SALRC</strong>
-                <small>Library System</small>
-            </div>
-        </a>
-    </nav>
+    <main class="login-stage">
+        <section class="login-card" aria-labelledby="signin-title">
 
-    <div class="login-wrap">
-
-        {{-- Left: what the system is for --}}
-        <section class="login-hero">
-            <div class="hero-kicker"><span class="kicker-line"></span>Staff portal</div>
-            <h1 class="hero-title">Welcome<br><em>back to the</em><br>library desk.</h1>
-            <p class="hero-copy" style="margin-bottom:0">{{ $description }}</p>
-
-            <ul class="feature-list">
-                @foreach ($features as $feature)
-                    <li>{{ $feature }}</li>
-                @endforeach
-            </ul>
-        </section>
-
-        {{-- Right: sign-in card --}}
-        <section class="auth-card" aria-labelledby="signin-title">
-            <div class="auth-seal">
-                <img src="{{ $logo }}" alt="Saint Augustine Learning Resource Center seal" width="54" height="54">
+            <div class="login-brand">
+                <img src="{{ $logo }}" alt="Saint Augustine Learning Resource Center seal" width="58" height="58">
                 <div>
-                    <h2 id="signin-title">Sign in</h2>
-                    <p class="sub">Use your school account.</p>
+                    <p class="college">La Consolacion College Tanauan</p>
+                    <p class="center">Saint Augustine Learning Resource Center</p>
                 </div>
             </div>
 
+            <h1 id="signin-title">Welcome back</h1>
+            <p class="sub">Sign in to the library staff portal.</p>
+
             @if (session('status'))
-                <div class="notice" role="status" style="margin-top:0;margin-bottom:18px">{{ session('status') }}</div>
+                <div class="lf-notice" role="status">{{ session('status') }}</div>
             @endif
 
-            <form method="POST" action="{{ route('login') }}" style="display:grid;gap:18px">
+            <form method="POST" action="{{ route('login') }}" class="login-form">
                 @csrf
 
-                <div class="field">
+                <div class="lf-field">
                     <label for="email">Email</label>
                     <input id="email" name="email" type="email" value="{{ old('email') }}"
                            placeholder="salrc@college.edu" required autofocus autocomplete="username">
@@ -70,7 +54,7 @@
                     @enderror
                 </div>
 
-                <div class="field">
+                <div class="lf-field">
                     <label for="password">Password</label>
                     <div class="pw-wrap">
                         <input id="password" name="password" type="password"
@@ -82,22 +66,20 @@
                     @enderror
                 </div>
 
-                <button type="submit" class="btn btn-primary">Sign in</button>
+                <button type="submit" class="lf-submit">Sign in</button>
             </form>
 
             @if (Route::has('password.request'))
-                <p class="auth-links">
+                <p class="login-links">
                     <a href="{{ route('password.request') }}">Forgot your password?</a>
                 </p>
             @endif
         </section>
-    </div>
+    </main>
 
-    <footer class="landing-bottom">
-        <span>SAINT AUGUSTINE LEARNING RESOURCE CENTER</span>
-        <span>Staff portal · Secure access</span>
+    <footer class="login-foot">
+        Saint Augustine Learning Resource Center · Staff portal · Secure access
     </footer>
-</div>
 
 <script>
     (function () {

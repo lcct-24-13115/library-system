@@ -1,0 +1,235 @@
+/* SALRC login page — blue & white, poster background.
+   Fully self-contained: only the login view loads this file, so the rest of
+   the system (salrc.css) is not affected. */
+
+:root {
+  --navy-950: #0a1433;
+  --blue-900: #1e3a8a;
+  --blue-700: #1d4ed8;
+  --blue-600: #2563eb;
+  --blue-100: #dbeafe;
+  --blue-50:  #eff6ff;
+  --ink:      #0f172a;
+  --muted:    #5b6b8c;
+  --line:     #c9d6ee;
+  --danger:   #b42335;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body.login-page {
+  margin: 0;
+  font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--ink);
+  background: var(--navy-950);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ---------- Poster background ---------- */
+.login-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(90deg, rgba(10, 20, 51, 0) 0%, rgba(10, 20, 51, .12) 50%, rgba(10, 20, 51, .62) 100%),
+    url('../images/login-bg.jpg') center center / cover no-repeat;
+  background-color: var(--navy-950);
+}
+
+/* ---------- Stage ---------- */
+.login-stage {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: grid;
+  align-items: center;
+  justify-items: end;
+  padding: 32px clamp(16px, 2.6vw, 44px);
+}
+
+/* ---------- Card ---------- */
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, .97);
+  border-radius: 18px;
+  padding: 34px 34px 28px;
+  box-shadow: 0 30px 80px rgba(4, 10, 32, .55), 0 0 0 1px rgba(255, 255, 255, .5) inset;
+  border-top: 5px solid var(--blue-700);
+  animation: card-in .45s ease-out both;
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.login-brand img {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--blue-100);
+  flex: none;
+}
+.login-brand .college {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--blue-700);
+}
+.login-brand .center {
+  margin: 3px 0 0;
+  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--navy-950);
+}
+
+.login-card h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--ink);
+}
+.login-card .sub {
+  margin: 0 0 22px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ---------- Form ---------- */
+.login-form { display: grid; gap: 18px; }
+
+.lf-field { display: flex; flex-direction: column; gap: 6px; }
+.lf-field label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: #2c3e66;
+}
+.lf-field input {
+  width: 100%;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.lf-field input::placeholder { color: #93a1bf; }
+.lf-field input:focus {
+  border-color: var(--blue-600);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, .15);
+}
+.lf-field .err { margin: 0; font-size: 12.5px; color: var(--danger); }
+
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 68px; }
+.pw-toggle {
+  position: absolute;
+  inset: 0 0 0 auto;
+  padding: 0 16px;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--blue-700);
+  cursor: pointer;
+  border-radius: 0 10px 10px 0;
+}
+.pw-toggle:hover { color: var(--blue-900); }
+
+.lf-submit {
+  width: 100%;
+  padding: 13px 18px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(180deg, var(--blue-600), var(--blue-700));
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(29, 78, 216, .35);
+  transition: transform .15s, box-shadow .15s, background .15s;
+}
+.lf-submit:hover {
+  background: linear-gradient(180deg, var(--blue-700), var(--blue-900));
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(29, 78, 216, .42);
+}
+.lf-submit:active { transform: translateY(0); }
+
+.login-links { margin: 16px 0 0; text-align: center; font-size: 13px; }
+.login-links a { color: var(--blue-700); font-weight: 600; text-decoration: none; }
+.login-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.lf-notice {
+  margin: 0 0 18px;
+  padding: 11px 13px;
+  font-size: 13px;
+  color: var(--blue-900);
+  background: var(--blue-50);
+  border: 1px solid var(--blue-100);
+  border-radius: 10px;
+}
+
+:focus-visible { outline: 2px solid var(--blue-600); outline-offset: 2px; }
+
+/* ---------- Footer ---------- */
+.login-foot {
+  position: relative;
+  z-index: 1;
+  padding: 14px 24px 18px;
+  text-align: center;
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .78);
+  text-shadow: 0 1px 8px rgba(4, 10, 32, .8);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+  /* Poster becomes a banner at the top; the card sits below it */
+  .login-bg {
+    background:
+      linear-gradient(180deg, rgba(10, 20, 51, .10) 0, rgba(10, 20, 51, .30) 28vh, var(--navy-950) 52vh),
+      url('../images/login-bg.jpg') 62% top / auto 52vh no-repeat;
+    background-color: var(--navy-950);
+  }
+  .login-stage { justify-items: center; align-items: start; padding: 34vh 18px 28px; }
+  .login-card { max-width: 440px; }
+}
+@media (max-height: 640px) and (min-width: 700px) and (max-width: 1100px) {
+  .login-stage { padding-top: 26vh; }
+}
+@media (max-width: 420px) {
+  .login-card { padding: 28px 22px 24px; border-radius: 16px; }
+  .login-brand .center { font-size: 19px; }
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-card { animation: none; }
+  .lf-submit, .lf-field input { transition: none; }
+}
