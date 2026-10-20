@@ -38,7 +38,7 @@
                 <h3 class="font-bold text-slate-900">Circulation — last 7 days</h3>
                 <div class="flex gap-3 text-xs text-slate-500">
                     <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-indigo-500 inline-block"></span> Issued</span>
-                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span> Returned</span>
+                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-amber-400 inline-block"></span> Returned</span>
                 </div>
             </div>
             <div class="flex items-end gap-3 h-48">
@@ -46,7 +46,7 @@
                     <div class="flex-1 flex flex-col items-center h-full justify-end" title="{{ $day['date'] }}: {{ $day['issued'] }} issued, {{ $day['returned'] }} returned">
                         <div class="flex items-end gap-1 w-full justify-center flex-1">
                             <div class="w-1/3 bg-indigo-500 rounded-t" style="height: {{ $day['issued'] / $chartMax * 100 }}%; min-height: {{ $day['issued'] ? '4px' : '0' }}"></div>
-                            <div class="w-1/3 bg-emerald-500 rounded-t" style="height: {{ $day['returned'] / $chartMax * 100 }}%; min-height: {{ $day['returned'] ? '4px' : '0' }}"></div>
+                            <div class="w-1/3 bg-amber-400 rounded-t" style="height: {{ $day['returned'] / $chartMax * 100 }}%; min-height: {{ $day['returned'] ? '4px' : '0' }}"></div>
                         </div>
                         <div class="text-xs text-slate-500 mt-2">{{ $day['label'] }}</div>
                         <div class="text-[10px] text-slate-400">{{ $day['issued'] }} / {{ $day['returned'] }}</div>

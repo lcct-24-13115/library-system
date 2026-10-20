@@ -1,0 +1,58 @@
+@php
+    $user = auth()->user();
+
+    $groups = [
+        [null, [
+            ['Dashboard', 'dashboard', route('dashboard'), request()->routeIs('dashboard')],
+        ]],
+        ['Circulation', [
+            ['Issue Book', 'issue', route('loans.create'), request()->routeIs('loans.create')],
+            ['Return Book', 'return', route('loans.return.form'), request()->routeIs('loans.return.form')],
+            ['Loans', 'loans', route('loans.index'), request()->routeIs('loans.index')],
+            ['Reservations', 'bookmark', route('reservations.index'), request()->routeIs('reservations.*')],
+        ]],
+        ['Collection', [
+            ['Books Catalog', 'books', route('books.index'), request()->routeIs('books.*')],
+            ['Patrons', 'users', route('patrons.index'), request()->routeIs('patrons.*')],
+        ]],
+        ['Library', [
+            ['Attendance', 'attendance', route('attendance.index'), request()->routeIs('attendance.*')],
+            ['Reports', 'reports', route('reports.index'), request()->routeIs('reports.*')],
+        ]],
+    ];
+
+    if ($user && $user->isAdmin()) {
+        $groups[] = ['Admin', [
+            ['Users', 'admin', route('users.index'), request()->routeIs('users.*')],
+        ]];
+    }
+@endphp
+
+<aside class="sidebar print:hidden">
+    <a href="{{ route('dashboard') }}" class="brand" aria-label="SALRC Library System home">
+        <div class="brand-mark"><x-icon name="library" :size="20" /></div>
+        <div>
+            <div class="brand-title">SALRC</div>
+            <div class="brand-sub">Library System</div>
+        </div>
+    </a>
+
+    <nav aria-label="Primary navigation">
+        @foreach($groups as [$label, $items])
+            <section>
+                @if($label)
+                    <div class="nav-label">{{ $label }}</div>
+                @endif
+                @foreach($items as [$text, $icon, $href, $active])
+                    <a href="{{ $href }}" class="nav-link {{ $active ? 'active' : '' }}" @if($active) aria-current="page" @endif>
+                        <x-icon :name="$icon" :size="16" />{{ $text }}
+                    </a>
+                @endforeach
+            </section>
+        @endforeach
+    </nav>
+
+    <div class="sidebar-foot">
+        Saint Augustine<br>Learning Resource Center
+    </div>
+</aside>
