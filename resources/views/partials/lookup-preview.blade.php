@@ -71,7 +71,8 @@
             ]);
         }
 
-        const tone = !d.is_active ? 'bad' : (d.overdue_count > 0 ? 'warn' : 'ok');
+        const atLimit = mode === 'issue' && d.active_loans_count >= d.max_loans;
+        const tone = !d.is_active ? 'bad' : ((d.overdue_count > 0 || atLimit) ? 'warn' : 'ok');
         const nodes = [];
 
         const head = el('div', 'flex items-start justify-between gap-2');
@@ -89,10 +90,13 @@
         if (contact) nodes.push(el('p', 'text-xs text-slate-600 mt-2', contact));
 
         nodes.push(el('p', 'text-xs text-slate-700 mt-2',
-            'On loan: ' + d.active_loans_count + ' · Overdue: ' + d.overdue_count + ' · Pending reservations: ' + d.pending_reservations_count));
+            'On loan: ' + d.active_loans_count + ' of ' + d.max_loans + ' allowed · Overdue: ' + d.overdue_count + ' · Pending reservations: ' + d.pending_reservations_count));
 
         if (!d.is_active) {
             nodes.push(el('p', 'text-xs font-semibold text-rose-700 mt-2', 'Marked inactive: cannot ' + (mode === 'issue' ? 'borrow' : 'reserve') + ' until set to active.'));
+        }
+        if (atLimit) {
+            nodes.push(el('p', 'text-xs font-semibold text-amber-800 mt-2', 'At the borrow limit. A librarian/admin must tick "Override limit" (with a remark) to issue another book.'));
         }
         if (d.overdue_count > 0) {
             nodes.push(el('p', 'text-xs text-amber-800 mt-2', 'Has overdue item(s). For information only; borrowing is not blocked.'));

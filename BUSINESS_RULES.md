@@ -9,7 +9,11 @@ These rules are fixed. Do not change or work around them.
 
 ## Borrowing
 - Borrowing is direct. Overdue items never block borrowing or renewing.
-- Issuing a book requires only: the patron exists, the patron is Active, and a copy is available.
+- Issuing a book requires: the patron exists, the patron is Active, a copy is available,
+  the patron is under their type's borrow limit (`config/library.php` -> `max_loans`, set in `.env`),
+  and the patron does not already have the same title on loan.
+- Overdue items still NEVER block. Only the borrow limit and the duplicate-title rule do.
+- Admin/librarian may override the limit on one issue (remark required). Staff cannot.
 - Renewing requires only that the loan has not been returned (plus the optional `LIBRARY_MAX_RENEWALS` cap, which is off by default).
 
 ## History

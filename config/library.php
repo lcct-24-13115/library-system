@@ -27,6 +27,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Maximum Active Loans per Patron
+    |--------------------------------------------------------------------------
+    |
+    | How many books a patron may have on loan (not yet returned) at one time.
+    | Overdue items still never block borrowing; this limit only protects the
+    | shelves. Keyed by patron type; 'default' is used for any other type.
+    | Override in .env, e.g. LIBRARY_MAX_LOANS_STUDENT=3
+    | An admin/librarian can override the limit on a single issue (remark required).
+    |
+    */
+    'max_loans' => [
+        'Student'      => (int) env('LIBRARY_MAX_LOANS_STUDENT', 3),
+        'Faculty'      => (int) env('LIBRARY_MAX_LOANS_FACULTY', 5),
+        'Staff'        => (int) env('LIBRARY_MAX_LOANS_STAFF', 3),
+        'Outside User' => (int) env('LIBRARY_MAX_LOANS_OUTSIDE', 3),
+        'default'      => (int) env('LIBRARY_MAX_LOANS_DEFAULT', 3),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Attendance: duplicate-scan window (minutes)
     |--------------------------------------------------------------------------
     |

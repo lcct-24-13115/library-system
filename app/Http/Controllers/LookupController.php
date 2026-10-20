@@ -40,6 +40,7 @@ class LookupController extends Controller
             'contact_no'                => $patron->contact_no,
             'profile_url'               => route('patrons.show', $patron),
             'active_loans_count'        => $active->count(),
+            'max_loans'                 => $patron->maxLoans(),
             'overdue_count'             => $active->filter(fn ($l) => $l->isOverdue())->count(),
             'pending_reservations_count' => $patron->reservations()->pending()->count(),
             'loans'                     => $active->take(5)->map(fn ($l) => [

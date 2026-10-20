@@ -30,6 +30,13 @@
             @if(auth()->check() && auth()->user()->isAdmin())
                 <a href="{{ route('users.index') }}" class="{{ $link(request()->routeIs('users.*')) }}">Users</a>
             @endif
+        
+            @auth
+                <form method="POST" action="{{ route('logout') }}" class="inline md:ml-2 md:pl-4 md:border-l md:border-indigo-700">
+                    @csrf
+                    <button type="submit" class="font-semibold text-rose-200 hover:text-white transition">Logout</button>
+                </form>
+            @endauth
         </div>
     </nav>
 
@@ -61,3 +68,4 @@
 
 </body>
 </html>
+

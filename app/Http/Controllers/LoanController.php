@@ -16,7 +16,9 @@ use Illuminate\Validation\ValidationException;
  *  - NO automatic fines / penalties / receipts / generated files.
  *  - Overdue items never block a patron from borrowing.
  *  - Fines and payments are handled manually and offline by the librarian.
- *  - The only hard limit is physical: a book needs an available copy.
+ *  - Hard limits: a book needs an available copy; a patron may not exceed the
+ *    per-type borrow limit (admin/librarian can override with a remark) and may not
+ *    borrow the same title twice at once.
  */
 class LoanController extends Controller
 {
@@ -67,6 +69,7 @@ class LoanController extends Controller
             'accession_number' => ['required', 'string', 'max:255'],
             'loan_days'        => ['required', 'integer', 'min:1', 'max:365'],
             'remarks'          => ['nullable', 'string', 'max:500'],
+            'override_limit'   => ['nullable', 'boolean'],
         ]);
 
         $patron = Patron::where('id_number', trim($data['patron_id_number']))->first();
@@ -84,6 +87,9 @@ class LoanController extends Controller
         }
 
         $loan = DB::transaction(function () use ($data, $patron, $request) {
+            // Lock the patron row so two desks can't push the same patron past the limit.
+            Patron::whereKey($patron->id)->lockForUpdate()->first();
+
             // Lock the row so two desks can't issue the last copy at the same time.
             $book = Book::where('accession_number', trim($data['accession_number']))
                 ->lockForUpdate()
@@ -99,6 +105,44 @@ class LoanController extends Controller
                 throw ValidationException::withMessages([
                     'accession_number' => "No copies of \"{$book->title}\" are currently available.",
                 ]);
+            }
+
+            // Same title already out with this patron? Block (no override).
+            $alreadyHas = Loan::active()
+                ->where('patron_id', $patron->id)
+                ->where('book_id', $book->id)
+                ->exists();
+
+            if ($alreadyHas) {
+                throw ValidationException::withMessages([
+                    'accession_number' => "{$patron->name} already has \"{$book->title}\" on loan.",
+                ]);
+            }
+
+            // Borrow limit (overdue items still never block; this is a shelf-protection limit).
+            $limit  = $patron->maxLoans();
+            $active = Loan::active()->where('patron_id', $patron->id)->count();
+
+            if ($active >= $limit) {
+                $user        = $request->user();
+                $wantsBypass = $request->boolean('override_limit');
+                $canBypass   = $user && $user->canManage();
+
+                if (! ($wantsBypass && $canBypass)) {
+                    $hint = $canBypass
+                        ? ' Tick "Override limit" and add a remark to issue anyway.'
+                        : ' Ask a librarian or admin to approve an override.';
+
+                    throw ValidationException::withMessages([
+                        'patron_id_number' => "{$patron->name} already has {$active} of {$limit} allowed books on loan.{$hint}",
+                    ]);
+                }
+
+                if (! filled($data['remarks'] ?? null)) {
+                    throw ValidationException::withMessages([
+                        'remarks' => 'A remark is required when overriding the borrow limit.',
+                    ]);
+                }
             }
 
             $book->decrement('available_copies');

@@ -49,10 +49,20 @@
                 </div>
             </div>
 
+            @if(auth()->check() && auth()->user()->canManage())
+                <label class="flex items-start gap-2 text-sm text-slate-700">
+                    <input type="checkbox" name="override_limit" value="1" @checked(old('override_limit'))
+                           class="mt-0.5 rounded border-slate-300">
+                    <span><span class="font-semibold">Override borrow limit</span>
+                        <span class="text-xs text-slate-500">(only if the patron is at the limit; a remark is required)</span></span>
+                </label>
+            @endif
+
             <div class="pt-2 flex items-center justify-between">
                 <p class="text-xs text-slate-500">
                     No fines are calculated and overdue items never block borrowing.
                     Fines and payments are handled manually by the librarian.
+                    A patron may borrow up to their type's limit and not the same title twice.
                 </p>
                 <button type="submit" class="px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 shadow-sm transition whitespace-nowrap">
                     Issue Book

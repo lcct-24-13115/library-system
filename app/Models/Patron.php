@@ -36,6 +36,14 @@ class Patron extends Model
         return $this->hasMany(Reservation::class);
     }
 
+    /** Max books this patron may have on loan at once (see config/library.php). */
+    public function maxLoans(): int
+    {
+        $limits = config('library.max_loans', []);
+
+        return (int) ($limits[$this->patron_type] ?? $limits['default'] ?? 3);
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active';
