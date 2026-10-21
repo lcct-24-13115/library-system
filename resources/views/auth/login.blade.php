@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ file_exists(public_path('css/login.css')) ? filemtime(public_path('css/login.css')) : 1 }}">
     <link rel="stylesheet" href="{{ asset('css/login-book.css') }}?v={{ file_exists(public_path('css/login-book.css')) ? filemtime(public_path('css/login-book.css')) : 1 }}">
     <script src="{{ asset('js/login-book.js') }}?v={{ file_exists(public_path('js/login-book.js')) ? filemtime(public_path('js/login-book.js')) : 1 }}" defer></script>
+    <script src="{{ asset('js/login-bg3d.js') }}?v={{ file_exists(public_path('js/login-bg3d.js')) ? filemtime(public_path('js/login-bg3d.js')) : 1 }}" defer></script>
 </head>
 
 @php

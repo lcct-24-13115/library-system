@@ -57,6 +57,27 @@
   to   { opacity: .6;  translate: 3vw 0; }
 }
 
+/* 3D background: WebGL canvas (login-bg3d.js) sits between the poster and the book.
+   The poster itself glides opposite to the camera for parallax (translate/scale compose
+   with whatever transform login.css already uses). */
+.login-bg {
+  scale: 1.05;
+  translate: calc(var(--bgx, 0) * 1px) calc(var(--bgy, 0) * 1px);
+  will-change: translate;
+}
+#bg3d {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+#bg3d.is-ready { opacity: 1; }
+
 /* ================================================================== Stage */
 body.login-page .login-stage {
   display: flex;
