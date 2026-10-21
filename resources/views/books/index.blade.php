@@ -36,8 +36,22 @@
         </form>
     </div>
 
+    <!-- View switch: 3D shelf (default) or table. The choice is remembered in this browser. -->
+    <div class="flex items-center justify-between mb-4">
+        <p class="text-sm text-slate-500">Click a book on the shelf to open it.</p>
+        <div class="viewswitch" data-viewswitch="books" data-default="shelf" role="group" aria-label="Catalog view">
+            <button type="button" data-set-view="shelf" aria-pressed="true">3D Shelf</button>
+            <button type="button" data-set-view="table" aria-pressed="false">Table</button>
+        </div>
+    </div>
+
+    <!-- 3D Bookshelf -->
+    <div data-view="shelf" class="mb-6">
+        @include('books._shelf', ['books' => $books, 'mode' => 'staff'])
+    </div>
+
     <!-- Catalog Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div data-view="table" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" hidden>
         <table class="w-full text-left border-collapse">
             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase text-xs font-bold tracking-wider">
                 <tr>

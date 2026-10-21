@@ -17,7 +17,7 @@
             </nav>
 
             <main class="guest-main">
-                <div class="auth-card">
+                <div class="auth-card" data-tilt="5">
                     {{ $slot }}
                 </div>
             </main>

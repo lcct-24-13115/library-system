@@ -1,0 +1,391 @@
+/* =====================================================================
+   SALRC 3D theme  —  additive layer loaded AFTER salrc.css
+   Re-skins every existing page (cards, tables, buttons, inputs, sidebar)
+   by targeting the Tailwind classes the views already use, so no view
+   needs to be rewritten to pick up the depth. Delete this file (and the
+   two <link>/<script> lines in layouts/_head.blade.php) to roll back.
+   ===================================================================== */
+
+:root {
+  --d-edge: rgba(8, 24, 70, .42);          /* hard "extrusion" edge under buttons */
+  --d-glow: rgba(37, 99, 235, .28);
+  --d-line: rgba(255, 255, 255, .75);
+  --d-card: linear-gradient(145deg, rgba(255,255,255,.96), rgba(244,248,255,.88));
+  --d-shadow: 0 1px 0 #fff inset, 0 2px 4px rgba(15,37,87,.06), 0 12px 24px -8px rgba(15,37,87,.18), 0 30px 50px -24px rgba(15,37,87,.22);
+  --d-shadow-hover: 0 1px 0 #fff inset, 0 4px 8px rgba(15,37,87,.08), 0 22px 36px -10px rgba(15,37,87,.26), 0 44px 70px -26px rgba(29,78,216,.30);
+  --d-ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+/* ---------- 3D canvas background (injected by salrc-3d.js) ---------- */
+#bg3d { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; display: block; }
+
+body.salrc, body.salrc-portal {
+  background:
+    radial-gradient(1200px 700px at 8% -10%, #dbe8ff 0%, transparent 60%),
+    radial-gradient(900px 600px at 100% 0%, #e6f1ff 0%, transparent 55%),
+    linear-gradient(180deg, #eef3fc, #e5edfa);
+  background-attachment: fixed;
+}
+body.salrc .shell, body.salrc .landing { background: transparent; }
+
+/* ---------- Floating sidebar ---------- */
+body.salrc .sidebar {
+  margin: 14px 0 14px 14px;
+  height: calc(100dvh - 28px);
+  top: 14px;
+  border-radius: 22px;
+  background:
+    radial-gradient(260px 200px at 0% 0%, rgba(96,165,250,.28), transparent 70%),
+    linear-gradient(165deg, #153277 0%, #0f2557 45%, #0a1a40 100%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.18) inset,
+    -1px 0 0 rgba(255,255,255,.05) inset,
+    0 18px 30px -8px rgba(10,26,64,.55),
+    0 40px 70px -20px rgba(10,26,64,.55);
+}
+body.salrc .sidebar nav section { perspective: 700px; }
+body.salrc .nav-link {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform .28s var(--d-ease), background .2s, box-shadow .28s var(--d-ease), color .2s;
+}
+body.salrc .nav-link:hover {
+  background: rgba(255,255,255,.09);
+  transform: translate3d(5px, -1px, 14px) rotateY(-7deg);
+  box-shadow: 0 10px 18px -8px rgba(0,0,0,.5);
+}
+body.salrc .nav-link.active {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  box-shadow:
+    inset 3px 0 #bfdbfe,
+    0 1px 0 rgba(255,255,255,.35) inset,
+    0 5px 0 #14308a,
+    0 14px 22px -6px rgba(37,99,235,.65);
+  transform: translate3d(4px, -2px, 18px);
+}
+body.salrc .nav-link.active:hover { transform: translate3d(6px, -3px, 22px) rotateY(-5deg); }
+body.salrc .brand img { filter: drop-shadow(0 6px 8px rgba(0,0,0,.35)); animation: floaty 6s ease-in-out infinite; }
+
+/* ---------- Floating glass top bar ---------- */
+body.salrc .topbar {
+  margin: 14px 14px 0 14px;
+  border: 1px solid var(--d-line);
+  border-radius: 18px;
+  background: rgba(255,255,255,.72);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: var(--d-shadow);
+  position: sticky; top: 14px; z-index: 20;
+}
+body.salrc .avatar { box-shadow: 0 3px 0 #a9c1f3, 0 8px 12px -4px rgba(29,78,216,.4); }
+
+/* ---------- Page entrance ---------- */
+body.salrc .content > div > * { animation: rise3d .6s var(--d-ease) both; }
+body.salrc .content > div > *:nth-child(2) { animation-delay: .06s; }
+body.salrc .content > div > *:nth-child(3) { animation-delay: .12s; }
+body.salrc .content > div > *:nth-child(4) { animation-delay: .18s; }
+body.salrc .content > div > *:nth-child(n+5) { animation-delay: .24s; }
+body.salrc .content h2.text-3xl, body.salrc .content h2.text-2xl {
+  text-shadow: 0 1px 0 #fff, 0 6px 14px rgba(29,78,216,.14);
+}
+
+/* ---------- Glass / neumorphic cards (every existing white panel) ---------- */
+:is(body.salrc, body.salrc-portal) .bg-white:is(div, article, section, form, aside) {
+  background: var(--d-card);
+  border: 1px solid var(--d-line) !important;
+  border-radius: 16px;
+  box-shadow: var(--d-shadow);
+}
+:is(body.salrc, body.salrc-portal) a.bg-white {
+  background: var(--d-card);
+  border: 1px solid var(--d-line) !important;
+  border-radius: 16px;
+  box-shadow: var(--d-shadow);
+}
+:is(body.salrc, body.salrc-portal) article.bg-white { transition: transform .3s var(--d-ease), box-shadow .3s var(--d-ease); }
+:is(body.salrc, body.salrc-portal) article.bg-white:hover { transform: translateY(-4px) translateZ(0); box-shadow: var(--d-shadow-hover); }
+
+/* Dark call-to-action card on the dashboard */
+body.salrc .bg-indigo-900:is(div) {
+  background: linear-gradient(145deg, #1e40af, #0f2557);
+  border-radius: 16px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.2) inset, 0 12px 0 -4px #0a1a40, 0 26px 40px -12px rgba(10,26,64,.55);
+}
+
+/* ---------- Tilt cards (data-tilt, wired by salrc-3d.js) ---------- */
+[data-tilt] {
+  --rx: 0deg; --ry: 0deg; --lift: 0px; --mx: 50%; --my: 50%;
+  position: relative;
+  transform: perspective(900px) translate3d(0, var(--lift), 0) rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform .35s var(--d-ease), box-shadow .35s var(--d-ease);
+  will-change: transform;
+}
+[data-tilt]:hover { --lift: -8px; box-shadow: var(--d-shadow-hover); }
+[data-tilt].is-tilting { transition: transform .08s linear, box-shadow .35s var(--d-ease); }
+[data-tilt]::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
+  background: radial-gradient(420px circle at var(--mx) var(--my), rgba(255,255,255,.55), transparent 45%);
+  transition: opacity .3s;
+}
+[data-tilt]:hover::after { opacity: .9; }
+.z-pop { transform: translateZ(34px); }
+.z-pop-sm { transform: translateZ(18px); }
+
+/* ---------- Stat cards ---------- */
+.stat3d {
+  display: block; padding: 18px 18px 16px; text-decoration: none; color: inherit;
+  --a: #2563eb; --a2: #60a5fa; --edge: #1e40af; --glow: rgba(37,99,235,.35);
+  border-radius: 16px; border: 1px solid var(--d-line);
+  background: radial-gradient(180px 140px at 100% 0%, var(--glow), transparent 70%), var(--d-card);
+  box-shadow: var(--d-shadow);
+}
+.stat3d__icon {
+  width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; color: #fff; margin-bottom: 14px;
+  background: linear-gradient(145deg, var(--a2), var(--a));
+  box-shadow: 0 1px 0 rgba(255,255,255,.55) inset, 0 6px 0 var(--edge), 0 14px 18px -4px var(--glow);
+  transform: translateZ(40px);
+  animation: floaty 5s ease-in-out infinite;
+}
+.stat3d:nth-child(2n) .stat3d__icon { animation-delay: -1.4s; }
+.stat3d:nth-child(3n) .stat3d__icon { animation-delay: -2.8s; }
+.stat3d__label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; color: #62708f; transform: translateZ(20px); }
+.stat3d__value { font: 800 28px/1.15 var(--font-display, 'Manrope', sans-serif); letter-spacing: -.03em; margin-top: 2px; transform: translateZ(28px); text-shadow: 0 1px 0 #fff, 0 6px 12px var(--glow); }
+
+/* ---------- 3D bar chart ---------- */
+.bar3d { position: relative; width: 26%; min-width: 10px; max-width: 26px; border-radius: 4px 4px 0 0; transform-origin: bottom; animation: grow3d .9s var(--d-ease) both; }
+.bar3d::before, .bar3d::after { content: ""; position: absolute; }
+.bar3d::before { top: 0; right: -6px; width: 6px; height: 100%; transform-origin: left top; transform: skewY(-45deg); filter: brightness(.7); background: inherit; border-radius: 0 3px 0 0; }
+.bar3d::after { top: -6px; left: 0; width: 100%; height: 6px; transform-origin: left bottom; transform: skewX(-45deg); filter: brightness(1.18); background: inherit; border-radius: 3px 3px 0 0; }
+.bar3d--issued { background: linear-gradient(180deg, #60a5fa, #1d4ed8); box-shadow: 0 12px 16px -6px rgba(29,78,216,.55); }
+.bar3d--returned { background: linear-gradient(180deg, #7dd3fc, #0284c7); box-shadow: 0 12px 16px -6px rgba(2,132,199,.5); }
+.chart-floor { background: linear-gradient(180deg, rgba(37,99,235,.06), transparent 40%); border-bottom: 3px solid #cfdcf3; border-radius: 0 0 6px 6px; }
+
+/* ---------- Tactile 3D buttons (existing coloured Tailwind buttons) ---------- */
+body.salrc :is(a, button)[class*="bg-indigo-5"], body.salrc :is(a, button)[class*="bg-indigo-6"], body.salrc :is(a, button)[class*="bg-indigo-7"], body.salrc :is(a, button)[class*="bg-indigo-9"],
+body.salrc :is(a, button)[class*="bg-slate-7"], body.salrc :is(a, button)[class*="bg-slate-8"], body.salrc :is(a, button)[class*="bg-slate-9"],
+body.salrc :is(a, button)[class*="bg-amber-5"], body.salrc :is(a, button)[class*="bg-amber-6"],
+body.salrc :is(a, button)[class*="bg-emerald-5"], body.salrc :is(a, button)[class*="bg-emerald-6"], body.salrc :is(a, button)[class*="bg-emerald-7"],
+body.salrc :is(a, button)[class*="bg-rose-5"], body.salrc :is(a, button)[class*="bg-rose-6"], body.salrc :is(a, button)[class*="bg-rose-7"],
+body.salrc .btn-primary, .btn3d, body.salrc-portal a[class*="bg-indigo-6"] {
+  position: relative;
+  box-shadow: 0 1px 0 rgba(255,255,255,.28) inset, 0 5px 0 var(--d-edge), 0 12px 16px -6px rgba(10,26,64,.45);
+  transform: translateY(0);
+  transition: transform .14s var(--d-ease), box-shadow .14s var(--d-ease), background-color .15s, filter .15s;
+}
+body.salrc :is(a, button)[class*="bg-indigo-5"]:hover, body.salrc :is(a, button)[class*="bg-indigo-6"]:hover, body.salrc :is(a, button)[class*="bg-indigo-7"]:hover, body.salrc :is(a, button)[class*="bg-indigo-9"]:hover,
+body.salrc :is(a, button)[class*="bg-slate-7"]:hover, body.salrc :is(a, button)[class*="bg-slate-8"]:hover, body.salrc :is(a, button)[class*="bg-slate-9"]:hover,
+body.salrc :is(a, button)[class*="bg-amber-5"]:hover, body.salrc :is(a, button)[class*="bg-amber-6"]:hover,
+body.salrc :is(a, button)[class*="bg-emerald-5"]:hover, body.salrc :is(a, button)[class*="bg-emerald-6"]:hover, body.salrc :is(a, button)[class*="bg-emerald-7"]:hover,
+body.salrc :is(a, button)[class*="bg-rose-5"]:hover, body.salrc :is(a, button)[class*="bg-rose-6"]:hover, body.salrc :is(a, button)[class*="bg-rose-7"]:hover,
+body.salrc .btn-primary:hover, .btn3d:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 1px 0 rgba(255,255,255,.32) inset, 0 7px 0 var(--d-edge), 0 18px 22px -8px rgba(10,26,64,.5);
+}
+body.salrc :is(a, button)[class*="bg-indigo-"]:active, body.salrc :is(a, button)[class*="bg-slate-"]:active, body.salrc :is(a, button)[class*="bg-amber-"]:active,
+body.salrc :is(a, button)[class*="bg-emerald-"]:active, body.salrc :is(a, button)[class*="bg-rose-"]:active, body.salrc .btn-primary:active, .btn3d:active {
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 rgba(255,255,255,.2) inset, 0 0 0 var(--d-edge), 0 3px 6px -2px rgba(10,26,64,.4);
+}
+/* small table buttons get a shorter edge */
+body.salrc :is(td, li) :is(a, button)[class*="bg-"].text-xs { box-shadow: 0 1px 0 rgba(255,255,255,.28) inset, 0 3px 0 var(--d-edge), 0 7px 10px -4px rgba(10,26,64,.4); }
+body.salrc :is(td, li) :is(a, button)[class*="bg-"].text-xs:hover { transform: translateY(-1px); }
+body.salrc :is(td, li) :is(a, button)[class*="bg-"].text-xs:active { transform: translateY(3px); box-shadow: 0 0 0 var(--d-edge); }
+body.salrc .pw-toggle, body.salrc .logout-btn { box-shadow: none; }
+.btn3d { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 10px; padding: 11px 18px; font: 700 13px/1 var(--font-body, 'DM Sans', sans-serif); color: #fff; background: linear-gradient(180deg, #3b82f6, #1d4ed8); cursor: pointer; text-decoration: none; }
+.btn3d--ghost { background: linear-gradient(180deg, #fff, #eaf0fa); color: #1e3a8a; --d-edge: #b9c9e8; }
+body.salrc .logout-btn { transition: transform .14s var(--d-ease), background .16s; }
+body.salrc .logout-btn:hover { transform: translateY(-1px); }
+body.salrc .logout-btn:active { transform: translateY(2px); }
+
+/* ---------- Neumorphic inputs ---------- */
+body.salrc :is(input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=submit]):not([type=file]), select, textarea) {
+  background: linear-gradient(180deg, #f4f7fd, #fff);
+  box-shadow: inset 0 2px 5px rgba(15,37,87,.10), inset 0 -1px 0 #fff, 0 1px 0 rgba(255,255,255,.9);
+  transition: box-shadow .2s var(--d-ease), transform .2s var(--d-ease), border-color .15s;
+}
+body.salrc :is(input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=submit]):not([type=file]), select, textarea):focus {
+  transform: translateY(-1px);
+  border-color: #3b82f6;
+  box-shadow: inset 0 1px 2px rgba(15,37,87,.06), 0 0 0 4px rgba(37,99,235,.16), 0 12px 18px -10px rgba(29,78,216,.5);
+}
+
+/* ---------- Neumorphic table containers + floating headers ---------- */
+body.salrc table thead { background: linear-gradient(180deg, #f6f9ff, #e9f0fc); }
+body.salrc table thead th {
+  position: relative;
+  box-shadow: 0 8px 12px -10px rgba(15,37,87,.45);
+  text-shadow: 0 1px 0 #fff;
+}
+body.salrc table tbody tr { position: relative; transition: transform .2s var(--d-ease), box-shadow .2s var(--d-ease), background .2s; }
+body.salrc table tbody tr:hover {
+  background: linear-gradient(90deg, rgba(219,234,254,.55), rgba(255,255,255,.9));
+  transform: translateY(-2px) scale(1.002);
+  box-shadow: 0 10px 18px -10px rgba(29,78,216,.45);
+  z-index: 2;
+}
+body.salrc .rounded-full[class*="bg-"]:is(span) { box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 2px 0 rgba(15,37,87,.12); }
+
+/* ---------- Scan & check-in / check-out panels ---------- */
+.scan-panel { position: relative; overflow: hidden; }
+.scan-panel::before, .scan-panel > .scan-corners::before {
+  content: ""; position: absolute; width: 22px; height: 22px; pointer-events: none; border: 3px solid #2563eb; opacity: .75; border-radius: 4px;
+}
+.scan-panel::before { left: 10px; top: 10px; border-right: 0; border-bottom: 0; }
+.scan-panel > .scan-corners::before { right: 10px; bottom: 10px; border-left: 0; border-top: 0; }
+.scan-laser {
+  position: absolute; left: 4%; right: 4%; top: 0; height: 2px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, #38bdf8, #2563eb, #38bdf8, transparent);
+  box-shadow: 0 0 14px 3px rgba(56,189,248,.65);
+  animation: laser 3.6s ease-in-out infinite;
+}
+.scan-panel:focus-within { box-shadow: var(--d-shadow-hover), 0 0 0 3px rgba(56,189,248,.35); }
+.scan-panel:focus-within .scan-laser { animation-duration: 1.8s; }
+
+/* ---------- Floating decorative 3D shapes (CSS fallback / portal) ---------- */
+.float-shape { position: fixed; z-index: 0; pointer-events: none; opacity: .5; animation: floaty 9s ease-in-out infinite; }
+.float-shape--cube { width: 64px; height: 64px; border-radius: 14px; background: linear-gradient(145deg, #bfdbfe, #60a5fa); box-shadow: 0 8px 0 #3b82f6, 0 22px 30px -8px rgba(37,99,235,.4); transform: rotate(18deg); }
+.hero-art .book-stack { transform-style: preserve-3d; animation: bookstack 9s ease-in-out infinite; }
+
+/* ---------- Public portal header ---------- */
+body.salrc-portal > header { background: rgba(255,255,255,.75) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: var(--d-shadow); position: sticky; top: 0; z-index: 30; }
+
+/* ---------- Auth (guest layout) card ---------- */
+body.salrc .auth-card { border-radius: 20px; background: var(--d-card); box-shadow: var(--d-shadow-hover); border: 1px solid var(--d-line); }
+
+/* =====================================================================
+   3D BOOKSHELF
+   ===================================================================== */
+.viewswitch { display: inline-flex; padding: 4px; border-radius: 12px; background: #e3ebf9; box-shadow: inset 0 2px 5px rgba(15,37,87,.18); gap: 4px; }
+.viewswitch button { border: 0; border-radius: 9px; padding: 8px 14px; font: 700 12px var(--font-body, 'DM Sans', sans-serif); color: #4a5b82; background: transparent; cursor: pointer; transition: all .2s var(--d-ease); }
+.viewswitch button[aria-pressed="true"] { background: linear-gradient(180deg, #fff, #eaf0fa); color: #1d4ed8; box-shadow: 0 3px 0 #b9c9e8, 0 8px 10px -4px rgba(15,37,87,.3); transform: translateY(-1px); }
+[data-view][hidden] { display: none !important; }
+
+.shelf3d {
+  --row: 244px;
+  display: flex; flex-wrap: wrap; align-content: flex-start;
+  padding: 0 22px; border-radius: 20px; position: relative;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--row) - 16px), #f4f8ff calc(var(--row) - 16px), #c4d3ee calc(var(--row) - 9px), #8fa6d3 calc(var(--row) - 8px), #4e6aa6 var(--row)) 0 0 / 100% var(--row) repeat-y content-box,
+    radial-gradient(900px 340px at 50% 0%, rgba(96,165,250,.22), transparent 70%),
+    linear-gradient(180deg, #0f2557, #0a1a40);
+  background-origin: content-box, border-box, border-box;
+  box-shadow: inset 0 16px 40px rgba(0,0,0,.45), inset 0 -2px 0 rgba(255,255,255,.08), 0 30px 50px -22px rgba(10,26,64,.6);
+}
+.shelf3d__cell { position: relative; flex: 0 0 auto; width: calc(var(--t) + 32px); height: var(--row); }
+.shelf3d__cell:hover, .shelf3d__cell:focus-within { z-index: 6; }
+.shelf3d__empty { color: #bccbec; padding: 60px 20px; width: 100%; text-align: center; height: var(--row); }
+.book3d-btn { all: unset; position: absolute; inset: 0; cursor: pointer; display: block; }
+.book3d-btn:focus-visible { outline: 2px solid #93c5fd; outline-offset: -2px; border-radius: 8px; }
+
+/* geometry: --w cover width, --t spine thickness, --h height */
+.book3d { --w: 124px; position: absolute; left: 50%; bottom: 16px; width: var(--w); height: var(--h); margin-left: calc(var(--w) / -2); perspective: 900px; perspective-origin: 50% 35%; pointer-events: none; }
+.book3d__body {
+  position: absolute; inset: 0; transform-style: preserve-3d; --ry: 80deg;
+  transform: translate3d(0, 0, 0) rotateY(var(--ry));
+  transition: transform .75s var(--d-ease);
+}
+.book3d-btn:hover .book3d__body, .book3d-btn:focus-visible .book3d__body { --ry: 32deg; transform: translate3d(0, -12px, 46px) rotateY(var(--ry)); }
+.book3d::after {                                   /* contact shadow on the plank */
+  content: ""; position: absolute; left: 0; right: 0; bottom: -7px; height: 16px; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0,0,0,.55), transparent 70%); transform: scaleX(.5); transition: transform .5s var(--d-ease), opacity .5s; opacity: .9; z-index: -1;
+}
+.book3d-btn:hover .book3d::after { transform: scaleX(1.05) translateY(6px); opacity: .55; }
+
+.book3d__face { position: absolute; display: block; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-sizing: border-box; }
+.book3d__back   { inset: 0; transform: translateZ(calc(var(--t) / -2)) rotateY(180deg); background: linear-gradient(145deg, var(--c1), var(--c2)); filter: brightness(.75); border-radius: 3px 6px 6px 3px; }
+.book3d__spine  { width: var(--t); height: 100%; left: calc((var(--w) - var(--t)) / 2); top: 0; transform: rotateY(-90deg) translateZ(calc(var(--w) / 2)); border-radius: 4px 0 0 4px;
+  background: linear-gradient(90deg, rgba(255,255,255,.28), transparent 18%, transparent 82%, rgba(0,0,0,.25)), linear-gradient(180deg, var(--c2), var(--c1));
+  display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.book3d__spine::before, .book3d__spine::after { content: ""; position: absolute; left: 0; right: 0; height: 3px; background: rgba(255,255,255,.55); }
+.book3d__spine::before { top: 12px; box-shadow: 0 6px 0 rgba(255,255,255,.3); }
+.book3d__spine::after { bottom: 26px; }
+.spine-title { writing-mode: vertical-rl; transform: rotate(180deg); color: #fff; font: 700 12px/1.15 var(--font-display, 'Manrope', sans-serif); letter-spacing: .02em; max-height: calc(100% - 64px); overflow: hidden; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,.45); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.spine-dot { position: absolute; bottom: 8px; left: 50%; width: 9px; height: 9px; margin-left: -4.5px; border-radius: 50%; }
+.spine-dot.is-on { background: #7dd3fc; box-shadow: 0 0 8px 2px #38bdf8; }
+.spine-dot.is-off { background: #fbbf24; box-shadow: 0 0 8px 2px #f59e0b; }
+.book3d__pages  { width: var(--t); height: calc(100% - 6px); top: 3px; left: calc((var(--w) - var(--t)) / 2); transform: rotateY(90deg) translateZ(calc(var(--w) / 2 - 2px));
+  background: repeating-linear-gradient(90deg, #fbfcff 0 2px, #dfe7f5 2px 3px); }
+.book3d__top    { width: 100%; height: var(--t); left: 0; top: calc((var(--h) - var(--t)) / 2); transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); background: linear-gradient(90deg, var(--c1), var(--c2)); filter: brightness(1.15); }
+.book3d__bottom { width: 100%; height: var(--t); left: 0; top: calc((var(--h) - var(--t)) / 2); transform: rotateX(-90deg) translateZ(calc(var(--h) / 2)); background: #202c4b; }
+.book3d__block  { inset: 3px 3px 3px 0; transform: translateZ(calc(var(--t) / 2 - 3px)); background: linear-gradient(90deg, #dfe7f5, #fff 14%); padding: 14px 12px 12px 18px; color: #1e293b; overflow: hidden; border-radius: 0 3px 3px 0; }
+.book3d__block small { display: block; font: 600 8px/1.4 var(--font-mono, monospace); letter-spacing: .06em; color: #62708f; text-transform: uppercase; }
+.book3d__block b { display: block; margin: 6px 0; font: 800 12px/1.2 var(--font-display, 'Manrope', sans-serif); color: #0f2557; }
+.book3d__cover { position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: left center; transform: translateZ(calc(var(--t) / 2)); transition: transform 1.1s var(--d-ease) .15s; }
+.book3d__cover-front { inset: 0; border-radius: 3px 8px 8px 3px; padding: 16px 12px 14px 20px; color: #fff; display: flex; flex-direction: column; gap: 8px;
+  background: linear-gradient(90deg, rgba(0,0,0,.28) 0 5px, rgba(255,255,255,.18) 5px 7px, transparent 7px), radial-gradient(160px 110px at 80% 0%, rgba(255,255,255,.32), transparent 70%), linear-gradient(150deg, var(--c2), var(--c1));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
+.cv-cat { font: 700 8px var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
+.book3d__cover-front strong { font: 800 14px/1.2 var(--font-display, 'Manrope', sans-serif); letter-spacing: -.01em; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; text-shadow: 0 2px 4px rgba(0,0,0,.35); }
+.book3d__cover-front em { margin-top: auto; font: 600 10px/1.3 var(--font-body, 'DM Sans', sans-serif); font-style: normal; opacity: .9; border-top: 1px solid rgba(255,255,255,.4); padding-top: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.book3d__cover-inner { inset: 0; transform: rotateY(180deg); background: linear-gradient(270deg, #dfe7f5, #fff 16%); border-radius: 6px 3px 3px 6px; }
+.book3d__cover-inner::after { content: "SALRC · Learning Resource Center"; position: absolute; inset: 14px 14px 14px 18px; border: 1px solid #c9d6ee; border-radius: 4px; display: grid; place-items: center; text-align: center; padding: 10px; font: 600 8px/1.6 var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase; color: #8aa0cc; }
+.book-open .book3d__cover { transform: translateZ(calc(var(--t) / 2)) rotateY(-168deg); }
+
+/* ---------- Book modal ---------- */
+.b3m { position: fixed; inset: 0; z-index: 99990; display: none; align-items: center; justify-content: center; padding: 20px; }
+.b3m.is-open { display: flex; }
+.b3m__backdrop { position: absolute; inset: 0; background: rgba(6,16,46,.62); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); animation: fade .25s both; }
+.b3m__panel {
+  position: relative; width: min(880px, 100%); max-height: calc(100dvh - 40px); overflow: auto; border-radius: 26px;
+  display: grid; grid-template-columns: 1fr 1.05fr; color: #0f1f3d;
+  background: linear-gradient(145deg, rgba(255,255,255,.97), rgba(232,240,254,.94));
+  border: 1px solid rgba(255,255,255,.8);
+  box-shadow: 0 1px 0 #fff inset, 0 40px 80px -10px rgba(0,0,0,.6), 0 0 0 1px rgba(37,99,235,.15);
+  animation: modalIn .55s var(--d-ease) both; transform-origin: 50% 100%;
+}
+.b3m__stage { position: relative; min-height: 380px; display: grid; place-items: end center; padding-bottom: 54px; border-radius: 26px 0 0 26px;
+  background: radial-gradient(360px 260px at 50% 30%, rgba(96,165,250,.35), transparent 70%), linear-gradient(180deg, #123074, #0a1a40); overflow: hidden; }
+.b3m__stage::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 44px; background: linear-gradient(180deg, #c4d3ee, #4e6aa6); box-shadow: 0 -2px 0 #f4f8ff; }
+.b3m__stage .book3d { position: relative; left: auto; bottom: auto; margin: 0; --w: 124px; transform: scale(1.55); transform-origin: 50% 100%; z-index: 1; }
+.b3m__stage .book3d__body { --ry: 28deg; transform: rotateY(var(--ry)); }
+.b3m__stage .book-open .book3d__body, .b3m__stage .book3d.book-open .book3d__body { --ry: -10deg; transform: translateX(calc(var(--w) * .5)) rotateY(var(--ry)); }
+.b3m__info { padding: 34px 32px 28px; display: flex; flex-direction: column; gap: 6px; }
+.b3m__kicker { font: 700 10px var(--font-mono, monospace); letter-spacing: .16em; text-transform: uppercase; color: #1d4ed8; }
+.b3m__info h3 { margin: 4px 0 0; font: 800 24px/1.15 var(--font-display, 'Manrope', sans-serif); letter-spacing: -.03em; }
+.b3m__author { margin: 0; color: #55658a; font-size: 14px; }
+.b3m__meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0 6px; }
+.b3m__meta div { background: linear-gradient(180deg, #f4f7fd, #fff); border-radius: 12px; padding: 10px 12px; box-shadow: inset 0 2px 4px rgba(15,37,87,.09), 0 1px 0 #fff; }
+.b3m__meta dt { font: 700 9px var(--font-mono, monospace); letter-spacing: .12em; text-transform: uppercase; color: #7a88a6; }
+.b3m__meta dd { margin: 3px 0 0; font-weight: 700; font-size: 13px; word-break: break-word; }
+.b3m__summary { font-size: 13px; line-height: 1.65; color: #44557a; margin: 6px 0 0; }
+.b3m__status { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 12px; padding: 6px 12px; border-radius: 999px; align-self: flex-start; margin-top: 8px; }
+.b3m__status.is-on { background: #e0f2fe; color: #075985; }
+.b3m__status.is-off { background: #fef3c7; color: #92400e; }
+.b3m__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: auto; padding-top: 22px; }
+.b3m__close { position: absolute; top: 14px; right: 14px; z-index: 5; width: 38px; height: 38px; border-radius: 12px; border: 0; cursor: pointer; font-size: 20px; line-height: 1; color: #1e3a8a; background: linear-gradient(180deg, #fff, #e9f0fc); box-shadow: 0 4px 0 #b9c9e8, 0 10px 14px -6px rgba(15,37,87,.4); transition: transform .14s; }
+.b3m__close:active { transform: translateY(3px); box-shadow: 0 1px 0 #b9c9e8; }
+body.b3m-lock { overflow: hidden; }
+
+/* ---------- Keyframes ---------- */
+@keyframes rise3d { from { opacity: 0; transform: translateY(26px) rotateX(-10deg); transform-origin: 50% 0; } to { opacity: 1; transform: none; } }
+@keyframes floaty { 0%, 100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+@keyframes grow3d { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes laser { 0%, 100% { top: 6%; opacity: .2; } 50% { top: 94%; opacity: 1; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalIn { from { opacity: 0; transform: perspective(1000px) translateY(60px) rotateX(18deg) scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes bookstack { 0%, 100% { transform: rotate(-8deg) rotateY(-8deg) rotateX(4deg); } 50% { transform: rotate(-8deg) rotateY(10deg) rotateX(-3deg); } }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 860px) {
+  .b3m__panel { grid-template-columns: 1fr; }
+  .b3m__stage { min-height: 330px; border-radius: 26px 26px 0 0; }
+}
+@media (max-width: 760px) {
+  body.salrc .sidebar { margin: 8px 8px 0; height: auto; top: 8px; border-radius: 16px; }
+  body.salrc .topbar { margin: 8px 8px 0; top: 70px; }
+  body.salrc .nav-link:hover, body.salrc .nav-link.active, body.salrc .nav-link.active:hover { transform: none; }
+  .stat3d__icon { transform: none; }
+}
+
+/* ---------- Accessibility & print ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  .scan-laser { display: none; }
+}
+@media (hover: none) { [data-tilt]:hover { --lift: 0px; } }
+@media print {
+  #bg3d, .float-shape, .scan-laser, .viewswitch { display: none !important; }
+  * { box-shadow: none !important; transform: none !important; animation: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  body.salrc .content > div > * { opacity: 1 !important; }
+}

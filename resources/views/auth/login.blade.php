@@ -13,6 +13,10 @@
 
     {{-- Login has its own self-contained blue & white stylesheet. --}}
     <link rel="stylesheet" href="{{ asset('css/login.css') }}?v={{ file_exists(public_path('css/login.css')) ? filemtime(public_path('css/login.css')) : 1 }}">
+    {{-- 3D layer: floating glass card, tilt, Three.js particle grid + floating books. --}}
+    <link rel="stylesheet" href="{{ asset('css/salrc-3d.css') }}?v={{ file_exists(public_path('css/salrc-3d.css')) ? filemtime(public_path('css/salrc-3d.css')) : 1 }}">
+    <link rel="stylesheet" href="{{ asset('css/login-3d.css') }}?v={{ file_exists(public_path('css/login-3d.css')) ? filemtime(public_path('css/login-3d.css')) : 1 }}">
+    <script src="{{ asset('js/salrc-3d.js') }}?v={{ file_exists(public_path('js/salrc-3d.js')) ? filemtime(public_path('js/salrc-3d.js')) : 1 }}" defer></script>
 </head>
 
 @php
@@ -20,12 +24,12 @@
     $logo = asset('images/salrc-logo-full.png');
 @endphp
 
-<body class="login-page">
+<body class="login-page" data-bg3d="login">
     {{-- Poster background: replace public/images/login-bg.jpg to change it --}}
     <div class="login-bg" aria-hidden="true"></div>
 
     <main class="login-stage">
-        <section class="login-card" aria-labelledby="signin-title">
+        <section class="login-card" aria-labelledby="signin-title" data-tilt="7">
 
             <div class="login-brand">
                 <img src="{{ $logo }}" alt="Saint Augustine Learning Resource Center seal" width="58" height="58">
@@ -77,7 +81,7 @@
                     @enderror
                 </div>
 
-                <button type="submit" class="lf-submit">Sign in</button>
+                <button type="submit" class="lf-submit" data-tilt="10">Sign in</button>
             </form>
 
             <p class="login-links">

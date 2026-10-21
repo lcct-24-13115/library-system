@@ -4,7 +4,7 @@
     @include('layouts._head')
     <title>@yield('title', 'SALRC Library')</title>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
+<body class="salrc-portal bg-slate-50 text-slate-800 min-h-screen">
     <header class="bg-white border-b border-slate-200">
         <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
             <a href="{{ route('catalog.index') }}" class="flex items-center gap-3">

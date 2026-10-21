@@ -144,7 +144,7 @@ class Phase5IssueScreenTest extends TestCase
         $this->assertStringContainsString('1 book', $html);
 
         // Juan's book is only in "Latest Transactions" now, not in the side list.
-        $side = substr($html, strpos($html, 'id="issued-session"'), strpos($html, '</aside>') - strpos($html, 'id="issued-session"'));
+        $side = substr($html, strpos($html, 'id="issued-session"'), strpos($html, '</aside>', strpos($html, 'id="issued-session"')) - strpos($html, 'id="issued-session"'));
         $this->assertStringContainsString('Ana Book', $side);
         $this->assertStringNotContainsString('Juan Book', $side);
     }
@@ -224,7 +224,7 @@ class Phase5IssueScreenTest extends TestCase
             ->getContent();
 
         $start = strpos($html, 'id="issued-session"');
-        $side  = substr($html, $start, strpos($html, '</aside>') - $start);
+        $side  = substr($html, $start, strpos($html, '</aside>', strpos($html, 'id="issued-session"')) - $start);
 
         $this->assertStringContainsString('Juan Book', $side);
         $this->assertStringNotContainsString('Ana Book', $side);

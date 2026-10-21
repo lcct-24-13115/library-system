@@ -1,0 +1,61 @@
+/* SALRC login — 3D layer. Loaded AFTER login.css (and salrc-3d.css for the shared tilt rules).
+   The Three.js canvas (#bg3d) sits above the poster image and below the card. */
+
+body.login-page #bg3d { z-index: 1; } /* canvas is first in <body>, so .login-stage (also z 1, later) paints above it */
+.login-bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(900px 600px at 70% 40%, rgba(37,99,235,.28), transparent 70%); }
+
+.login-stage { perspective: 1400px; perspective-origin: 70% 40%; }
+
+/* Floating glass card with real depth */
+.login-card {
+  position: relative;
+  transform-style: preserve-3d;
+  background: linear-gradient(145deg, rgba(255,255,255,.97), rgba(236,244,255,.93)); /* no backdrop-filter: it would flatten the 3D layers */
+  border: 1px solid rgba(255,255,255,.75);
+  border-top: 5px solid var(--blue-700);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 30px 60px -10px rgba(4,10,32,.55),
+    0 70px 110px -30px rgba(29,78,216,.55);
+  animation: card-in .6s var(--d-ease, ease-out) backwards, floaty 7s ease-in-out .6s infinite; /* floaty uses `translate`, tilt uses `transform` */
+}
+/* reflective edge + ground shadow layers that sit behind the card in 3D space */
+.login-card::before {
+  content: ""; position: absolute; inset: 14px -10px -18px; border-radius: 22px; z-index: -1; transform: translateZ(-40px);
+  background: linear-gradient(145deg, rgba(96,165,250,.45), rgba(30,58,138,.55)); filter: blur(2px); opacity: .8;
+}
+.login-card[data-tilt]::after { content: ""; position: absolute; top: auto; opacity: 1; left: 8%; right: 8%; bottom: -46px; height: 30px; border-radius: 50%; background: radial-gradient(ellipse, rgba(0,0,0,.5), transparent 70%); transform: translateZ(-60px); filter: blur(6px); z-index: -2; }
+.login-card[data-tilt]:hover::after { opacity: 1; }
+
+/* layered depth: content floats at different heights */
+.login-brand { transform: translateZ(46px); }
+.login-card h1 { transform: translateZ(38px); text-shadow: 0 1px 0 #fff, 0 8px 14px rgba(29,78,216,.18); }
+.login-card .sub { transform: translateZ(26px); }
+.role-tabs { transform: translateZ(30px); }
+.lf-field { transform: translateZ(28px); transition: transform .3s var(--d-ease, ease); }
+.lf-field:focus-within { transform: translateZ(54px) scale(1.015); }
+.lf-field input { background: linear-gradient(180deg, #f1f5fc, #fff); box-shadow: inset 0 2px 6px rgba(15,37,87,.14), 0 1px 0 #fff; }
+.lf-field input:focus { box-shadow: inset 0 1px 2px rgba(15,37,87,.08), 0 0 0 4px rgba(37,99,235,.18), 0 18px 24px -14px rgba(29,78,216,.7); }
+
+/* tactile pressable sign-in button */
+.lf-submit {
+  transform: translateZ(42px); position: relative;
+  box-shadow: 0 1px 0 rgba(255,255,255,.35) inset, 0 7px 0 #1e3a8a, 0 18px 24px -8px rgba(29,78,216,.6);
+  transition: transform .14s var(--d-ease, ease), box-shadow .14s var(--d-ease, ease), background .15s;
+}
+.lf-submit:hover { transform: translateZ(52px) translateY(-2px); box-shadow: 0 1px 0 rgba(255,255,255,.4) inset, 0 9px 0 #1e3a8a, 0 24px 30px -8px rgba(29,78,216,.7); }
+.lf-submit:active { transform: translateZ(40px) translateY(7px); box-shadow: 0 0 0 #1e3a8a, 0 4px 8px -2px rgba(29,78,216,.5); }
+.lf-submit[data-tilt]::after { display: none; }
+.login-links { transform: translateZ(20px); }
+.role-tab span { transition: transform .15s, box-shadow .15s; }
+.role-tab input:checked + span { transform: translateY(-1px); }
+.login-foot { position: relative; z-index: 1; }
+
+@media (max-width: 760px) {
+  .login-card, .login-brand, .login-card h1, .login-card .sub, .role-tabs, .lf-field, .lf-submit, .login-links { transform: none; }
+  .login-card { animation: card-in .5s ease-out backwards; }
+  .lf-field:focus-within { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-card { animation: none; }
+}

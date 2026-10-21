@@ -20,9 +20,19 @@
         <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg text-sm transition">Search</button>
     </form>
 
-    <p class="text-sm text-slate-500 mb-3">{{ $books->total() }} {{ \Illuminate\Support\Str::plural('title', $books->total()) }} found</p>
+    <div class="flex items-center justify-between mb-3">
+        <p class="text-sm text-slate-500">{{ $books->total() }} {{ \Illuminate\Support\Str::plural('title', $books->total()) }} found</p>
+        <div class="viewswitch" data-viewswitch="catalog" data-default="shelf" role="group" aria-label="Catalog view">
+            <button type="button" data-set-view="shelf" aria-pressed="true">3D Shelf</button>
+            <button type="button" data-set-view="list" aria-pressed="false">List</button>
+        </div>
+    </div>
 
-    <div class="space-y-3">
+    <div data-view="shelf" class="mb-6">
+        @include('books._shelf', ['books' => $books, 'mode' => 'public'])
+    </div>
+
+    <div class="space-y-3" data-view="list" hidden>
         @forelse($books as $book)
             <article class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                 <div class="min-w-0">

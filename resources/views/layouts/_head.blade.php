@@ -19,6 +19,18 @@
                     display: ['Manrope', 'DM Sans', 'system-ui', 'sans-serif'],
                     mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
                 },
+                // --- 3D theme additions (shadows, keyframes, transform utilities) ---
+                boxShadow: {
+                    tactile: '0 8px 0 #1e293b, 0 16px 20px -6px rgba(15,23,42,.45)',
+                    'tactile-blue': '0 8px 0 #1e3a8a, 0 16px 20px -6px rgba(29,78,216,.5)',
+                    depth: '0 2px 4px rgba(15,37,87,.06), 0 12px 24px -8px rgba(15,37,87,.18), 0 30px 50px -24px rgba(15,37,87,.22)',
+                    'depth-lg': '0 4px 8px rgba(15,37,87,.08), 0 22px 36px -10px rgba(15,37,87,.26), 0 44px 70px -26px rgba(29,78,216,.3)'
+                },
+                keyframes: {
+                    floaty: { '0%,100%': { translate: '0 0' }, '50%': { translate: '0 -8px' } },
+                    rise3d: { from: { opacity: 0, transform: 'translateY(26px) rotateX(-10deg)' }, to: { opacity: 1, transform: 'none' } }
+                },
+                animation: { floaty: 'floaty 6s ease-in-out infinite', rise3d: 'rise3d .6s cubic-bezier(.2,.8,.2,1) both' },
                 colors: (function () {
                     // Blue & white scheme. The existing views use indigo / emerald / slate / gray
                     // utility classes, so re-mapping those scales recolours every page at once.
@@ -53,7 +65,27 @@
                     };
                 })()
             }
-        }
+        },
+        plugins: [
+            // 3D utilities: perspective-*, preserve-3d, rotate-x-*, rotate-y-*, translate-z-*
+            function (api) {
+                var u = {
+                    '.preserve-3d': { 'transform-style': 'preserve-3d' },
+                    '.backface-hidden': { 'backface-visibility': 'hidden' },
+                    '.perspective-600': { perspective: '600px' },
+                    '.perspective-1000': { perspective: '1000px' },
+                    '.perspective-1500': { perspective: '1500px' }
+                };
+                [3, 6, 12, 45].forEach(function (d) {
+                    u['.rotate-x-' + d] = { transform: 'rotateX(' + d + 'deg)' };
+                    u['.rotate-y-' + d] = { transform: 'rotateY(' + d + 'deg)' };
+                });
+                [10, 20, 40].forEach(function (d) { u['.translate-z-' + d] = { transform: 'translateZ(' + d + 'px)' }; });
+                api.addUtilities(u, { variants: ['hover', 'focus', 'active', 'group-hover'] });
+            }
+        ]
     };
 </script>
 <link rel="stylesheet" href="{{ asset('css/salrc.css') }}?v={{ file_exists(public_path('css/salrc.css')) ? filemtime(public_path('css/salrc.css')) : 1 }}">
+<link rel="stylesheet" href="{{ asset('css/salrc-3d.css') }}?v={{ file_exists(public_path('css/salrc-3d.css')) ? filemtime(public_path('css/salrc-3d.css')) : 1 }}">
+<script src="{{ asset('js/salrc-3d.js') }}?v={{ file_exists(public_path('js/salrc-3d.js')) ? filemtime(public_path('js/salrc-3d.js')) : 1 }}" defer></script>
