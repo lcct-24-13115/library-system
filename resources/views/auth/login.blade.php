@@ -83,7 +83,9 @@
                                 <form method="POST" action="{{ route('login') }}" class="login-form" id="login-form" aria-labelledby="signin-title">
                                     @csrf
 
-                                    {{-- Optional: choose the type of account you are signing in with --}}
+                                    {{-- Optional: choose the type of account you are signing in with.
+                                         Only shown when App\Models\User::PORTALS exists. --}}
+                                    @if (defined('App\\Models\\User::PORTALS'))
                                     <div class="lf-field">
                                         <span class="lf-label" id="portal-label">Sign in as</span>
                                         <div class="role-tabs" role="radiogroup" aria-labelledby="portal-label">
@@ -95,6 +97,7 @@
                                             @endforeach
                                         </div>
                                     </div>
+                                    @endif
 
                                     <div class="lf-field">
                                         <label for="email">Email or ID number</label>
