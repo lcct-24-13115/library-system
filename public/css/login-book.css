@@ -57,19 +57,6 @@
   to   { opacity: .6;  translate: 3vw 0; }
 }
 
-#bg3d {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-  display: block;
-  opacity: 0;
-  transition: opacity 1.6s ease;
-}
-#bg3d.is-ready { opacity: 1; }
-
 /* ================================================================== Stage */
 body.login-page .login-stage {
   display: flex;
@@ -521,6 +508,5 @@ body.login-page .login-stage {
 
 @media (prefers-reduced-motion: reduce) {
   .book-float, .login-bg .beam, .book-scene { animation: none !important; }
-  .book-shift, .book-rest, .book-tilt, .b-cover, .b-leaf, .b-slab, .book-glow, .book-ground, .b-page__inner,
-  #bg3d { transition: none !important; }
+  .book-shift, .book-rest, .book-tilt, .b-cover, .b-leaf, .b-slab, .book-glow, .book-ground, .b-page__inner { transition: none !important; }
 }
