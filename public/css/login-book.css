@@ -439,28 +439,44 @@ body.login-page .login-stage {
 }
 .b-cover__back::after { content: ""; position: absolute; inset: 0; background: var(--grain); opacity: .07; pointer-events: none; }
 
-.lp {
-  position: relative;
-  z-index: 1;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 44px 44px 34px 38px;
-}
+.lp { position: relative; height: 100%; overflow: hidden; border-radius: inherit; }
 .lp p { margin: 0; }
-.lp__top img { width: 76px; height: 76px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px var(--blue-100), 0 8px 18px rgba(30, 58, 138, .2); }
-.lp__college { margin-top: 16px !important; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; color: var(--blue-700); }
-.lp__center { margin-top: 4px !important; font: 700 23px/1.08 'Cormorant Garamond', Georgia, serif; color: var(--navy-950); max-width: 14ch; }
-.lp__mid h1 {
-  margin: 0 0 10px;
-  font: 700 clamp(40px, 3.7vw, 52px)/.98 'Cormorant Garamond', Georgia, serif;
-  letter-spacing: -.01em;
-  color: var(--ink);
+.lp__art {                          /* Saint Augustine painting fills the whole left page */
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 52% 18%;
 }
-.lp__mid .sub { margin: 0; font-size: 15px; color: var(--muted); max-width: 22ch; line-height: 1.45; }
-.lp__foot { border-top: 1px solid var(--paper-line); padding-top: 14px; font-size: 12px; line-height: 1.55; color: var(--muted); }
+.lp__shade {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 18, 52, .10) 0%, rgba(8, 18, 52, 0) 30%, rgba(8, 18, 52, .62) 62%, rgba(6, 14, 42, .94) 100%),
+    linear-gradient(270deg, rgba(40, 28, 6, .38), transparent 12%);
+}
+.lp__body {
+  position: relative; z-index: 1; height: 100%;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 44px 40px 32px 38px; color: #fff;
+}
+.lp__college { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; color: #f3d98a; }
+.lp__mid h1, .lp__body h1 {
+  margin: 8px 0 8px;
+  font: 700 clamp(40px, 3.7vw, 52px)/.98 'Cormorant Garamond', Georgia, serif;
+  letter-spacing: -.01em; color: #fff; text-shadow: 0 2px 14px rgba(0, 0, 0, .45);
+}
+.lp .sub { font-size: 15px; color: rgba(255, 255, 255, .88); max-width: 24ch; line-height: 1.45; }
+.lp__foot { margin-top: 22px; border-top: 1px solid rgba(255, 255, 255, .3); padding-top: 14px; font-size: 12px; line-height: 1.55; color: rgba(255, 255, 255, .78); }
 .lp__foot p { overflow-wrap: anywhere; }
+
+/* "Close book" button on the right page */
+.pg-close {
+  position: absolute; top: 16px; right: 16px; z-index: 2;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 13px; border-radius: 999px;
+  border: 1px solid var(--paper-line); background: rgba(255, 255, 255, .75);
+  font: 600 12.5px/1 'DM Sans', system-ui, sans-serif; color: #2c3e66; cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.pg-close:hover { background: #fff; border-color: var(--blue-600); color: var(--blue-700); }
+.pg-close:focus-visible { outline: 3px solid var(--blue-600); outline-offset: 2px; }
 
 /* ============================================================ Responsive */
 @media (min-width: 900px) and (max-width: 1100px) {
@@ -490,11 +506,11 @@ body.login-page .login-stage {
   .b-slab, .b-leaf { display: none; }
   .m-head { display: flex; }
   .pg-logo { display: none; }
-  .b-page__inner { padding: 30px 24px 24px 30px; }
+  .b-page__inner { padding: 58px 24px 24px 30px; }
   .book-closed .b-cover:hover { transform: translateZ(calc(var(--t) / 2)) rotateY(0deg); }
 }
 @media (max-width: 420px) {
-  .b-page__inner { padding: 26px 20px 22px 26px; }
+  .b-page__inner { padding: 54px 20px 22px 26px; }
   .b-page .role-tab span { padding: 6px 11px; font-size: 12px; }
 }
 

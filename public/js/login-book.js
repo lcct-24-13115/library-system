@@ -25,6 +25,8 @@
     if (!scene || !page || !cover || !tilt) return;
 
     var autoTimer = 0;
+    var closeBtn = doc.getElementById('book-close-btn');
+    var hint = doc.querySelector('.cv-hint');
     function isClosed() { return root.classList.contains('book-closed'); }
 
     function focusFirst() {
@@ -41,17 +43,35 @@
       cover.setAttribute('aria-expanded', 'true');
       window.dispatchEvent(new CustomEvent('salrc:book-open'));
       setTimeout(function () {
+        if (isClosed()) return;               // closed again before the animation ended
         page.removeAttribute('inert');
         page.removeAttribute('aria-hidden');
         focusFirst();
       }, 1350);
     }
 
+    function closeBook() {
+      if (isClosed()) return;
+      clearTimeout(autoTimer);
+      root.classList.add('book-closed');
+      cover.setAttribute('aria-expanded', 'false');
+      page.setAttribute('inert', '');
+      page.setAttribute('aria-hidden', 'true');
+      if (hint) hint.textContent = 'Click to open';
+      window.dispatchEvent(new CustomEvent('salrc:book-close'));
+      try { cover.focus({ preventScroll: true }); } catch (e) { cover.focus(); }
+    }
+
+    cover.addEventListener('click', openBook);
+    if (closeBtn) closeBtn.addEventListener('click', closeBook);
+    doc.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !isClosed() && page.contains(doc.activeElement)) closeBook();
+    });
+
     if (isClosed()) {
       // keep the form out of reach (tab order, clicks, screen readers) until the cover is open
       page.setAttribute('inert', '');
       page.setAttribute('aria-hidden', 'true');
-      cover.addEventListener('click', openBook);
       autoTimer = setTimeout(openBook, 1700);
     } else {
       focusFirst();

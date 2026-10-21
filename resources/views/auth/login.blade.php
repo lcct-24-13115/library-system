@@ -63,6 +63,11 @@
                         <section class="b-page" id="book-page" aria-label="Sign in">
                             <div class="b-page__inner">
 
+                                <button type="button" class="pg-close" id="book-close-btn" aria-label="Close the book">
+                                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v14H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3"/></svg>
+                                    Close book
+                                </button>
+
                                 <div class="m-head" aria-hidden="true">
                                     <img src="{{ $logo }}" alt="" width="46" height="46">
                                     <div>
@@ -148,18 +153,16 @@
 
                             <div class="b-cover__back">
                                 <div class="lp">
-                                    <div class="lp__top">
-                                        <img src="{{ $logo }}" alt="Saint Augustine Learning Resource Center seal" width="76" height="76">
+                                    <img class="lp__art" src="{{ asset('images/st-augustine.jpg') }}" alt="Saint Augustine of Hippo writing, holding a flaming heart (painting by Philippe de Champaigne)" width="720" height="919">
+                                    <span class="lp__shade" aria-hidden="true"></span>
+                                    <div class="lp__body">
                                         <p class="lp__college">La Consolacion College Tanauan</p>
-                                        <p class="lp__center">Saint Augustine Learning Resource Center</p>
-                                    </div>
-                                    <div class="lp__mid">
                                         <h1 id="signin-title">Welcome back</h1>
                                         <p class="sub">Sign in to your library account.</p>
-                                    </div>
-                                    <div class="lp__foot">
-                                        <p>saintaugustinelearningresource@gmail.com</p>
-                                        <p>A. Mabini Avenue, Tanauan City, Batangas</p>
+    <div class="lp__foot">
+                                            <p>saintaugustinelearningresource@gmail.com</p>
+                                            <p>A. Mabini Avenue, Tanauan City, Batangas</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
