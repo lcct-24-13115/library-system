@@ -3,7 +3,7 @@
      • warm light beams that fall from the top-left (the "Veritas" light of the painting),
      • drifting golden / blue dust at many depths,
      • large out-of-focus bokeh lights far back,
-     • the camera (and the poster itself) glide with the pointer, so everything has real depth.
+     • the camera glides with the pointer, so the light and dust have real depth.
    The book opening / closing makes the light flare.
    Fails safe: no WebGL or "reduce motion" simply leaves the plain poster. */
 (function () {
@@ -235,10 +235,6 @@
       var ex = cx * 1.9 + Math.sin(time * 0.12) * 0.55;
       var ey = -cy * 1.1 + Math.cos(time * 0.1) * 0.3;
       var view = lookAt(ex, ey, 18 - pulse * 1.2);
-
-      // the poster behind slides the opposite way (gives the flat image a sense of distance)
-      root.style.setProperty('--bgx', (-ex * 7).toFixed(1));
-      root.style.setProperty('--bgy', (-ey * 6).toFixed(1));
 
       gl.clear(gl.COLOR_BUFFER_BIT);
       drawBeams(view, time);

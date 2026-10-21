@@ -58,13 +58,7 @@
 }
 
 /* 3D background: WebGL canvas (login-bg3d.js) sits between the poster and the book.
-   The poster itself glides opposite to the camera for parallax (translate/scale compose
-   with whatever transform login.css already uses). */
-.login-bg {
-  scale: 1.05;
-  translate: calc(var(--bgx, 0) * 1px) calc(var(--bgy, 0) * 1px);
-  will-change: translate;
-}
+   The poster itself is NOT moved or scaled, so its edge details (contacts, logos) stay visible. */
 #bg3d {
   position: fixed;
   inset: 0;
