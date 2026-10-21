@@ -98,17 +98,17 @@
     var palette = dark
       ? [0x2563eb, 0x60a5fa, 0x1d4ed8, 0x38bdf8, 0x3b82f6, 0x93c5fd]
       : [0x93c5fd, 0x60a5fa, 0xbfdbfe, 0x7dd3fc, 0xa5b4fc];
-    var opacity = dark ? 0.92 : 0.5;
+    var opacity = dark ? 0.5 : 0.5;
     var paper = new T.MeshStandardMaterial({ color: 0xf1f5fb, roughness: 0.9, transparent: true, opacity: opacity });
-    var count = dark ? (small ? 12 : 22) : (small ? 6 : 13);
+    var count = dark ? (small ? 5 : 9) : (small ? 6 : 13);
     var books = [];
     for (var i = 0; i < count; i++) {
       var col = new T.MeshStandardMaterial({ color: palette[i % palette.length], roughness: 0.5, metalness: 0.08, transparent: true, opacity: opacity });
       var geo = new T.BoxGeometry(1.2, 1.7, 0.38 + Math.random() * 0.3);
       var m = new T.Mesh(geo, [paper, col, paper, paper, col, col]);
-      var s = 0.7 + Math.random() * 1.1;
+      var s = dark ? 0.35 + Math.random() * 0.35 : 0.7 + Math.random() * 1.1;
       m.scale.set(s, s, s);
-      m.position.set((Math.random() - 0.5) * 34, (Math.random() - 0.5) * 20, -10 + Math.random() * 11);
+      m.position.set((Math.random() - 0.5) * 34, (Math.random() - 0.5) * 20, dark ? -18 + Math.random() * 8 : -10 + Math.random() * 11);
       m.rotation.set(Math.random() * 6, Math.random() * 6, Math.random() * 6);
       m.userData = { sx: (Math.random() - 0.5) * 0.004, sy: (Math.random() - 0.5) * 0.006, ph: Math.random() * 6.28, amp: 0.2 + Math.random() * 0.5, y0: m.position.y };
       scene.add(m);
@@ -267,7 +267,16 @@
     });
   }
 
+  /* Scan boxes (Issue / Return): add the viewfinder + laser class without touching those views. */
+  function initScanPanels() {
+    doc.querySelectorAll('input[name="accession_number"]').forEach(function (input) {
+      var card = input.closest('.bg-white');
+      if (card) card.classList.add('scan-panel');
+    });
+  }
+
   ready(function () {
+    initScanPanels();
     initTilt();
     initViewSwitch();
     initBookModal();
