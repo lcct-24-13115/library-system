@@ -1,0 +1,507 @@
+/* SALRC login — the sign-in box is a real 3D book.
+   Loaded AFTER login.css. Default (no class on <html>) = book open, so the form always
+   works without JavaScript. <html class="book-closed"> = closed; login-book.js removes it
+   to play the opening animation.
+
+   Geometry: the book is --pw wide (one page). Closed, you see the front cover. Opened,
+   the cover swings 180° around the spine and its back becomes the LEFT page; the book
+   slides half a page right so the two-page spread stays where the box used to be. */
+
+:root {
+  --pw: clamp(330px, 24vw, 410px);   /* width of one page */
+  --t: 38px;                          /* book thickness */
+  --u: calc(var(--pw) / 400);         /* scale unit for the cover artwork */
+
+  --paper: #fbf8f0;
+  --paper-2: #f3eddd;
+  --paper-line: #d9d0ba;
+
+  --cover-1: #22409a;
+  --cover-2: #132a72;
+  --cover-3: #0a173f;
+  --gold-1: #f8e6a6;
+  --gold-2: #d6b055;
+  --gold-3: #9b7526;
+
+  --open-dur: 1.5s;
+  --open-ease: cubic-bezier(.62, .04, .2, 1);
+
+  --grain: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ======================================================= Poster layer extras */
+.login-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(900px 620px at 72% 46%, rgba(59, 110, 230, .34), transparent 70%),
+    radial-gradient(1200px 500px at 12% 0%, rgba(147, 197, 253, .10), transparent 70%);
+  pointer-events: none;
+}
+.login-bg .beam {
+  position: absolute;
+  top: -25%;
+  width: 16vw;
+  height: 150%;
+  background: linear-gradient(180deg, rgba(170, 210, 255, .22), rgba(170, 210, 255, 0) 72%);
+  filter: blur(26px);
+  mix-blend-mode: screen;
+  opacity: .55;
+  pointer-events: none;
+}
+.login-bg .beam-a { left: 44%; transform: rotate(17deg); animation: beam 16s ease-in-out infinite alternate; }
+.login-bg .beam-b { left: 63%; width: 10vw; transform: rotate(23deg); animation: beam 21s ease-in-out -6s infinite alternate; }
+@keyframes beam {
+  from { opacity: .25; translate: -2vw 0; }
+  to   { opacity: .6;  translate: 3vw 0; }
+}
+
+#bg3d {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+#bg3d.is-ready { opacity: 1; }
+
+/* ================================================================== Stage */
+body.login-page .login-stage {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 36px calc(var(--pw) / 2 + clamp(28px, 4vw, 84px)) 36px 24px;
+}
+
+.book-scene {
+  position: relative;
+  flex: none;
+  width: var(--pw);
+  perspective: 2400px;
+  perspective-origin: 50% 40%;
+  scale: var(--bs, 1);
+}
+@media (max-height: 780px) { .book-scene { --bs: .9; } }
+@media (max-height: 680px) { .book-scene { --bs: .8; } }
+
+/* glow and ground shadow live outside the 3D tree so they never sort against the book */
+.book-glow {
+  position: absolute;
+  inset: -22% -70%;
+  background: radial-gradient(closest-side, rgba(96, 165, 250, .55), rgba(37, 99, 235, .18) 55%, transparent 75%);
+  opacity: .9;
+  transition: opacity var(--open-dur) ease, transform var(--open-dur) var(--open-ease);
+  pointer-events: none;
+}
+.book-ground {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: -44px;
+  height: 64px;
+  background: radial-gradient(closest-side, rgba(2, 6, 24, .75), transparent);
+  filter: blur(9px);
+  transform: scaleX(2.04);
+  transition: transform var(--open-dur) var(--open-ease), opacity .6s;
+  pointer-events: none;
+}
+
+/* =========================================================== 3D wrappers */
+.book-shift, .book-rest, .book-tilt, .book-float, .book {
+  transform-style: preserve-3d;
+}
+
+.book-shift {
+  transform: translateX(calc(var(--pw) / 2));
+  transition: transform var(--open-dur) var(--open-ease);
+}
+.book-rest {
+  transform: rotateX(-4deg) rotateY(0deg);
+  transition: transform var(--open-dur) var(--open-ease);
+}
+.book-tilt {
+  transform-origin: 0 50%;
+  transform: rotateX(var(--trx, 0deg)) rotateY(var(--try, 0deg));
+  transition: transform .45s ease-out;
+}
+.book-float { animation: book-float 7.5s ease-in-out infinite; }
+@keyframes book-float {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -9px; }
+}
+
+.book {
+  position: relative;
+  width: 100%;
+}
+
+/* ---------------- closed state ---------------- */
+.book-closed .book-glow   { opacity: .55; transform: scale(.7); }
+.book-closed .book-ground { transform: scaleX(1.05); }
+.book-closed .book-shift  { transform: translateX(0); }
+.book-closed .book-rest   { transform: rotateX(-9deg) rotateY(26deg); }
+.book-closed .book-scene  { animation: book-in 1.2s var(--open-ease) both; }
+@keyframes book-in {
+  from { opacity: 0; translate: 0 46px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+/* ========================================================= Book structure */
+.b-back, .b-spine, .b-edge, .b-slab, .b-leaf, .b-page, .b-cover,
+.b-cover__front, .b-cover__back { position: absolute; }
+
+/* back board */
+.b-back {
+  inset: 0;
+  border-radius: 10px 5px 5px 10px;
+  background: linear-gradient(135deg, var(--cover-2), var(--cover-3));
+  transform: translateZ(calc(var(--t) / -2));
+}
+
+/* spine: faces left, spans the full thickness */
+.b-spine {
+  left: 0; top: 0; bottom: 0;
+  width: var(--t);
+  transform-origin: 0 50%;
+  transform: translateZ(calc(var(--t) / -2)) rotateY(-90deg);
+  background:
+    linear-gradient(180deg,
+      transparent 0 6%, var(--gold-2) 6% 7.2%, transparent 7.2% 9.4%, var(--gold-2) 9.4% 10%, transparent 10% 90%,
+      var(--gold-2) 90% 90.6%, transparent 90.6% 92.8%, var(--gold-2) 92.8% 94%, transparent 94%),
+    linear-gradient(180deg, transparent 0 32%, var(--gold-2) 32% 33%, transparent 33% 67%, var(--gold-2) 67% 68%, transparent 68%),
+    linear-gradient(90deg, var(--cover-3), var(--cover-1) 42%, var(--cover-2) 70%, var(--cover-3)),
+    var(--grain);
+  border-radius: 6px 0 0 6px;
+}
+
+/* fore-edge and top / bottom page edges (leather rim + page lines) */
+.b-edge { background-color: #efe8d4; }
+.b-edge--r {
+  left: 100%; top: 0; bottom: 0;
+  width: var(--t);
+  transform-origin: 0 50%;
+  transform: translateZ(calc(var(--t) / 2)) rotateY(90deg);
+  background:
+    linear-gradient(90deg, var(--cover-2) 0 4px, transparent 4px calc(100% - 4px), var(--cover-2) calc(100% - 4px)),
+    linear-gradient(0deg, rgba(60, 45, 10, .22), transparent 14% 86%, rgba(60, 45, 10, .22)),
+    repeating-linear-gradient(90deg, #faf6ea 0 2px, var(--paper-line) 2px 3px);
+}
+.b-edge--t, .b-edge--b {
+  left: 0;
+  width: var(--pw);
+  height: var(--t);
+  transform: translateZ(calc(var(--t) / -2)) rotateX(90deg);
+  background:
+    linear-gradient(180deg, var(--cover-2) 0 4px, transparent 4px calc(100% - 4px), var(--cover-2) calc(100% - 4px)),
+    repeating-linear-gradient(180deg, #faf6ea 0 2px, var(--paper-line) 2px 3px);
+}
+.b-edge--t { top: 0; transform-origin: 50% 0; }
+.b-edge--b {
+  bottom: 0;
+  transform-origin: 50% 100%;
+  transform: translateZ(calc(var(--t) / -2)) rotateX(-90deg);
+  filter: brightness(.72);
+}
+
+/* ------------------------------------------------ left page stack (open only) */
+.b-slab {
+  top: 0; bottom: 0;
+  left: calc(var(--pw) * -1);
+  width: var(--pw);
+  transform: translateZ(calc(var(--t) / 2 - 6px));
+  border-radius: 6px 0 0 6px;
+  background: var(--paper-2);
+  box-shadow:
+    -1px 1px 0 #ece5d2, -2px 2px 0 #e4dcc7, -3px 3px 0 #ddd4be, -4px 4px 0 #d6ccb5,
+    -5px 5px 0 #cfc5ac, -6px 6px 0 #1c3180, -7px 7px 0 #172a6c;
+  opacity: 1;
+  transition: opacity .3s ease calc(var(--open-dur) * .5);
+}
+.book-closed .b-slab { opacity: 0; transition-delay: 0s; transition-duration: .1s; }
+
+/* ------------------------------------------------ loose leaves that flip with the cover */
+.b-leaf {
+  inset: 0;
+  transform-origin: 0 50%;
+  background:
+    linear-gradient(90deg, rgba(60, 45, 10, .12), transparent 10%),
+    var(--paper);
+  border-radius: 0 6px 6px 0;
+  transition: transform calc(var(--open-dur) - .15s) var(--open-ease);
+}
+.b-leaf--1 { transform: translateZ(calc(var(--t) / 2 - 2px)) rotateY(-180deg); transition-delay: .14s; }
+.b-leaf--2 { transform: translateZ(calc(var(--t) / 2 - 3px)) rotateY(-180deg); transition-delay: .26s; }
+.book-closed .b-leaf { transition-delay: 0s; transition-duration: .2s; }
+.book-closed .b-leaf--1 { transform: translateZ(calc(var(--t) / 2 - 2px)) rotateY(0deg); }
+.book-closed .b-leaf--2 { transform: translateZ(calc(var(--t) / 2 - 3px)) rotateY(0deg); }
+
+/* =============================================================== Right page */
+.b-page {
+  position: relative;               /* in flow: sets the book's height */
+  min-height: 560px;
+  transform: translateZ(calc(var(--t) / 2 - 5px));
+  border-radius: 2px 8px 8px 2px;
+  background:
+    linear-gradient(90deg, rgba(70, 52, 14, .26), rgba(70, 52, 14, .08) 5%, transparent 13%),
+    linear-gradient(180deg, #fffdf8, var(--paper));
+  overflow: hidden;
+}
+.b-page::after {                    /* paper grain */
+  content: ""; position: absolute; inset: 0; background: var(--grain); opacity: .07; pointer-events: none;
+}
+.b-page__inner {
+  position: relative;
+  z-index: 1;
+  padding: 38px 34px 28px 40px;
+  opacity: 1;
+  transition: opacity .6s ease .75s;
+}
+.book-closed .b-page__inner { opacity: 0; transition-delay: 0s; transition-duration: .1s; }
+
+/* page content — re-skins the shared login form classes */
+.b-page .login-form { gap: 20px; }
+.b-page .lf-field label,
+.b-page .lf-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: #2c3e66;
+}
+.b-page .lf-field input[type="text"],
+.b-page .lf-field input[type="password"] {
+  padding: 13px 14px;
+  font-size: 15px;
+  background: #fff;
+  box-shadow: inset 0 1px 3px rgba(15, 37, 87, .10);
+}
+.b-page .lf-field input:focus {
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, .16);
+}
+.b-page .lf-submit {
+  padding: 14px 18px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .3) inset, 0 6px 0 #1e3a8a, 0 16px 22px -8px rgba(29, 78, 216, .55);
+  transition: transform .14s ease, box-shadow .14s ease, background .15s;
+}
+.b-page .lf-submit:hover { transform: translateY(-2px); box-shadow: 0 1px 0 rgba(255, 255, 255, .35) inset, 0 8px 0 #1e3a8a, 0 20px 26px -8px rgba(29, 78, 216, .6); }
+.b-page .lf-submit:active { transform: translateY(6px); box-shadow: 0 0 0 #1e3a8a, 0 4px 8px -2px rgba(29, 78, 216, .5); }
+.b-page .login-links { margin: 14px 0 0; }
+.b-page .login-links + .login-links { margin-top: 8px; }
+.b-page .lf-notice { margin-bottom: 16px; }
+
+/* account type chips */
+.b-page .role-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+.b-page .role-tab span {
+  padding: 7px 13px;
+  font-size: 12.5px;
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.b-page .role-tab:hover span { border-color: var(--blue-600); color: var(--blue-700); }
+.b-page .role-tab input:checked + span {
+  background: var(--blue-700);
+  border-color: var(--blue-700);
+  color: #fff;
+  box-shadow: 0 3px 8px rgba(29, 78, 216, .35);
+  transform: none;
+}
+
+/* mobile-only header (the left page is not shown there) */
+.m-head { display: none; align-items: center; gap: 12px; margin-bottom: 20px; }
+.m-head img { width: 46px; height: 46px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px var(--blue-100); }
+.m-head p { margin: 0; }
+.m-head__college { font-size: 9.5px; letter-spacing: .15em; text-transform: uppercase; font-weight: 700; color: var(--blue-700); }
+.m-head__title { margin-top: 2px; font: 700 26px/1.05 'Cormorant Garamond', Georgia, serif; color: var(--navy-950); }
+
+/* ============================================================== Front cover */
+.b-cover {
+  inset: 0;
+  transform-origin: 0 50%;
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--t) / 2)) rotateY(-180deg);
+  transition: transform var(--open-dur) var(--open-ease), visibility 0s;
+}
+.book-closed .b-cover {
+  transform: translateZ(calc(var(--t) / 2)) rotateY(0deg);
+  transition-duration: .5s;
+}
+.book-closed .b-cover:hover { transform: translateZ(calc(var(--t) / 2)) rotateY(-7deg); }
+
+.b-cover__front, .b-cover__back {
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* outside of the cover: navy leather with gold foil */
+.b-cover__front {
+  transform: translateZ(2px);
+  border-radius: 10px 6px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(52 * var(--u)) calc(44 * var(--u)) calc(44 * var(--u));
+  text-align: center;
+  background:
+    radial-gradient(circle at var(--sx, 30%) var(--sy, 18%), rgba(150, 190, 255, .30), transparent 52%),
+    linear-gradient(90deg, rgba(0, 0, 0, .55) 0, rgba(255, 255, 255, .10) 10px, rgba(0, 0, 0, .35) 15px, transparent 34px),
+    var(--grain),
+    linear-gradient(145deg, var(--cover-1), var(--cover-2) 55%, var(--cover-3));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08), inset 0 0 40px rgba(0, 0, 0, .35);
+}
+.foil-frame {
+  position: absolute;
+  inset: calc(20 * var(--u)) calc(20 * var(--u)) calc(20 * var(--u)) calc(34 * var(--u));
+  border: 1.5px solid var(--gold-2);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 4px transparent, inset 0 0 0 5px rgba(214, 176, 85, .55);
+  pointer-events: none;
+}
+.cv-college, .cv-title, .cv-hint { margin: 0; position: relative; }
+.cv-college {
+  font-size: calc(10.5 * var(--u));
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gold-1);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .5);
+}
+.cv-seal {
+  margin: calc(34 * var(--u)) 0 calc(30 * var(--u));
+  padding: calc(7 * var(--u));
+  border-radius: 50%;
+  background: conic-gradient(from 210deg, var(--gold-1), var(--gold-3), var(--gold-1) 40%, var(--gold-2) 70%, var(--gold-1));
+  box-shadow: 0 10px 22px rgba(0, 0, 0, .5), inset 0 0 0 1px rgba(255, 255, 255, .4);
+  position: relative;
+}
+.cv-seal img {
+  display: block;
+  width: calc(132 * var(--u));
+  height: calc(132 * var(--u));
+  border-radius: 50%;
+  background: #fff;
+}
+.cv-title {
+  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: calc(34 * var(--u));
+  line-height: 1.04;
+  letter-spacing: .01em;
+  background: linear-gradient(180deg, var(--gold-1), var(--gold-2) 55%, #b98f3a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, .55));
+  max-width: 13ch;
+}
+.cv-hint {
+  margin-top: auto;
+  font-size: calc(11.5 * var(--u));
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(248, 230, 166, .8);
+}
+.cv-btn {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: inherit;
+}
+.cv-btn:focus-visible { outline: 3px solid var(--gold-1); outline-offset: -8px; }
+
+/* inside of the cover = the LEFT page */
+.b-cover__back {
+  transform: rotateY(180deg) translateZ(2px);
+  border-radius: 6px 0 0 6px;
+  background:
+    linear-gradient(270deg, rgba(70, 52, 14, .30), rgba(70, 52, 14, .09) 5%, transparent 14%),
+    linear-gradient(180deg, #fffdf8, var(--paper));
+}
+.b-cover__back::after { content: ""; position: absolute; inset: 0; background: var(--grain); opacity: .07; pointer-events: none; }
+
+.lp {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 44px 44px 34px 38px;
+}
+.lp p { margin: 0; }
+.lp__top img { width: 76px; height: 76px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px var(--blue-100), 0 8px 18px rgba(30, 58, 138, .2); }
+.lp__college { margin-top: 16px !important; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; color: var(--blue-700); }
+.lp__center { margin-top: 4px !important; font: 700 23px/1.08 'Cormorant Garamond', Georgia, serif; color: var(--navy-950); max-width: 14ch; }
+.lp__mid h1 {
+  margin: 0 0 10px;
+  font: 700 clamp(40px, 3.7vw, 52px)/.98 'Cormorant Garamond', Georgia, serif;
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+.lp__mid .sub { margin: 0; font-size: 15px; color: var(--muted); max-width: 22ch; line-height: 1.45; }
+.lp__foot { border-top: 1px solid var(--paper-line); padding-top: 14px; font-size: 12px; line-height: 1.55; color: var(--muted); }
+.lp__foot p { overflow-wrap: anywhere; }
+
+/* ============================================================ Responsive */
+@media (min-width: 900px) and (max-width: 1100px) {
+  body.login-page .login-stage {
+    justify-content: center;
+    align-items: flex-start;
+    padding: 30vh 24px 48px;
+  }
+}
+
+/* one page only: the cover swings away and the right page holds everything */
+@media (max-width: 899px) {
+  :root { --pw: min(calc(100vw - 28px), 410px); }
+  body.login-page .login-stage {
+    justify-content: center;
+    align-items: flex-start;
+    padding: 26vh 14px 52px;
+  }
+  .book-shift, .book-closed .book-shift { transform: none; }
+  .book-rest { transform: rotateX(0deg) rotateY(0deg); }
+  .book-closed .book-rest { transform: rotateX(-7deg) rotateY(14deg); }
+  .book-tilt { --trx: 0deg !important; --try: 0deg !important; }
+  .book-ground, .book-closed .book-ground { transform: scaleX(1.05); }
+  .book-glow { inset: -12% -30%; }
+  .b-cover { transition: transform var(--open-dur) var(--open-ease), visibility 0s linear 1.1s; visibility: hidden; }
+  .book-closed .b-cover { visibility: visible; transition-delay: 0s; }
+  .b-slab, .b-leaf { display: none; }
+  .m-head { display: flex; }
+  .b-page__inner { padding: 30px 24px 24px 30px; }
+  .book-closed .b-cover:hover { transform: translateZ(calc(var(--t) / 2)) rotateY(0deg); }
+}
+@media (max-width: 420px) {
+  .b-page__inner { padding: 26px 20px 22px 26px; }
+  .b-page .role-tab span { padding: 6px 11px; font-size: 12px; }
+}
+
+/* the browser can't show 3D (very old) → plain card look */
+@supports not (transform-style: preserve-3d) {
+  .b-cover, .b-spine, .b-edge, .b-slab, .b-leaf, .b-back { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book-float, .login-bg .beam, .book-scene { animation: none !important; }
+  .book-shift, .book-rest, .book-tilt, .b-cover, .b-leaf, .b-slab, .book-glow, .book-ground, .b-page__inner,
+  #bg3d { transition: none !important; }
+}
