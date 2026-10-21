@@ -320,6 +320,8 @@ body.login-page .login-stage {
 }
 
 /* mobile-only header (the left page is not shown there) */
+.pg-logo { display: flex; justify-content: center; margin: 0 0 18px; }
+.pg-logo img { width: 96px; height: 96px; border-radius: 50%; display: block; box-shadow: 0 0 0 3px #fff, 0 0 0 4px var(--blue-100), 0 8px 18px rgba(10,26,78,.25); }
 .m-head { display: none; align-items: center; gap: 12px; margin-bottom: 20px; }
 .m-head img { width: 46px; height: 46px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px var(--blue-100); }
 .m-head p { margin: 0; }
@@ -487,6 +489,7 @@ body.login-page .login-stage {
   .book-closed .b-cover { visibility: visible; transition-delay: 0s; }
   .b-slab, .b-leaf { display: none; }
   .m-head { display: flex; }
+  .pg-logo { display: none; }
   .b-page__inner { padding: 30px 24px 24px 30px; }
   .book-closed .b-cover:hover { transform: translateZ(calc(var(--t) / 2)) rotateY(0deg); }
 }

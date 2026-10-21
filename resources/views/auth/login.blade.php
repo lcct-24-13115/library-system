@@ -71,6 +71,11 @@
                                     </div>
                                 </div>
 
+                                {{-- Desktop logo above the form (mobile uses .m-head instead) --}}
+                                <div class="pg-logo">
+                                    <img src="{{ asset('images/salrc-badge.png') }}" alt="Saint Augustine Learning Resource Center logo" width="96" height="96">
+                                </div>
+
                                 @if (session('status'))
                                     <div class="lf-notice" role="status">{{ session('status') }}</div>
                                 @endif
