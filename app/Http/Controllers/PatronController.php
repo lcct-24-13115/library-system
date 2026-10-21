@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Patron;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class PatronController extends Controller
@@ -68,13 +69,32 @@ class PatronController extends Controller
 
     private function validated(Request $request, ?Patron $patron = null): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'id_number'   => ['required', 'string', 'max:255', Rule::unique('patrons', 'id_number')->ignore($patron?->id)],
             'name'        => ['required', 'string', 'max:255'],
             'patron_type' => ['required', Rule::in(Patron::TYPES)],
             'email'       => ['nullable', 'email', 'max:255'],
             'contact_no'  => ['nullable', 'string', 'max:50'],
             'status'      => ['required', Rule::in(['active', 'inactive'])],
+            'photo'       => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remove_photo' => ['nullable', 'boolean'],
         ]);
+
+        // ID photo (shown on the attendance kiosk). Replace or remove the old file.
+        if ($request->hasFile('photo')) {
+            if ($patron?->photo) {
+                Storage::disk('public')->delete($patron->photo);
+            }
+            $data['photo'] = $request->file('photo')->store('patron-photos', 'public');
+        } elseif ($patron && $request->boolean('remove_photo')) {
+            if ($patron->photo) {
+                Storage::disk('public')->delete($patron->photo);
+            }
+            $data['photo'] = null;
+        }
+
+        unset($data['remove_photo']);
+
+        return $data;
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\Patron;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -18,8 +19,36 @@ use Illuminate\Validation\ValidationException;
  */
 class AttendanceController extends Controller
 {
-    /** Scan station + live statistics for a chosen day (default: today). */
-    public function index(Request $request)
+    /**
+     * "Record your visit" screen: type / scan a student ID, confirm the photo,
+     * tap Record entry. Footer cards show live counters.
+     */
+    public function index()
+    {
+        return view('attendance.index', ['summary' => $this->summary()]);
+    }
+
+    /** Live ID lookup (JSON) for the kiosk: returns the photo + name so identity can be confirmed. */
+    public function lookup(Request $request): JsonResponse
+    {
+        $idNumber = trim((string) $request->query('id_number'));
+        $patron   = $idNumber === '' ? null : Patron::where('id_number', $idNumber)->first();
+
+        if (! $patron) {
+            return response()->json(['found' => false]);
+        }
+
+        return response()->json(['found' => true] + $this->patronPayload($patron));
+    }
+
+    /** Footer counters as JSON (kept fresh while the kiosk stays open). */
+    public function summaryJson(): JsonResponse
+    {
+        return response()->json($this->summary());
+    }
+
+    /** Staff analytics: hourly chart, 14-day totals and the day log for a chosen day (default: today). */
+    public function stats(Request $request)
     {
         $request->validate(['date' => ['nullable', 'date']]);
 
@@ -74,7 +103,7 @@ class AttendanceController extends Controller
         });
         $dailyMax = max(1, $dailyChart->max('count'));
 
-        return view('attendance.index', [
+        return view('attendance.stats', [
             'date'       => $date,
             'isToday'    => $isToday,
             'visits'     => $visits->take(25),
@@ -115,6 +144,7 @@ class AttendanceController extends Controller
                 'headline' => "{$patron->name} was already logged at {$last->visited_at->format('h:i A')}.",
                 'detail'   => 'Duplicate scan ignored.',
                 'patron'   => $this->patronPayload($patron),
+                'summary'  => $this->summary(),
             ];
 
             return $request->expectsJson()
@@ -138,6 +168,7 @@ class AttendanceController extends Controller
             // Informational only; inactive patrons are still logged, the librarian decides.
             'warning'  => $patron->isActive() ? null : 'This patron is marked inactive.',
             'patron'   => $this->patronPayload($patron),
+            'summary'  => $this->summary(),
         ];
 
         return $request->expectsJson()
@@ -193,6 +224,20 @@ class AttendanceController extends Controller
             'name'        => $patron->name,
             'patron_type' => $patron->patron_type,
             'status'      => $patron->status,
+            'photo_url'   => $patron->photoUrl(),
+            'initials'    => $patron->initials(),
+        ];
+    }
+
+    /** Numbers for the three footer cards: visits today, unique visitors today, visits this week (Mon-Sun). */
+    private function summary(): array
+    {
+        $today = Attendance::onDate(today()->toDateString());
+
+        return [
+            'today'  => (clone $today)->count(),
+            'unique' => (clone $today)->distinct()->count('patron_id'),
+            'week'   => Attendance::whereBetween('visited_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
         ];
     }
 }

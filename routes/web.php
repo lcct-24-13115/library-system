@@ -99,6 +99,9 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
     // v3: Attendance (daily visitor log)
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+    Route::get('/attendance/lookup', [AttendanceController::class, 'lookup'])->name('attendance.lookup');
+    Route::get('/attendance/summary', [AttendanceController::class, 'summaryJson'])->name('attendance.summary');
+    Route::get('/attendance/stats', [AttendanceController::class, 'stats'])->name('attendance.stats');
     Route::get('/attendance/history', [AttendanceController::class, 'history'])->name('attendance.history');
 
     // v3: Reservations

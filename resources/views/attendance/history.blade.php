@@ -14,7 +14,7 @@
             <p class="text-slate-400 text-xs hidden print:block">SALRC Library System &middot; Printed {{ now()->format('M d, Y h:i A') }}</p>
         </div>
         <div class="flex gap-2 print:hidden">
-            <a href="{{ route('attendance.index') }}" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm hover:bg-slate-50 font-medium">&larr; Scan station</a>
+            <a href="{{ route('attendance.index') }}" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm hover:bg-slate-50 font-medium">&larr; Record entry</a>
             <button onclick="window.print()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-900 shadow-sm">Print</button>
         </div>
     </div>

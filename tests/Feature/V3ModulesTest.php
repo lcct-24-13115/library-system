@@ -103,8 +103,44 @@ class V3ModulesTest extends TestCase
         $patron = $this->patron();
         Attendance::create(['patron_id' => $patron->id, 'visited_at' => now()]);
 
-        $this->get(route('attendance.index'))->assertOk()->assertSee('Visitors per hour');
+        $this->get(route('attendance.index'))->assertOk()->assertSee('Record your visit')->assertSee('Record entry');
+        $this->get(route('attendance.stats'))->assertOk()->assertSee('Visitors per hour');
         $this->get(route('attendance.history'))->assertOk()->assertSee('Juan Dela Cruz');
+    }
+
+    public function test_kiosk_lookup_returns_patron_details_and_unknown_is_not_found(): void
+    {
+        $this->login();
+        $this->patron();
+
+        $this->getJson(route('attendance.lookup', ['id_number' => '2026-0001']))
+            ->assertOk()
+            ->assertJsonPath('found', true)
+            ->assertJsonPath('name', 'Juan Dela Cruz')
+            ->assertJsonPath('initials', 'JD')
+            ->assertJsonPath('photo_url', null);
+
+        $this->getJson(route('attendance.lookup', ['id_number' => 'NOPE']))
+            ->assertOk()
+            ->assertJsonPath('found', false);
+    }
+
+    public function test_kiosk_summary_counts_today_unique_and_week(): void
+    {
+        config(['library.attendance_duplicate_minutes' => 0]);
+        $this->login();
+        $a = $this->patron();
+        $b = $this->patron(['id_number' => '2026-0002', 'name' => 'Maria Santos']);
+
+        Attendance::create(['patron_id' => $a->id, 'visited_at' => now()]);
+        Attendance::create(['patron_id' => $a->id, 'visited_at' => now()]);
+        Attendance::create(['patron_id' => $b->id, 'visited_at' => now()]);
+
+        $this->getJson(route('attendance.summary'))
+            ->assertOk()
+            ->assertJsonPath('today', 3)
+            ->assertJsonPath('unique', 2)
+            ->assertJsonPath('week', 3);
     }
 
     /* ------------------------------ Reservations ----------------------------- */

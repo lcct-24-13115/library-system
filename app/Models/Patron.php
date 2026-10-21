@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 
 class Patron extends Model
 {
@@ -20,6 +21,7 @@ class Patron extends Model
         'email',
         'contact_no',
         'status',
+        'photo',
     ];
 
     /** Student / Faculty portal login (role 'patron'), if one was created. */
@@ -52,5 +54,19 @@ class Patron extends Model
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    /** Public URL of the ID photo, or null when none was uploaded. */
+    public function photoUrl(): ?string
+    {
+        return $this->photo ? Storage::disk('public')->url($this->photo) : null;
+    }
+
+    /** Up to two initials, used as the avatar when there is no photo. */
+    public function initials(): string
+    {
+        $words = preg_split('/\s+/', trim((string) $this->name), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        return mb_strtoupper(collect($words)->take(2)->map(fn ($w) => mb_substr($w, 0, 1))->implode(''));
     }
 }

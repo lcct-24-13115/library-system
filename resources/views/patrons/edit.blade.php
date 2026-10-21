@@ -10,7 +10,7 @@
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <form action="{{ route('patrons.update', $patron) }}" method="POST" class="space-y-4">
+        <form action="{{ route('patrons.update', $patron) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             @method('PUT')
             @include('patrons._form', ['patron' => $patron])

@@ -1,222 +1,309 @@
-@extends('layouts.library')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    @include('layouts._head')
+    <title>Library Attendance - Saint Augustine Learning Center</title>
+    <style>
+        .att-bg {
+            min-height: 100dvh;
+            background:
+                radial-gradient(900px 420px at 50% -120px, #dbe7ff 0%, rgba(219, 231, 255, 0) 70%),
+                var(--cream);
+        }
+        .att-card { box-shadow: 0 2px 4px rgba(15,37,87,.06), 0 18px 40px -14px rgba(15,37,87,.22); }
+        .att-photo { transition: opacity .25s ease, transform .25s ease; }
+        .att-photo.is-hidden { opacity: 0; transform: translateY(6px); height: 0; margin: 0; overflow: hidden; }
+        .att-stat-num { font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body class="salrc">
+<div class="att-bg flex flex-col">
 
-@section('title', 'Attendance - SALRC Library')
+    {{-- Staff shortcuts (this page sits behind the staff login) --}}
+    <nav class="flex items-center justify-end gap-4 px-5 py-3 text-xs font-semibold text-slate-500 print:hidden">
+        <a href="{{ route('dashboard') }}" class="hover:text-indigo-700">Dashboard</a>
+        <a href="{{ route('attendance.stats') }}" class="hover:text-indigo-700">Statistics</a>
+        <a href="{{ route('attendance.history') }}" class="hover:text-indigo-700">Visitor history</a>
+    </nav>
 
-@section('content')
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <div>
-            <h2 class="text-3xl font-extrabold text-slate-900">Attendance</h2>
-            <p class="text-slate-500 text-sm">Scan a patron ID to log a library visit.</p>
-        </div>
-        <div class="flex items-center gap-3">
-            <form action="{{ route('attendance.index') }}" method="GET" class="flex items-center gap-2">
-                <input type="date" name="date" value="{{ $date->toDateString() }}" max="{{ today()->toDateString() }}"
-                       class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">Show</button>
-                @unless($isToday)
-                    <a href="{{ route('attendance.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-2 rounded-lg text-sm transition">Today</a>
-                @endunless
-            </form>
-            <a href="{{ route('attendance.history') }}" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm whitespace-nowrap">Visitor history &rarr;</a>
-        </div>
-    </div>
+    <main class="flex-1 flex flex-col items-center px-4 pb-10">
 
-    {{-- Scan station --}}
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6 print:hidden">
-        <form id="scan-form" action="{{ route('attendance.store') }}" method="POST" class="flex flex-col sm:flex-row gap-3">
-            @csrf
-            <input type="text" id="scan-input" name="patron_id_number" required autofocus autocomplete="off"
-                   placeholder="Scan or type the patron ID number, then press Enter"
-                   class="w-full border-2 border-indigo-300 rounded-lg px-4 py-3 text-lg focus:outline-none focus:border-indigo-600">
-            <button type="submit" class="px-6 py-3 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 shadow-sm transition whitespace-nowrap">Log Visit</button>
-        </form>
-        <div id="scan-result" class="hidden mt-4 rounded-lg border p-4"></div>
-        @unless($isToday)
-            <p class="text-xs text-amber-700 mt-3">You are viewing {{ $date->format('M d, Y') }}. New scans are always recorded with the current date and time.</p>
-        @endunless
-    </div>
+        {{-- 1. Header --}}
+        <header class="text-center mt-2 mb-8">
+            <img src="{{ asset('images/salrc-logo-full.png') }}" alt="Saint Augustine Learning Center"
+                 class="mx-auto w-20 h-20 object-contain mb-3">
+            <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Saint Augustine Learning Center</h1>
+            <p class="mt-1 text-xs sm:text-sm font-bold tracking-[.28em] text-indigo-600 uppercase">Library Attendance</p>
+        </header>
 
-    {{-- Everything in here is re-fetched after each scan --}}
-    <div id="attendance-live">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <p class="text-xs uppercase font-bold text-slate-500">Visits {{ $isToday ? 'today' : $date->format('M d') }}</p>
-                <p class="text-2xl font-extrabold text-indigo-900">{{ $stats['total'] }}</p>
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <p class="text-xs uppercase font-bold text-slate-500">Unique visitors</p>
-                <p class="text-2xl font-extrabold text-slate-800">{{ $stats['unique'] }}</p>
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <p class="text-xs uppercase font-bold text-slate-500">Peak hour</p>
-                <p class="text-2xl font-extrabold text-emerald-600">{{ $peakHour ? $peakHour['label'] : '—' }}</p>
-                @if($peakHour)<p class="text-xs text-slate-400">{{ $peakHour['count'] }} {{ \Illuminate\Support\Str::plural('visit', $peakHour['count']) }}</p>@endif
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <p class="text-xs uppercase font-bold text-slate-500">By patron type</p>
-                <div class="text-sm text-slate-700 mt-1 space-y-0.5">
-                    @forelse($stats['by_type'] as $type => $count)
-                        <div class="flex justify-between"><span>{{ $type }}</span><span class="font-bold">{{ $count }}</span></div>
-                    @empty
-                        <span class="text-slate-400">No visits yet.</span>
-                    @endforelse
-                </div>
-            </div>
-        </div>
+        {{-- 2. Form card --}}
+        <section class="att-card w-full max-w-xl bg-white rounded-2xl border border-slate-200 p-6 sm:p-8">
+            <h2 class="font-display text-2xl font-extrabold text-slate-900">Record your visit</h2>
+            <p class="mt-2 text-sm text-slate-500">Enter your student ID — your photo will appear to confirm your identity, then tap Record entry.</p>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            {{-- Hourly chart --}}
-            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h3 class="font-bold text-slate-900 mb-4">Visitors per hour &mdash; {{ $date->format('l, M d, Y') }}</h3>
-                <div class="flex items-end gap-1.5 h-48">
-                    @foreach($hourly as $h)
-                        <div class="flex-1 flex flex-col items-center h-full justify-end" title="{{ $h['label'] }}: {{ $h['count'] }} {{ \Illuminate\Support\Str::plural('visit', $h['count']) }}">
-                            <div class="text-[10px] text-slate-500 mb-1">{{ $h['count'] ?: '' }}</div>
-                            <div class="w-full {{ $peakHour && $peakHour['hour'] === $h['hour'] ? 'bg-emerald-500' : 'bg-indigo-500' }} rounded-t"
-                                 style="height: {{ $h['count'] / $hourlyMax * 85 }}%; min-height: {{ $h['count'] ? '4px' : '0' }}"></div>
-                            <div class="text-[10px] text-slate-500 mt-2">{{ $h['label'] }}</div>
+            <form id="att-form" action="{{ route('attendance.store') }}" method="POST" class="mt-6" novalidate>
+                @csrf
+                <label for="att-id" class="sr-only">Student ID</label>
+                <input type="text" id="att-id" name="patron_id_number" autofocus autocomplete="off" autocapitalize="characters" spellcheck="false"
+                       data-lookup-url="{{ route('attendance.lookup') }}"
+                       placeholder="STUDENT ID (E.G. P-1024-1001)"
+                       class="w-full rounded-xl border-2 border-slate-300 bg-white px-4 py-3.5 text-base font-semibold tracking-wide text-slate-900 placeholder:text-xs placeholder:font-bold placeholder:tracking-[.14em] placeholder:text-slate-400 focus:outline-none focus:border-indigo-600">
+
+                {{-- Identity confirmation (photo appears here) --}}
+                <div id="att-photo" class="att-photo is-hidden" aria-live="polite">
+                    <div class="mt-5 flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                        <div class="relative w-24 h-24 shrink-0 rounded-full overflow-hidden bg-indigo-100 border-4 border-white shadow">
+                            <img id="att-img" alt="" class="hidden w-full h-full object-cover">
+                            <span id="att-initials" class="w-full h-full grid place-items-center text-2xl font-extrabold text-indigo-700"></span>
                         </div>
-                    @endforeach
+                        <div class="min-w-0">
+                            <p id="att-name" class="font-display text-lg font-extrabold text-slate-900 truncate"></p>
+                            <p id="att-meta" class="text-sm text-slate-500"></p>
+                            <p id="att-flag" class="hidden mt-1 text-xs font-semibold text-amber-700"></p>
+                        </div>
+                    </div>
                 </div>
+
+                {{-- Not found / result messages --}}
+                <div id="att-msg" class="hidden mt-4 rounded-xl border p-4 text-sm" role="status"></div>
+
+                <button type="submit" id="att-btn" disabled
+                        class="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M15 19a6 6 0 0 0-12 0"/><circle cx="9" cy="8" r="4"/><path d="M19 8v6M16 11h6"/>
+                    </svg>
+                    <span id="att-btn-text">Record entry</span>
+                </button>
+            </form>
+        </section>
+
+        {{-- 3. Live counters --}}
+        <section class="w-full max-w-xl mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3" aria-label="Attendance summary">
+            <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <span class="grid place-items-center w-10 h-10 rounded-full bg-indigo-50 text-indigo-600">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </span>
+                <p class="text-sm text-slate-600 leading-tight"><span id="c-today" class="att-stat-num block text-xl font-extrabold text-slate-900">{{ $summary['today'] }}</span> <span id="c-today-label">{{ $summary['today'] === 1 ? 'visit' : 'visits' }}</span> today</p>
             </div>
 
-            {{-- 14-day totals --}}
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h3 class="font-bold text-slate-900 mb-3">Last 14 days</h3>
-                <ul class="space-y-1.5 text-sm">
-                    @foreach($dailyChart->reverse() as $d)
-                        <li class="flex items-center gap-2" title="{{ $d['dow'] }} {{ $d['label'] }}: {{ $d['count'] }}">
-                            <a href="{{ route('attendance.index', ['date' => $d['date']]) }}" class="w-14 text-xs text-slate-500 hover:text-indigo-700">{{ $d['label'] }}</a>
-                            <div class="flex-1 bg-slate-100 rounded h-3">
-                                <div class="bg-indigo-400 h-3 rounded" style="width: {{ $d['count'] / $dailyMax * 100 }}%"></div>
-                            </div>
-                            <span class="w-8 text-right text-xs font-bold text-slate-600">{{ $d['count'] }}</span>
-                        </li>
-                    @endforeach
-                </ul>
+            <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <span class="grid place-items-center w-10 h-10 rounded-full bg-indigo-50 text-indigo-600">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/>
+                    </svg>
+                </span>
+                <p class="text-sm text-slate-600 leading-tight"><span id="c-unique" class="att-stat-num block text-xl font-extrabold text-slate-900">{{ $summary['unique'] }}</span> unique <span id="c-unique-label">{{ $summary['unique'] === 1 ? 'visitor' : 'visitors' }}</span></p>
             </div>
-        </div>
 
-        {{-- Day log --}}
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-                <h3 class="font-bold text-slate-900">{{ $isToday ? "Today's" : $date->format('M d') }} log <span class="text-slate-400 font-normal text-sm">(latest {{ $visits->count() }} of {{ $stats['total'] }})</span></h3>
-                <a href="{{ route('attendance.history', ['from' => $date->toDateString(), 'to' => $date->toDateString()]) }}" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm print:hidden">Full log &rarr;</a>
+            <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <span class="grid place-items-center w-10 h-10 rounded-full bg-indigo-50 text-indigo-600">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+                    </svg>
+                </span>
+                <p class="text-sm text-slate-600 leading-tight"><span id="c-week" class="att-stat-num block text-xl font-extrabold text-slate-900">{{ $summary['week'] }}</span> this week</p>
             </div>
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase text-xs font-bold tracking-wider">
-                    <tr>
-                        <th class="p-3">Time</th>
-                        <th class="p-3">ID Number</th>
-                        <th class="p-3">Name</th>
-                        <th class="p-3">Type</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 text-sm">
-                    @forelse($visits as $v)
-                        <tr>
-                            <td class="p-3 whitespace-nowrap">{{ $v->visited_at->format('h:i A') }}</td>
-                            <td class="p-3 font-bold text-indigo-900">{{ $v->patron->id_number }}</td>
-                            <td class="p-3"><a href="{{ route('patrons.show', $v->patron) }}" class="hover:text-indigo-700">{{ $v->patron->name }}</a></td>
-                            <td class="p-3">{{ $v->patron->patron_type }}</td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="4" class="p-6 text-center text-slate-400">No visits logged for this day.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+        </section>
+    </main>
+</div>
 
-    <script>
-    (function () {
-        const form   = document.getElementById('scan-form');
-        const input  = document.getElementById('scan-input');
-        const result = document.getElementById('scan-result');
-        const live   = document.getElementById('attendance-live');
-        const csrf   = document.querySelector('meta[name="csrf-token"]').content;
+<script>
+(function () {
+    const form     = document.getElementById('att-form');
+    const input    = document.getElementById('att-id');
+    const btn      = document.getElementById('att-btn');
+    const btnText  = document.getElementById('att-btn-text');
+    const photoBox = document.getElementById('att-photo');
+    const img      = document.getElementById('att-img');
+    const initials = document.getElementById('att-initials');
+    const nameEl   = document.getElementById('att-name');
+    const metaEl   = document.getElementById('att-meta');
+    const flagEl   = document.getElementById('att-flag');
+    const msg      = document.getElementById('att-msg');
+    const csrf     = document.querySelector('meta[name="csrf-token"]').content;
+    const lookupUrl  = input.dataset.lookupUrl;
+    const summaryUrl = @json(route('attendance.summary'));
 
-        const TONES = {
-            ok:   'border-emerald-300 bg-emerald-50 text-emerald-900',
-            warn: 'border-amber-300 bg-amber-50 text-amber-900',
-            bad:  'border-rose-300 bg-rose-50 text-rose-800',
-        };
+    const TONES = {
+        ok:   'border-sky-300 bg-sky-50 text-sky-900',
+        warn: 'border-amber-300 bg-amber-50 text-amber-900',
+        bad:  'border-rose-300 bg-rose-50 text-rose-800',
+    };
 
-        function show(tone, headline, detail, extra) {
-            result.className = 'mt-4 rounded-lg border p-4 ' + TONES[tone];
-            result.replaceChildren();
-            const h = document.createElement('p');
-            h.className = 'text-lg font-bold';
-            h.textContent = headline;
-            result.append(h);
-            [detail, extra].filter(Boolean).forEach(function (t) {
-                const p = document.createElement('p');
-                p.className = 'text-sm mt-1';
-                p.textContent = t;
-                result.append(p);
+    let timer = null;      // debounce for the live lookup
+    let seq = 0;           // ignore out-of-date lookup responses
+    let resetTimer = null;
+    let busy = false;
+
+    function showMessage(tone, headline, detail) {
+        msg.className = 'mt-4 rounded-xl border p-4 text-sm ' + TONES[tone];
+        msg.replaceChildren();
+        const h = document.createElement('p');
+        h.className = 'font-bold';
+        h.textContent = headline;
+        msg.append(h);
+        if (detail) {
+            const d = document.createElement('p');
+            d.className = 'mt-1';
+            d.textContent = detail;
+            msg.append(d);
+        }
+    }
+    function hideMessage() { msg.className = 'hidden'; msg.replaceChildren(); }
+
+    function hidePhoto() {
+        photoBox.classList.add('is-hidden');
+        img.removeAttribute('src');
+        img.classList.add('hidden');
+    }
+
+    function showPatron(p) {
+        nameEl.textContent = p.name;
+        metaEl.textContent = [p.patron_type, p.id_number].filter(Boolean).join(' · ');
+        if (p.photo_url) {
+            img.onerror = function () { img.classList.add('hidden'); initials.textContent = p.initials || ''; initials.classList.remove('hidden'); };
+            img.src = p.photo_url;
+            img.alt = 'Photo of ' + p.name;
+            img.classList.remove('hidden');
+            initials.classList.add('hidden');
+        } else {
+            img.classList.add('hidden');
+            initials.textContent = p.initials || '';
+            initials.classList.remove('hidden');
+        }
+        if (p.status && p.status !== 'active') {
+            flagEl.textContent = 'This ID is marked inactive.';
+            flagEl.classList.remove('hidden');
+        } else {
+            flagEl.classList.add('hidden');
+        }
+        photoBox.classList.remove('is-hidden');
+    }
+
+    function setCounter(id, value) {
+        const el = document.getElementById(id);
+        if (el && el.textContent !== String(value)) el.textContent = value;
+    }
+    function applySummary(s) {
+        if (!s) return;
+        setCounter('c-today', s.today);
+        setCounter('c-unique', s.unique);
+        setCounter('c-week', s.week);
+        document.getElementById('c-today-label').textContent = s.today === 1 ? 'visit' : 'visits';
+        document.getElementById('c-unique-label').textContent = s.unique === 1 ? 'visitor' : 'visitors';
+    }
+
+    function setBusy(state) {
+        busy = state;
+        btn.disabled = state || input.value.trim() === '';
+        btnText.textContent = state ? 'Recording…' : 'Record entry';
+    }
+
+    // Live lookup while typing / scanning (no page refresh).
+    async function lookup(value, mine) {
+        try {
+            const res = await fetch(lookupUrl + '?id_number=' + encodeURIComponent(value), {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
             });
-        }
-
-        async function refreshPanel() {
-            try {
-                const res  = await fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
-                const html = await res.text();
-                const doc  = new DOMParser().parseFromString(html, 'text/html');
-                const fresh = doc.getElementById('attendance-live');
-                if (fresh) live.innerHTML = fresh.innerHTML;
-            } catch (e) { /* stats refresh is best-effort; the visit is already saved */ }
-        }
-
-        form.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const value = input.value.trim();
-            if (value === '') return;
-            input.value = '';
-            input.focus();
-
-            try {
-                const res = await fetch(form.action, {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrf,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: JSON.stringify({ patron_id_number: value }),
-                });
-                const data = await res.json().catch(function () { return {}; });
-
-                if (res.status === 422) {
-                    const msg = (data.errors && data.errors.patron_id_number && data.errors.patron_id_number[0]) || data.message || 'Invalid ID.';
-                    show('bad', 'Not recorded: ' + value, msg);
-                    return;
-                }
-                if (res.status === 419) {
-                    show('bad', 'Session expired', 'Reload this page and log in again, then scan again.');
-                    return;
-                }
-                if (!res.ok) {
-                    show('bad', 'Something went wrong', 'The visit may not have been recorded. Please scan again.');
-                    return;
-                }
-
-                if (data.status === 'duplicate') {
-                    show('warn', data.headline, data.detail);
-                } else {
-                    show(data.warning ? 'warn' : 'ok', data.headline, data.detail, data.warning);
-                }
-                refreshPanel();
-            } catch (err) {
-                show('bad', 'Network error', 'The visit was not recorded. Check the connection and scan again.');
+            if (mine !== seq) return;
+            const data = await res.json();
+            if (data.found) {
+                hideMessage();
+                showPatron(data);
+            } else {
+                hidePhoto();
+                showMessage('bad', 'No student found', 'Check the ID number and try again.');
             }
-        });
+        } catch (e) {
+            if (mine === seq) { hidePhoto(); }
+        }
+    }
 
-        // Keep the scanner ready: clicking empty space puts the cursor back in the box.
-        document.addEventListener('click', function (e) {
-            if (!e.target.closest('a, button, input, select, textarea, label')) input.focus();
-        });
-    })();
-    </script>
-@endsection
+    input.addEventListener('input', function () {
+        clearTimeout(timer);
+        clearTimeout(resetTimer);
+        const value = input.value.trim();
+        btn.disabled = busy || value === '';
+        seq++;
+        if (value === '') { hidePhoto(); hideMessage(); return; }
+        const mine = seq;
+        timer = setTimeout(function () { lookup(value, mine); }, 250);
+    });
+
+    // Record entry.
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const value = input.value.trim();
+        if (value === '' || busy) return;
+        clearTimeout(timer);
+        seq++;
+        setBusy(true);
+
+        try {
+            const res = await fetch(form.action, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({ patron_id_number: value }),
+            });
+            const data = await res.json().catch(function () { return {}; });
+
+            if (res.status === 422) {
+                hidePhoto();
+                showMessage('bad', 'Not recorded', (data.errors && data.errors.patron_id_number && data.errors.patron_id_number[0]) || data.message || 'Invalid ID.');
+                return;
+            }
+            if (res.status === 419) {
+                showMessage('bad', 'Session expired', 'Reload this page and log in again.');
+                return;
+            }
+            if (!res.ok) {
+                showMessage('bad', 'Something went wrong', 'The entry may not have been recorded. Please try again.');
+                return;
+            }
+
+            if (data.patron) showPatron(data.patron);
+            if (data.status === 'duplicate') {
+                showMessage('warn', data.headline, data.detail);
+            } else {
+                showMessage(data.warning ? 'warn' : 'ok', data.headline, [data.detail, data.warning].filter(Boolean).join(' '));
+            }
+            applySummary(data.summary);
+
+            // Ready for the next student after a few seconds.
+            input.value = '';
+            clearTimeout(resetTimer);
+            resetTimer = setTimeout(function () { hidePhoto(); hideMessage(); }, 5000);
+        } catch (err) {
+            showMessage('bad', 'Network error', 'The entry was not recorded. Check the connection and try again.');
+        } finally {
+            setBusy(false);
+            input.focus();
+        }
+    });
+
+    // Keep the counters fresh when other stations record visits.
+    setInterval(async function () {
+        if (document.hidden) return;
+        try {
+            const res = await fetch(summaryUrl, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+            if (res.ok) applySummary(await res.json());
+        } catch (e) { /* best effort */ }
+    }, 30000);
+
+    // Clicking empty space puts the cursor back in the box (scanner ready).
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('a, button, input, select, textarea, label')) input.focus();
+    });
+})();
+</script>
+</body>
+</html>

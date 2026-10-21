@@ -10,7 +10,7 @@
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <form action="{{ route('patrons.store') }}" method="POST" class="space-y-4">
+        <form action="{{ route('patrons.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             @include('patrons._form')
             <div class="pt-4 flex justify-end space-x-3">
