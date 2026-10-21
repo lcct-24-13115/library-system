@@ -36,7 +36,8 @@ class RoleMiddleware
             return redirect()->route('login')->withErrors(['email' => $message]);
         }
 
-        if (! in_array($user->role, $roles, true)) {
+        // The role is read from the authenticated user's database record on every request.
+        if (! $user->hasRole(...$roles)) {
             abort(403, 'You do not have permission to do that.');
         }
 

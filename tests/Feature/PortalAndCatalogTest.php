@@ -69,32 +69,48 @@ class PortalAndCatalogTest extends TestCase
 
     /* ---------------- Login tabs ---------------- */
 
-    public function test_login_page_shows_the_account_tabs_and_catalog_link(): void
+    public function test_login_page_has_no_role_selection_but_keeps_the_catalog_link(): void
     {
         $this->get(route('login'))->assertOk()
-            ->assertSee('Student')->assertSee('Faculty')->assertSee('Librarian')
-            ->assertSee('Administrator')->assertSee('Staff')
+            ->assertDontSee('name="portal"', false)
+            ->assertDontSee('Sign in as')
+            ->assertSee('images/st-augustine.jpg', false)   // left page of the open book
+            ->assertSee('id="book-close-btn"', false)       // the book can be closed again
             ->assertSee(route('catalog.index'));
     }
 
-    public function test_the_chosen_tab_must_match_the_account(): void
+    public function test_each_staff_role_is_detected_automatically_and_sent_to_the_dashboard(): void
+    {
+        foreach (['admin', 'librarian', 'staff'] as $role) {
+            $user = $this->staff($role);
+
+            $this->post(route('login'), ['email' => $user->email, 'password' => 'password'])
+                ->assertRedirect(route('dashboard'));
+            $this->assertAuthenticatedAs($user);
+
+            auth()->logout();
+        }
+    }
+
+    public function test_a_stray_portal_field_is_ignored_and_the_database_role_wins(): void
     {
         $user = $this->staff('librarian');
 
+        // Even if someone posts the old "portal" field with a different role, it has no effect.
         $this->post(route('login'), ['email' => $user->email, 'password' => 'password', 'portal' => 'administrator'])
-            ->assertSessionHasErrors('email');
-        $this->assertGuest();
-
-        $this->post(route('login'), ['email' => $user->email, 'password' => 'password', 'portal' => 'librarian'])
             ->assertRedirect(route('dashboard'));
         $this->assertAuthenticatedAs($user);
+        $this->assertFalse($user->fresh()->isAdmin());
     }
 
-    public function test_login_without_a_tab_still_works(): void
+    public function test_middleware_uses_the_database_role_not_anything_from_login(): void
     {
-        $user = $this->staff('admin');
+        $librarian = $this->staff('librarian');
 
-        $this->post(route('login'), ['email' => $user->email, 'password' => 'password'])->assertRedirect(route('dashboard'));
+        $this->post(route('login'), ['email' => $librarian->email, 'password' => 'password', 'portal' => 'administrator']);
+
+        $this->get(route('users.index'))->assertForbidden();   // admin only
+        $this->get(route('books.index'))->assertOk();          // librarian allowed
     }
 
     /* ---------------- Portal accounts ---------------- */
@@ -108,7 +124,7 @@ class PortalAndCatalogTest extends TestCase
         $this->assertSame('patron', $account->role);
         $this->assertSame($patron->id, $account->patron_id);
 
-        $this->post(route('login'), ['email' => '2026-0001', 'password' => 'password123', 'portal' => 'student'])
+        $this->post(route('login'), ['email' => '2026-0001', 'password' => 'password123'])
             ->assertRedirect(route('portal.index'));
         $this->assertAuthenticatedAs($account);
     }
@@ -122,15 +138,20 @@ class PortalAndCatalogTest extends TestCase
         ])->assertForbidden();
     }
 
-    public function test_student_tab_rejects_a_faculty_account_and_the_faculty_tab_accepts_it(): void
+    public function test_student_and_faculty_accounts_are_detected_and_sent_to_the_portal(): void
     {
+        $student = $this->patron('S-1', 'Student', 'Juan Student');
         $faculty = $this->patron('F-1', 'Faculty', 'Prof Cruz');
+        $this->makeAccount($student);
         $this->makeAccount($faculty);
 
-        $this->post(route('login'), ['email' => 'F-1', 'password' => 'password123', 'portal' => 'student'])->assertSessionHasErrors('email');
-        $this->assertGuest();
+        $this->assertSame('Student', $student->fresh()->account->accountType());
+        $this->assertSame('Faculty', $faculty->fresh()->account->accountType());
 
-        $this->post(route('login'), ['email' => 'F-1', 'password' => 'password123', 'portal' => 'faculty'])->assertRedirect(route('portal.index'));
+        $this->post(route('login'), ['email' => 'S-1', 'password' => 'password123'])->assertRedirect(route('portal.index'));
+        auth()->logout();
+
+        $this->post(route('login'), ['email' => 'F-1', 'password' => 'password123'])->assertRedirect(route('portal.index'));
     }
 
     public function test_outside_users_and_inactive_patrons_get_no_account(): void

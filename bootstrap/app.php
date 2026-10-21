@@ -12,10 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Already signed in? Students / faculty go to their portal, staff to the dashboard.
-        $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->isPatron()
-            ? route('portal.index')
-            : route('dashboard'));
+        // Already signed in? Send each account to its own home (portal or dashboard).
+        $middleware->redirectUsersTo(fn (Request $request) => route($request->user()->homeRoute()));
 
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,

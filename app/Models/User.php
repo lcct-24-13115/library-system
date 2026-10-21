@@ -23,15 +23,6 @@ class User extends Authenticatable
     /** Student / Faculty portal accounts (read-only access to their own loans). Not in ROLES: created from the patron page. */
     public const PATRON_ROLE = 'patron';
 
-    /** Tabs on the login page: key => label. */
-    public const PORTALS = [
-        'student'       => 'Student',
-        'faculty'       => 'Faculty',
-        'librarian'     => 'Librarian',
-        'administrator' => 'Administrator',
-        'staff'         => 'Staff',
-    ];
-
     /** The only groups that may have an account (client requirement). */
     public const USER_TYPES = [
         'Lower School Faculty',
@@ -64,16 +55,34 @@ class User extends Authenticatable
         return $this->role === self::PATRON_ROLE;
     }
 
-    /** Does this account belong to the login tab that was chosen? */
-    public function matchesPortal(string $portal): bool
+    /** Does this account have one of the given roles? (Read from the users table, never from the session.) */
+    public function hasRole(string ...$roles): bool
     {
-        return match ($portal) {
-            'administrator' => $this->role === 'admin',
-            'librarian'     => $this->role === 'librarian',
-            'staff'         => $this->role === 'staff',
-            'student'       => $this->isPatron() && $this->patron?->patron_type === 'Student',
-            'faculty'       => $this->isPatron() && $this->patron !== null && $this->patron->patron_type !== 'Student',
-            default         => false,
+        return in_array($this->role, $roles, true);
+    }
+
+    /**
+     * Where this account lands after login (and when an already signed-in user opens /login).
+     * Add a case here when a role gets its own dashboard.
+     */
+    public function homeRoute(): string
+    {
+        return match ($this->role) {
+            self::PATRON_ROLE => 'portal.index',            // students / faculty
+            'admin', 'librarian', 'staff' => 'dashboard',   // library staff
+            default => 'dashboard',
+        };
+    }
+
+    /** Detected account type for display: Administrator, Librarian, Staff, Student or Faculty. */
+    public function accountType(): string
+    {
+        return match (true) {
+            $this->isAdmin()     => 'Administrator',
+            $this->isLibrarian() => 'Librarian',
+            $this->isStaff()     => 'Staff',
+            $this->isPatron()    => $this->patron?->patron_type === 'Student' ? 'Student' : 'Faculty',
+            default              => 'User',
         };
     }
 

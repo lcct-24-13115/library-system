@@ -28,11 +28,16 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        if ($request->user()->isPatron()) {
-            return redirect()->route('portal.index');
+        // No role is sent by the form: the account's own role (users table / linked patron)
+        // decides where it lands.
+        $user = $request->user();
+
+        // Students / faculty always go to their portal (an old "intended" staff URL would 403).
+        if ($user->isPatron()) {
+            return redirect()->route($user->homeRoute());
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route($user->homeRoute(), absolute: false));
     }
 
     /**

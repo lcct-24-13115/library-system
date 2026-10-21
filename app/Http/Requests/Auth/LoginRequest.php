@@ -10,7 +10,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
@@ -34,8 +33,6 @@ class LoginRequest extends FormRequest
             // Staff sign in with their email; students / faculty may use their ID number too.
             'email' => ['required', 'string'],
             'password' => ['required', 'string'],
-            // Optional login tab (Student / Faculty / Librarian / Administrator / Staff).
-            'portal' => ['nullable', Rule::in(array_keys(User::PORTALS))],
         ];
     }
 
@@ -64,17 +61,6 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'email' => 'This account has been deactivated. Please contact the library administrator.',
-            ]);
-        }
-
-        // The chosen tab must match the account (only checked when a tab was chosen).
-        $portal = $this->input('portal');
-
-        if ($portal && ! Auth::user()->matchesPortal($portal)) {
-            Auth::logout();
-
-            throw ValidationException::withMessages([
-                'email' => 'This is not a ' . User::PORTALS[$portal] . ' account. Please choose the correct tab.',
             ]);
         }
 
