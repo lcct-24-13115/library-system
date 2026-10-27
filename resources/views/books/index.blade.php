@@ -38,7 +38,11 @@
 
     <!-- View switch: 3D shelf (default) or table. The choice is remembered in this browser. -->
     <div class="flex items-center justify-between mb-4">
-        <p class="text-sm text-slate-500">Click a book on the shelf to open it.</p>
+        @if(filled($search))
+            <p class="text-sm text-slate-600"><span class="font-bold text-slate-900">{{ number_format($books->total()) }}</span> {{ \Illuminate\Support\Str::plural('book', $books->total()) }} found for &ldquo;{{ $search }}&rdquo; &middot; best matches first</p>
+        @else
+            <p class="text-sm text-slate-500">Click a book on the shelf to open it.</p>
+        @endif
         <div class="viewswitch" data-viewswitch="books" data-default="shelf" role="group" aria-label="Catalog view">
             <button type="button" data-set-view="shelf" aria-pressed="true">3D Shelf</button>
             <button type="button" data-set-view="table" aria-pressed="false">Table</button>

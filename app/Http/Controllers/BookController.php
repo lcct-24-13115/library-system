@@ -11,22 +11,13 @@ class BookController extends Controller
     {
         $search = $request->input('search');
 
-        $books = Book::when($search, function ($query, $search) {
-            return $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('author', 'like', "%{$search}%")
-                  ->orWhere('accession_number', 'like', "%{$search}%")
-                  ->orWhere('category', 'like', "%{$search}%")
-                  // RDA fields
-                  ->orWhere('isbn', 'like', "%{$search}%")
-                  ->orWhere('call_number', 'like', "%{$search}%")
-                  ->orWhere('publisher', 'like', "%{$search}%")
-                  ->orWhere('subjects', 'like', "%{$search}%")
-                  ->orWhere('series_statement', 'like', "%{$search}%");
-            });
-        })
-        ->latest()
-        ->paginate(10);
+        $books = Book::search($search)
+            ->when(
+                filled($search),
+                fn ($query) => $query->orderByRelevance($search)->orderBy('title'),
+                fn ($query) => $query->latest()->orderByDesc('id')
+            )
+            ->paginate(10);
 
         return view('books.index', compact('books', 'search'));
     }

@@ -12,6 +12,16 @@ No migration, no package.
 - Live date and time at the top right of the dashboard (ticks every second, uses the app timezone Asia/Manila,
   starts from the server clock so a wrong computer clock does not matter).
 
+- Better catalog search (staff Book Catalog and the public catalog): searching "the" lists the books with "the"
+  best match first (titles starting with "The", then titles with the word, then longer words like "Mathematics").
+  Several words work in any order ("prince little"). The catalog shows how many books were found.
+- More "The ..." titles in the test data (The Story of ..., The Art of ...). Books already in the database keep their
+  old titles; to get the new ones, remove the test books and seed again:
+      php artisan tinker
+      >>> App\Models\Book::where('accession_number', 'like', 'TEST-%')->doesntHave('loans')->delete();
+      >>> exit
+      php artisan db:seed --class=DemoDataSeeder
+
 ## Run the test data
     php artisan db:seed --class=DemoDataSeeder
 
@@ -27,3 +37,6 @@ Safe to run again (no duplicates). If the patrons table is empty it runs PatronS
 - resources/views/dashboard.blade.php
 - database/seeders/DemoDataSeeder.php (new)
 - tests/Feature/DashboardVisitorsTest.php (new)
+- app/Models/Book.php, app/Http/Controllers/BookController.php, app/Http/Controllers/CatalogController.php,
+  resources/views/books/index.blade.php (search)
+- tests/Feature/BookSearchTest.php (new)

@@ -117,6 +117,7 @@ class DemoDataSeeder extends Seeder
             'Introduction to %s', 'Fundamentals of %s', '%s: Principles and Practice', 'Essentials of %s',
             'Modern %s', 'Understanding %s', '%s for Beginners', 'Advanced %s', '%s: A Practical Guide',
             'Foundations of %s', 'Exploring %s', '%s Today',
+            'The Story of %s', 'The Art of %s', 'The Complete Guide to %s', 'The World of %s',
         ];
 
         $surnames = ['Santos', 'Reyes', 'Cruz', 'Bautista', 'Ocampo', 'Garcia', 'Mendoza', 'Torres', 'Flores', 'Villanueva',

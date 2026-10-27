@@ -14,16 +14,10 @@ class CatalogController extends Controller
         $library = trim((string) $request->query('library', ''));
 
         $books = Book::query()
-            ->when($q !== '', function ($query) use ($q) {
-                $like = '%' . addcslashes($q, '%_\\') . '%';
-
-                $query->where(function ($w) use ($like) {
-                    foreach (['title', 'subtitle', 'author', 'isbn', 'call_number', 'subjects', 'category', 'publisher'] as $col) {
-                        $w->orWhere($col, 'like', $like);
-                    }
-                });
-            })
+            // The public catalog never searches accession numbers.
+            ->search($q, ['title', 'subtitle', 'author', 'isbn', 'call_number', 'subjects', 'category', 'publisher'])
             ->when($library !== '', fn ($query) => $query->where('library', $library))
+            ->when($q !== '', fn ($query) => $query->orderByRelevance($q))
             ->orderBy('title')
             ->paginate(12)
             ->withQueryString();
