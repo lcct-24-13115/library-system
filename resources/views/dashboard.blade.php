@@ -75,6 +75,51 @@
         </div>
     </div>
 
+    <!-- Visitors today (attendance log) -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+                <h3 class="font-bold text-slate-900">Library visitors today</h3>
+                <p class="text-xs text-slate-500">Who checked in at the entrance, latest first.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-800 font-semibold">{{ $visitors['today'] }} check-ins today</span>
+                <span class="px-3 py-1 rounded-full bg-sky-50 text-sky-800 font-semibold">{{ $visitors['unique'] }} different visitors</span>
+                <span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold">{{ $visitors['week'] }} this week</span>
+                <a href="{{ route('attendance.stats') }}" class="text-indigo-600 hover:text-indigo-800 font-medium">Statistics &rarr;</a>
+                <a href="{{ route('attendance.history') }}" class="text-indigo-600 hover:text-indigo-800 font-medium">Visitor log &rarr;</a>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                        <th class="py-2 pr-4 font-semibold">Time</th>
+                        <th class="py-2 pr-4 font-semibold">Name</th>
+                        <th class="py-2 pr-4 font-semibold">ID number</th>
+                        <th class="py-2 font-semibold">Type</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse($recentVisits as $visit)
+                        <tr>
+                            <td class="py-2 pr-4 whitespace-nowrap text-slate-500">{{ $visit->visited_at->format('g:i A') }}</td>
+                            <td class="py-2 pr-4 font-medium text-slate-800">{{ $visit->patron->name }}</td>
+                            <td class="py-2 pr-4 text-slate-500">{{ $visit->patron->id_number }}</td>
+                            <td class="py-2"><span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{{ $visit->patron->patron_type }}</span></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4" class="py-4 text-slate-400">No one has checked in yet today.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        @if($visitors['today'] > $recentVisits->count())
+            <p class="text-xs text-slate-400 mt-3">Showing the latest {{ $recentVisits->count() }} of {{ $visitors['today'] }}. <a href="{{ route('attendance.history') }}" class="text-indigo-600 hover:text-indigo-800">See everyone &rarr;</a></p>
+        @endif
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Overdue -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">

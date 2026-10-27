@@ -18,9 +18,14 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+// Splash screen (the book opens, then the sign-in page). Signed-in users go straight to their home.
 Route::get('/', function () {
-    return redirect()->route('login');
-});
+    if (auth()->check()) {
+        return redirect()->route(auth()->user()->homeRoute());
+    }
+
+    return view('splash');
+})->name('splash');
 
 // Public catalog (OPAC): search books without an account. Read only, no patron data.
 Route::get('/catalog', [CatalogController::class, 'index'])->middleware('throttle:60,1')->name('catalog.index');

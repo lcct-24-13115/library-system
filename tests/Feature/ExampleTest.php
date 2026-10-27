@@ -14,6 +14,7 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertStatus(302);
+        // The home page is the splash screen (book opens, then the sign-in page).
+        $response->assertOk()->assertSee(route('login'), false);
     }
 }

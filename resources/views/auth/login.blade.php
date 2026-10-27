@@ -13,7 +13,15 @@
         (function () {
             var hasErrors = {{ $errors->any() ? 'true' : 'false' }};
             var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-            if (!hasErrors && !reduce) document.documentElement.classList.add('book-closed');
+            // Coming from the splash screen: its book already opened, so show the open book right away.
+            var fromSplash = false;
+            try {
+                if (sessionStorage.getItem('salrc.fromSplash') === '1') {
+                    fromSplash = true;
+                    sessionStorage.removeItem('salrc.fromSplash');
+                }
+            } catch (e) {}
+            if (!hasErrors && !reduce && !fromSplash) document.documentElement.classList.add('book-closed');
         })();
     </script>
 

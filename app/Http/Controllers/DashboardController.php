@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
 use App\Models\Book;
 use App\Models\Loan;
 use App\Models\Patron;
@@ -47,6 +48,19 @@ class DashboardController extends Controller
         $recent  = Loan::with(['book', 'patron'])->latest('id')->take(8)->get();
         $popular = Book::withCount('loans')->whereHas('loans')->orderByDesc('loans_count')->take(5)->get();
 
-        return view('dashboard', compact('stats', 'chart', 'chartMax', 'overdue', 'recent', 'popular'));
+        // Library visitors (attendance log): who checked in today.
+        $visitsToday = fn () => Attendance::onDate(today()->toDateString());
+
+        $visitors = [
+            'today'  => $visitsToday()->count(),
+            'unique' => $visitsToday()->distinct()->count('patron_id'),
+            'week'   => Attendance::whereBetween('visited_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+        ];
+
+        $recentVisits = $visitsToday()->with('patron')
+            ->orderByDesc('visited_at')->orderByDesc('id')
+            ->take(10)->get();
+
+        return view('dashboard', compact('stats', 'chart', 'chartMax', 'overdue', 'recent', 'popular', 'visitors', 'recentVisits'));
     }
 }
