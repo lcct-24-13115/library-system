@@ -41,6 +41,16 @@ class DashboardVisitorsTest extends TestCase
             ->assertDontSee('Maria Santos');
     }
 
+    public function test_dashboard_has_a_live_date_and_time(): void
+    {
+        $this->actingAs($this->librarian())->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('id="live-date"', false)
+            ->assertSee('id="live-time"', false)
+            ->assertSee('setInterval(tick, 1000)', false)
+            ->assertSee(now()->format('l, F j, Y'));
+    }
+
     public function test_dashboard_says_so_when_nobody_checked_in(): void
     {
         $this->actingAs($this->librarian())->get(route('dashboard'))

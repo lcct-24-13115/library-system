@@ -9,6 +9,9 @@ No migration, no package.
   titles and authors across 13 categories) and 12 sample check-ins today (plus a few for the past 6 days).
   Change the total with TOTAL_BOOKS at the top of the seeder.
 
+- Live date and time at the top right of the dashboard (ticks every second, uses the app timezone Asia/Manila,
+  starts from the server clock so a wrong computer clock does not matter).
+
 ## Run the test data
     php artisan db:seed --class=DemoDataSeeder
 

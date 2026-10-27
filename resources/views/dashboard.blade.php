@@ -3,9 +3,15 @@
 @section('title', 'Dashboard - SALRC Library')
 
 @section('content')
-    <div class="mb-6">
-        <h2 class="text-3xl font-extrabold text-slate-900">Dashboard</h2>
-        <p class="text-slate-500 text-sm">{{ now()->format('l, F j, Y') }}</p>
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+            <h2 class="text-3xl font-extrabold text-slate-900">Dashboard</h2>
+            <p id="live-date" class="text-slate-500 text-sm">{{ now()->format('l, F j, Y') }}</p>
+        </div>
+        <div class="text-right">
+            <p id="live-time" class="text-3xl font-extrabold text-indigo-900 tabular-nums leading-none">{{ now()->format('g:i:s A') }}</p>
+            <p class="text-[11px] uppercase tracking-wider text-slate-400 mt-1">Live &middot; {{ str_replace('_', ' ', config('app.timezone')) }}</p>
+        </div>
     </div>
 
     <!-- Stat cards (3D extruded, tilt on hover) -->
@@ -163,4 +169,26 @@
             </ul>
         </div>
     </div>
+
+    {{-- Live date and time: ticks every second, starts from the server clock and uses the app timezone. --}}
+    <script>
+        (function () {
+            var tz = @json(config('app.timezone'));
+            var offset = @json(now()->timestamp * 1000) - Date.now();   // server time minus this computer's time
+            var dateEl = document.getElementById('live-date');
+            var timeEl = document.getElementById('live-time');
+            if (!dateEl || !timeEl || !window.Intl) return;
+
+            var dateFmt = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            var timeFmt = new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+
+            function tick() {
+                var now = new Date(Date.now() + offset);
+                dateEl.textContent = dateFmt.format(now);
+                timeEl.textContent = timeFmt.format(now);
+            }
+            tick();
+            setInterval(tick, 1000);
+        })();
+    </script>
 @endsection
