@@ -32,3 +32,14 @@ NO migration. Uses the existing `reservations` table. Nothing existing is change
 - An existing account (e.g. custom password set by the librarian) is never touched.
 - The Patron profile now says "Automatic"; the manual buttons moved into "Advanced" for resets / custom passwords.
 - No migration. Files: Patron.php, LoginRequest.php, PatronAccountController.php, patrons/show.blade.php, StudentReserveTest.php.
+
+## Fix: patron email already used by a staff account
+- If the patron's email is already taken by another user (e.g. the librarian uses the same address), the portal login now uses `<id>@patron.local` instead of failing silently. Students still sign in with their ID number.
+
+## Import patrons from Excel / CSV
+- Patrons page > green **Import from Excel** button (admin + librarian only): `GET/POST /patrons/import`.
+- Columns: id_number, name (required); patron_type (blank = Student), email, contact_no, status. Headings are matched loosely ("ID Number", "Student ID", "Contact No"...).
+- Accepts .xlsx (first sheet, read with PHP's zip extension, no extra package) and .csv. Max 2 MB / 5,000 rows.
+- Additive: an existing ID number is skipped, never overwritten. A result table lists every skipped row and why.
+- The upload is read in memory and discarded: nothing is stored. The sample template is a static file (public/templates/patrons-import-template.csv), not generated.
+- No migration. Files: PatronImportController.php, Support/PatronImportReader.php, patrons/import.blade.php, patrons/index.blade.php, routes/web.php, PatronImportTest.php.

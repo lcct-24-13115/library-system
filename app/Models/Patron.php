@@ -46,9 +46,14 @@ class Patron extends Model
             return null;
         }
 
-        $email = filled($this->email)
-            ? strtolower(trim($this->email))
-            : strtolower(preg_replace('/\s+/', '', $this->id_number)) . '@patron.local';
+        // Prefer the patron's own email; if another account already uses it
+        // (e.g. a staff account with the same address), fall back to an ID-based address.
+        $fallback = strtolower(preg_replace('/\s+/', '', $this->id_number)) . '@patron.local';
+        $email = filled($this->email) ? strtolower(trim($this->email)) : $fallback;
+
+        if (User::where('email', $email)->exists()) {
+            $email = $fallback;
+        }
 
         if (User::where('email', $email)->exists()) {
             return null;

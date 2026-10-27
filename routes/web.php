@@ -8,6 +8,7 @@ use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LookupController;
 use App\Http\Controllers\PatronAccountController;
 use App\Http\Controllers\PatronController;
+use App\Http\Controllers\PatronImportController;
 use App\Http\Controllers\PatronProfileController;
 use App\Http\Controllers\PortalController;
 use App\Http\Controllers\ProfileController;
@@ -76,6 +77,8 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
     // entries, cancel reservations. Declared before the read routes so /books/create wins.
     Route::middleware('role:admin,librarian')->group(function () {
         Route::resource('books', BookController::class)->except(['index', 'show']);
+        Route::get('/patrons/import', [PatronImportController::class, 'create'])->name('patrons.import');
+        Route::post('/patrons/import', [PatronImportController::class, 'store'])->middleware('throttle:10,1')->name('patrons.import.store');
         Route::resource('patrons', PatronController::class)->except(['index', 'show']);
         Route::delete('/attendance/{attendance}', [AttendanceController::class, 'destroy'])->name('attendance.destroy');
         Route::post('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');

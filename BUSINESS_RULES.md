@@ -66,3 +66,8 @@ These rules are fixed. Do not change or work around them.
 - No duplicate pending request for the same book, and no request for a book the patron already has on loan.
 - A patron can cancel only their own pending request.
 - Guarded by `tests/Feature/StudentReserveTest.php`.
+
+## Patron import (Excel / CSV)
+- Admin and librarian may add many patrons from an uploaded .xlsx / .csv. Existing ID numbers are skipped, never overwritten.
+- The uploaded file is read in memory and not stored. The system generates no file; the sample sheet is a static download.
+- Guarded by `tests/Feature/PatronImportTest.php`.

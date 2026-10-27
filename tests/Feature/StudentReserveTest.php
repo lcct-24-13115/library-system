@@ -170,4 +170,14 @@ class StudentReserveTest extends TestCase
         $this->post(route('login'), ['email' => 'S-77', 'password' => 'S-77'])->assertSessionHasErrors('email');
         $this->post(route('login'), ['email' => 'S-77', 'password' => 'password123'])->assertRedirect(route('portal.index'));
     }
+
+    public function test_automatic_login_still_works_when_the_patron_email_is_used_by_a_staff_account(): void
+    {
+        User::factory()->create(['email' => 'shared@school.edu', 'role' => 'librarian', 'user_type' => 'Non-Teaching Personnel', 'is_active' => true]);
+        $patron = Patron::create(['id_number' => '24-55555', 'name' => 'Shared Mail', 'email' => 'shared@school.edu', 'patron_type' => 'Student', 'status' => 'active']);
+
+        $this->post(route('login'), ['email' => '24-55555', 'password' => '24-55555'])->assertRedirect(route('portal.index'));
+
+        $this->assertSame('24-55555@patron.local', $patron->fresh()->account->email);
+    }
 }
