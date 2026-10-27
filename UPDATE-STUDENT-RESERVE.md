@@ -43,3 +43,4 @@ NO migration. Uses the existing `reservations` table. Nothing existing is change
 - Additive: an existing ID number is skipped, never overwritten. A result table lists every skipped row and why.
 - The upload is read in memory and discarded: nothing is stored. The sample template is a static file (public/templates/patrons-import-template.csv), not generated.
 - No migration. Files: PatronImportController.php, Support/PatronImportReader.php, patrons/import.blade.php, patrons/index.blade.php, routes/web.php, PatronImportTest.php.
+- The Patrons list no longer shows the Contact column (email / contact number stay on the patron profile and edit form).

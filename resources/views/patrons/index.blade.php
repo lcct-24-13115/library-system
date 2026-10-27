@@ -34,7 +34,6 @@
                     <th class="p-4">ID Number</th>
                     <th class="p-4">Name</th>
                     <th class="p-4">Type</th>
-                    <th class="p-4">Contact</th>
                     <th class="p-4">Books Out</th>
                     <th class="p-4">Status</th>
                     <th class="p-4 text-center">Actions</th>
@@ -48,7 +47,6 @@
                         <td class="p-4">
                             <span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full text-xs font-semibold">{{ $patron->patron_type }}</span>
                         </td>
-                        <td class="p-4 text-slate-600">{{ $patron->email ?? $patron->contact_no ?? '—' }}</td>
                         <td class="p-4 font-semibold text-slate-700">{{ $patron->active_loans_count }}</td>
                         <td class="p-4">
                             @if($patron->isActive())
@@ -71,7 +69,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="p-10 text-center text-slate-400">
+                        <td colspan="6" class="p-10 text-center text-slate-400">
                             <p class="text-lg font-medium">No patrons found.</p>
                             <p class="text-sm mt-1">Add a patron before issuing books.</p>
                         </td>

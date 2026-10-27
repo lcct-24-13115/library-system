@@ -28,3 +28,6 @@ Thumbs.db
 
 /database/*.sqlite
 *.xlsx
+
+/database/*.sqlite
+*.xlsx
