@@ -63,7 +63,6 @@
                     <th class="p-4">Title</th>
                     <th class="p-4">Author</th>
                     <th class="p-4">Category</th>
-                    <th class="p-4">Copies (Avail / Total)</th>
                     <th class="p-4 text-center">Actions</th>
                 </tr>
             </thead>
@@ -86,7 +85,6 @@
                                 {{ $book->category ?? 'General' }}
                             </span>
                         </td>
-                        <td class="p-4 font-semibold text-slate-700">{{ $book->available_copies }} / {{ $book->total_copies }}</td>
                         <td class="p-4 text-center space-x-2">
                             <a href="{{ route('books.show', $book->id) }}" class="inline-block bg-slate-700 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-slate-800 shadow-sm transition">
                                 View
@@ -107,7 +105,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="p-10 text-center text-slate-400">
+                        <td colspan="5" class="p-10 text-center text-slate-400">
                             <p class="text-lg font-medium">No books found.</p>
                             <p class="text-sm mt-1">Try adjusting your search criteria or add a new book.</p>
                         </td>
