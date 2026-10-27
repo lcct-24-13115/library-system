@@ -226,13 +226,8 @@
       setText('category', data.category || 'General');
       setText('call', data.call || '—');
       setText('accession', data.accession || '—');
-      setText('copies', data.available + ' of ' + data.total + ' available');
       setText('publisher', [data.publisher, data.year].filter(Boolean).join(', ') || '—');
       setText('summary', data.summary || '');
-
-      var status = field('status');
-      status.className = 'b3m__status ' + (data.available > 0 ? 'is-on' : 'is-off');
-      status.textContent = data.available > 0 ? 'Available to borrow' : 'All copies on loan';
 
       var actions = field('actions');
       actions.textContent = '';

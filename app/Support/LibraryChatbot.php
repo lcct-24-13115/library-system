@@ -219,13 +219,6 @@ class LibraryChatbot
             : $this->t("I found {$total} books" . ($total > 5 ? ' (showing the first 5):' : ':'),
                        "May nakita akong {$total} na libro" . ($total > 5 ? ' (ito ang unang 5):' : ':'));
 
-        if ($found->contains(fn (Book $b) => $b->available_copies < 1)) {
-            $reply .= "\n" . $this->t(
-                'If every copy is on loan, ask the librarian to reserve it for you.',
-                'Kung lahat ng kopya ay hiram, magpa-reserve sa librarian.'
-            );
-        }
-
         $links = $total > 5
             ? [['label' => $this->t('See all results in the catalog', 'Tingnan lahat sa catalog'), 'url' => route('catalog.index', ['q' => $label], false)]]
             : [];

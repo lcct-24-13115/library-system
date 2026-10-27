@@ -46,11 +46,6 @@
                     @if($book->subjects)<p class="text-xs text-slate-400 mt-1">{{ $book->subjects }}</p>@endif
                 </div>
                 <div class="shrink-0">
-                    @if($book->available_copies > 0)
-                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">Available: {{ $book->available_copies }} of {{ $book->total_copies }}</span>
-                    @else
-                        <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">All copies on loan</span>
-                    @endif
                     @auth
                         @if(auth()->user()->isPatron())
                             <a href="{{ route('portal.reserve.confirm', $book->id) }}" class="block mt-2 text-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-1.5 rounded-lg text-xs transition">Reserve</a>

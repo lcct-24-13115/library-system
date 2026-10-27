@@ -16,14 +16,6 @@
         <p class="text-sm text-slate-600">{{ $book->author ?: '—' }}</p>
         <p class="text-xs text-slate-500 mt-1">@if($book->call_number)Call no. <span class="font-semibold">{{ $book->call_number }}</span>@endif @if($book->library) &middot; {{ $book->library }}@endif</p>
 
-        <div class="mt-4">
-            @if($book->available_copies > 0)
-                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">Available: {{ $book->available_copies }} of {{ $book->total_copies }}</span>
-            @else
-                <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">All copies on loan</span>
-            @endif
-        </div>
-
         <div class="mt-6">
             @if($alreadyOnLoan)
                 <p class="text-sm text-amber-700">You already have this book on loan.</p>

@@ -139,7 +139,6 @@
             card.appendChild(el('b', '', b.title));
             if (b.author) card.appendChild(el('span', 'cb-meta', b.author));
             if (b.where) card.appendChild(el('span', 'cb-meta', b.where));
-            card.appendChild(el('span', 'cb-badge ' + (b.available ? 'cb-ok' : 'cb-no'), b.status));
             row.appendChild(card);
         });
 
