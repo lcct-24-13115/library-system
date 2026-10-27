@@ -1,25 +1,27 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
+<x-auth-poster title="Forgot password">
+    <h1 class="card-title">Forgot your password?</h1>
+    <p class="lf-hint">Students and faculty: enter your ID number, then choose a new password.</p>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form method="POST" action="{{ route('password.email') }}">
+    <form method="POST" action="{{ route('password.email') }}" class="login-form">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="lf-field">
+            <label for="id_number">ID number</label>
+            <input id="id_number" name="id_number" type="text" value="{{ old('id_number') }}"
+                   placeholder="Your ID number" required autofocus autocomplete="off">
+            @error('id_number')
+                <p class="err">{{ $message }}</p>
+            @enderror
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
+
+        <button type="submit" class="lf-submit">Continue</button>
     </form>
-</x-guest-layout>
+
+    <p class="lf-hint" style="margin:16px 0 0;font-size:13px">
+        <strong>Library staff:</strong> please ask the library administrator to reset your password.
+        Can't get in? See the librarian.
+    </p>
+
+    <p class="login-links"><a href="{{ route('login') }}">&larr; Back to sign in</a></p>
+</x-auth-poster>

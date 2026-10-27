@@ -62,6 +62,10 @@
                         </td>
                         <td class="p-4 text-center space-x-2 whitespace-nowrap">
                             <a href="{{ route('users.edit', $u) }}" class="inline-block bg-amber-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-amber-600 shadow-sm transition">Edit</a>
+                            <form action="{{ route('users.reset-password', $u) }}" method="POST" class="inline-block" onsubmit="return confirm('Reset this user\'s password to a new temporary one?');">
+                                @csrf
+                                <button type="submit" class="bg-slate-700 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-slate-800 shadow-sm transition">Reset password</button>
+                            </form>
                             @if($u->is_active && ! $u->is(auth()->user()))
                                 <form action="{{ route('users.deactivate', $u) }}" method="POST" class="inline-block" onsubmit="return confirm('Deactivate this user? They will no longer be able to log in.');">
                                     @csrf

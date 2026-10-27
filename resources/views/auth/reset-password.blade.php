@@ -1,39 +1,43 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('password.store') }}">
+<x-auth-poster title="Reset password">
+    <h1 class="card-title">Choose a new password</h1>
+    <p class="lf-hint">You are verified. Choose a new password for your library account.</p>
+
+    <form method="POST" action="{{ route('password.store') }}" class="login-form">
         @csrf
 
-        <!-- Password Reset Token -->
-        <input type="hidden" name="token" value="{{ $request->route('token') }}">
-
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="lf-field">
+            <label for="password">New password</label>
+            <div class="pw-wrap">
+                <input id="password" name="password" type="password" required autofocus autocomplete="new-password" placeholder="At least 8 characters">
+                <button type="button" class="pw-toggle" data-target="password" aria-pressed="false">Show</button>
+            </div>
+            @error('password')
+                <p class="err">{{ $message }}</p>
+            @enderror
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div class="lf-field">
+            <label for="password_confirmation">Confirm new password</label>
+            <div class="pw-wrap">
+                <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password" placeholder="Type it again">
+                <button type="button" class="pw-toggle" data-target="password_confirmation" aria-pressed="false">Show</button>
+            </div>
         </div>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Reset Password') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" class="lf-submit">Reset password</button>
     </form>
-</x-guest-layout>
+
+    <p class="login-links"><a href="{{ route('login') }}">&larr; Back to sign in</a></p>
+
+    <script>
+        document.querySelectorAll('.pw-toggle').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var input = document.getElementById(btn.dataset.target);
+                var show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                btn.textContent = show ? 'Hide' : 'Show';
+                btn.setAttribute('aria-pressed', show);
+            });
+        });
+    </script>
+</x-auth-poster>

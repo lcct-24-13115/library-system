@@ -262,3 +262,18 @@ body.login-page {
 }
 .role-tab input:focus-visible + span { outline: 2px solid var(--blue-600); }
 @media (max-width: 420px) { .role-tab span { font-size: 10.5px; } }
+
+/* ---------- Forgot / reset password pages (centered card, same look as sign-in) ---------- */
+.login-stage--center { justify-items: center; }
+.login-card .card-title {
+  margin: 0 0 4px;
+  text-align: left;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  text-transform: none;
+  color: var(--ink);
+  text-shadow: none;
+}
+.login-card .lf-hint { margin: 0 0 20px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.login-card .lf-notice--ok { color: #14532d; background: #f0fdf4; border-color: #bbf7d0; }

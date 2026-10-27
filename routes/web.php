@@ -66,6 +66,7 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
         Route::put('/{user}', [UserController::class, 'update'])->name('update');
         Route::post('/{user}/deactivate', [UserController::class, 'deactivate'])->name('deactivate');
         Route::post('/{user}/activate', [UserController::class, 'activate'])->name('activate');
+        Route::post('/{user}/reset-password', [UserController::class, 'resetPassword'])->name('reset-password');
     });
 
     // Admin only: Settings (excluded days, report heading, holidays / suspensions, loan policy)

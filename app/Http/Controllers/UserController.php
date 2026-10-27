@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
@@ -120,5 +121,16 @@ class UserController extends Controller
         $user->update(['is_active' => true]);
 
         return back()->with('success', "{$user->name} has been reactivated.");
+    }
+
+    /** Forgot-password for staff: the admin sets a random temporary password and gives it to the person. */
+    public function resetPassword(Request $request, User $user)
+    {
+        abort_if($user->isPatron(), 404); // students / faculty reset theirs on the sign-in page or the patron page
+
+        $temp = Str::password(10, symbols: false);
+        $user->forceFill(['password' => $temp, 'remember_token' => Str::random(60)])->save();
+
+        return back()->with('success', "New temporary password for {$user->name}: {$temp} — give it to them now (it is shown only once) and ask them to change it after signing in.");
     }
 }

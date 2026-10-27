@@ -3,61 +3,67 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Auth\Events\PasswordReset;
+use App\Models\Patron;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
+/** Second step of the no-email password reset: choose a new password after verification. */
 class NewPasswordController extends Controller
 {
-    /**
-     * Display the password reset view.
-     */
-    public function create(Request $request): View
+    public function create(Request $request): View|RedirectResponse
     {
-        return view('auth.reset-password', ['request' => $request]);
+        if (! $this->verifiedPatron($request)) {
+            return redirect()->route('password.request')
+                ->withErrors(['id_number' => 'Please verify your details first (or your time ran out).']);
+        }
+
+        return view('auth.reset-password');
     }
 
-    /**
-     * Handle an incoming new password request.
-     *
-     * @throws ValidationException
-     */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'token' => ['required'],
-            'email' => ['required', 'email'],
+        $patron = $this->verifiedPatron($request);
+
+        if (! $patron) {
+            return redirect()->route('password.request')
+                ->withErrors(['id_number' => 'Your time ran out. Please verify your details again.']);
+        }
+
+        $data = $request->validate([
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user) use ($request) {
-                $user->forceFill([
-                    'password' => Hash::make($request->password),
-                    'remember_token' => Str::random(60),
-                ])->save();
+        $account = $patron->account;
 
-                event(new PasswordReset($user));
+        if ($account) {
+            if (! $account->is_active) {
+                throw ValidationException::withMessages(['password' => 'This account has been deactivated. Please see the librarian.']);
             }
-        );
 
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        return $status == Password::PASSWORD_RESET
-                    ? redirect()->route('login')->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+            $account->forceFill(['password' => $data['password'], 'remember_token' => \Illuminate\Support\Str::random(60)])->save();
+        } elseif (! $patron->provisionAccount($data['password'])) {
+            throw ValidationException::withMessages(['password' => 'Could not set up your account. Please see the librarian.']);
+        }
+
+        $request->session()->forget('pwreset');
+
+        return redirect()->route('login')->with('status', 'Your password has been changed. You can sign in now.');
+    }
+
+    /** The patron who passed the ID + contact-number check in the last 10 minutes, if any. */
+    private function verifiedPatron(Request $request): ?Patron
+    {
+        $state = $request->session()->get('pwreset');
+
+        if (! $state || ($state['expires'] ?? 0) < now()->timestamp) {
+            $request->session()->forget('pwreset');
+
+            return null;
+        }
+
+        return Patron::find($state['patron_id']);
     }
 }
