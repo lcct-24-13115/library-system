@@ -3,7 +3,7 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div>
         <label class="block text-xs font-bold uppercase text-slate-600 mb-1">ID Number</label>
-        <input type="text" name="id_number" value="{{ old('id_number', $p?->id_number) }}" required placeholder="e.g. 2026-0001"
+        <input type="text" name="id_number" value="{{ old('id_number', $p?->id_number) }}" required placeholder="e.g. 24-13115"
                class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
     </div>
     <div>

@@ -23,7 +23,7 @@
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Patron ID Number</label>
                     <input type="text" name="patron_id_number" value="{{ old('patron_id_number', request('patron_id_number')) }}" required autocomplete="off"
                            @if(! request('patron_id_number') && ! old('patron_id_number')) autofocus @endif
-                           placeholder="e.g. 2026-0001"
+                           placeholder="e.g. 24-13115"
                            class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
