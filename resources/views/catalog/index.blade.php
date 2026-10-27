@@ -51,6 +51,11 @@
                     @else
                         <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">All copies on loan</span>
                     @endif
+                    @auth
+                        @if(auth()->user()->isPatron())
+                            <a href="{{ route('portal.reserve.confirm', $book->id) }}" class="block mt-2 text-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-1.5 rounded-lg text-xs transition">Reserve</a>
+                        @endif
+                    @endauth
                 </div>
             </article>
         @empty

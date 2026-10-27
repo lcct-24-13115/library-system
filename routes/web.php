@@ -27,6 +27,9 @@ Route::get('/catalog', [CatalogController::class, 'index'])->middleware('throttl
 // Student / Faculty portal: their own loans, due dates and reservations (read only).
 Route::middleware(['auth', 'role:patron'])->prefix('my-library')->name('portal.')->group(function () {
     Route::get('/', [PortalController::class, 'index'])->name('index');
+    Route::get('/reserve/{book}', [PortalController::class, 'reserveConfirm'])->whereNumber('book')->name('reserve.confirm');
+    Route::post('/reserve/{book}', [PortalController::class, 'reserve'])->whereNumber('book')->middleware('throttle:20,1')->name('reserve.store');
+    Route::post('/reservations/{reservation}/cancel', [PortalController::class, 'cancelReservation'])->whereNumber('reservation')->name('reserve.cancel');
 });
 
 Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified', 'role:admin,librarian,staff'])->name('dashboard');

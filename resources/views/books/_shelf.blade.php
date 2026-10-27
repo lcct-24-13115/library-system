@@ -29,6 +29,8 @@
                 }
             } elseif (! auth()->check()) {
                 $actions[] = ['label' => 'Sign in to borrow', 'url' => route('login')];
+            } elseif (auth()->user()->isPatron()) {
+                $actions[] = ['label' => 'Reserve', 'url' => route('portal.reserve.confirm', $book->id)];
             }
 
             $payload = [

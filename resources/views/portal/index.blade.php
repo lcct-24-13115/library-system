@@ -3,6 +3,15 @@
 @section('title', 'My Library - SALRC')
 
 @section('content')
+    @if($errors->has('reserve'))
+        <div class="mb-6 p-4 bg-rose-100 border border-rose-300 text-rose-800 rounded-lg">{{ $errors->first('reserve') }}</div>
+    @endif
+
+    <div class="mb-6 p-4 bg-indigo-50 border border-indigo-100 rounded-xl text-sm text-indigo-900 flex flex-wrap items-center justify-between gap-3">
+        <span>Want a book? Find it in the catalog and press <strong>Reserve</strong>. Then show your ID at the library to borrow it.</span>
+        <a href="{{ route('catalog.index') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-1.5 rounded-lg">Browse catalog</a>
+    </div>
+
     @php $overdueCount = $active->filter(fn ($l) => $l->isOverdue())->count(); @endphp
 
     <p class="text-xs font-bold text-indigo-900 uppercase tracking-wider">{{ $patron->id_number }} &middot; {{ $patron->patron_type }}</p>
@@ -52,7 +61,13 @@
             @foreach($reservations as $r)
                 <li class="p-3 flex justify-between gap-3">
                     <span class="font-medium">{{ $r->book->title }}</span>
-                    <span class="text-slate-500 whitespace-nowrap">Reserved {{ $r->reserved_at?->format('M d, Y') }}</span>
+                    <span class="flex items-center gap-3 whitespace-nowrap">
+                        <span class="text-slate-500">Reserved {{ $r->reserved_at?->format('M d, Y') }}</span>
+                        <form action="{{ route('portal.reserve.cancel', $r) }}" method="POST" onsubmit="return confirm('Cancel this request?');">
+                            @csrf
+                            <button type="submit" class="text-xs font-semibold text-rose-600 hover:text-rose-800">Cancel</button>
+                        </form>
+                    </span>
                 </li>
             @endforeach
         </ul>

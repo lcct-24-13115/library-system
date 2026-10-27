@@ -59,3 +59,10 @@ These rules are fixed. Do not change or work around them.
 `tests/Feature/VoidLoanTest.php` and `tests/Feature/LoanNotesTest.php` check the Void and Remarks rules above.
 `tests/Feature/LostDamagedTest.php` checks the Lost/Damaged rules above.
 `tests/Feature/OverdueDoesNotBlockTest.php` checks that a patron with an overdue loan can still borrow, and that an overdue loan can be renewed.
+
+## Student reserve requests
+- A signed-in student/faculty may request (reserve) a book from the catalog. The librarian still issues it at the desk.
+- A request is a normal Pending reservation. It never holds a copy and never blocks borrowing, returning or renewing; overdue does not block it.
+- No duplicate pending request for the same book, and no request for a book the patron already has on loan.
+- A patron can cancel only their own pending request.
+- Guarded by `tests/Feature/StudentReserveTest.php`.
