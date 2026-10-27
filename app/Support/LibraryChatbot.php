@@ -10,6 +10,8 @@ use App\Models\Reservation;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 /**
  * SALRC Library Assistant: a rule-based chatbot (no external AI service, no API key).
@@ -44,6 +46,7 @@ class LibraryChatbot
         'need', 'want', 'gusto', 'ko', 'kailangan', 'available', 'copy', 'copies', 'any', 'some', 'in',
         'library', 'naman', 'dito', 'show', 'list', 'to', 'at', 'with', 'my', 'kopya', 'ito', 'iyon',
         'what', 'which', 'where', 'whats', "what's", 'anong', 'ano', 'na',
+        'saan', 'nasaan', 'nasan', 'mahahanap', 'makikita', 'makukuha', 'nakalagay', 'location', 'locate', 'located', 'shelf', 'lugar',
     ];
 
     private ?User $user = null;
@@ -137,7 +140,8 @@ class LibraryChatbot
         }
 
         $explicitSearch = $this->any($lower, $words, ['search', 'find', 'look', 'looking', 'hanap', 'hanapin', 'pahanap', 'pakihanap',
-            'meron', 'mayroon', 'available', 'do you have', 'have you', 'books about', 'book about', 'libro tungkol', 'may libro']);
+            'meron', 'mayroon', 'available', 'do you have', 'have you', 'books about', 'book about', 'libro tungkol', 'may libro',
+            'saan', 'nasaan', 'nasan', 'mahahanap', 'makikita', 'makukuha', 'nakalagay', 'location', 'locate', 'located', 'where']);
 
         if ($explicitSearch || $count <= 6) {
             return $this->search($words, ! $explicitSearch);
@@ -190,11 +194,23 @@ class LibraryChatbot
         $label = implode(' ', $tokens);
 
         if ($total === 0) {
+            // Maybe a typo: offer the closest titles in the catalog.
+            $similar = $this->similarTitles($tokens);
+
+            if ($similar !== []) {
+                $list = '• ' . implode("\n• ", $similar);
+
+                return $this->out($this->t(
+                    "I couldn't find \"{$label}\". Did you mean:\n{$list}\nType the full title to see where it is.",
+                    "Hindi ko nakita ang \"{$label}\". Ito ba ang ibig mong sabihin:\n{$list}\nI-type ang buong title para makita ang location."
+                ));
+            }
+
             return $guess
                 ? $this->fallback()
                 : $this->out($this->t(
-                    "I couldn't find a book matching \"{$label}\". Try another title, author or subject, or ask the librarian.",
-                    "Wala akong nakitang libro na tumutugma sa \"{$label}\". Subukan ang ibang title, author o subject, o magtanong sa librarian."
+                    "I couldn't find a book matching \"{$label}\" in the catalog. Try another title, author or subject.",
+                    "Wala sa catalog ang libro na \"{$label}\". Subukan ang ibang title, author o subject."
                 ));
         }
 
@@ -224,6 +240,54 @@ class LibraryChatbot
             : [];
 
         return $this->out($reply, $books, $links);
+    }
+
+    /**
+     * Misspelling help: the catalog titles closest to what the student typed
+     * ("acounting" finds "The Art of Accounting"). A word counts as a match when it is the same,
+     * or within 1 letter (2 for long words) of a word in the title. Needs 60%+ of the typed words to match.
+     *
+     * @param  array<int,string>  $tokens
+     * @return array<int,string>
+     */
+    private function similarTitles(array $tokens, int $limit = 3): array
+    {
+        $tokens = array_values(array_filter(array_map(fn ($t) => Str::ascii(mb_strtolower($t)), $tokens), fn ($t) => strlen($t) >= 3));
+
+        if ($tokens === []) {
+            return [];
+        }
+
+        // All distinct titles, remembered for 10 minutes so the check stays fast.
+        $titles = Cache::remember('chatbot.titles', 600, fn () => Book::query()->whereNotNull('title')->distinct()->pluck('title')->all());
+
+        $scored = [];
+
+        foreach ($titles as $title) {
+            $titleWords = preg_split('/[^a-z0-9]+/', Str::ascii(mb_strtolower($title)), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            $hits = 0;
+
+            foreach ($tokens as $token) {
+                $allowed = strlen($token) >= 7 ? 2 : (strlen($token) >= 4 ? 1 : 0);
+
+                foreach ($titleWords as $word) {
+                    if ($token === $word || ($allowed > 0 && levenshtein($token, $word) <= $allowed)) {
+                        $hits++;
+                        break;
+                    }
+                }
+            }
+
+            $score = $hits / count($tokens);
+
+            if ($score >= 0.6) {
+                $scored[$title] = $score - (abs(count($titleWords) - count($tokens)) * 0.001); // prefer closer length
+            }
+        }
+
+        arsort($scored);
+
+        return array_slice(array_keys($scored), 0, $limit);
     }
 
     private function myLoans(): array
@@ -418,11 +482,11 @@ class LibraryChatbot
     {
         return $this->out(
             $this->t(
-                'Student and faculty portal accounts are created by the librarian. To get an account, or to reset a forgotten password, please ask at the library desk.',
-                'Ang mga student at faculty portal account ay ginagawa ng librarian. Para magkaroon ng account, o ma-reset ang nakalimutang password, magtanong sa library desk.'
+                'Student and faculty accounts are created by the librarian. Forgot your password? On the sign-in page tap \"Forgot your password?\", type your ID number, then choose a new one.',
+                'Ang student at faculty account ay ginagawa ng librarian. Nakalimutan ang password? Sa sign-in page, pindutin ang \"Forgot your password?\", i-type ang ID number mo, tapos pumili ng bagong password.'
             ),
             [],
-            $this->user ? [] : [['label' => $this->t('Go to sign in', 'Pumunta sa sign in'), 'url' => route('login', [], false)]]
+            $this->user ? [] : [['label' => $this->t('Forgot your password?', 'Nakalimutan ang password?'), 'url' => route('password.request', [], false)]]
         );
     }
 
@@ -448,8 +512,8 @@ class LibraryChatbot
     private function fallback(): array
     {
         return $this->out($this->t(
-            "Sorry, I didn't catch that. You can type a book title, author or subject, or ask about due dates, borrowing, renewing, reserving, holidays or library hours.",
-            'Pasensya na, hindi ko naintindihan. I-type ang title, author o subject ng libro, o magtanong tungkol sa due dates, paghiram, pag-renew, pag-reserve, holidays o oras ng library.'
+            "Sorry, I didn't catch that. Try typing a book title, for example \"Where is Noli Me Tangere?\", or ask about due dates, borrowing, renewing, reserving, holidays or library hours.",
+            'Pasensya na, hindi ko naintindihan. Subukan mong i-type ang title ng libro, halimbawa \"Saan ang Noli Me Tangere?\", o magtanong tungkol sa due dates, paghiram, pag-renew, pag-reserve, holidays o oras ng library.'
         ));
     }
 
