@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\BookImportController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoanController;
@@ -81,6 +82,9 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
     // Admin + librarian only: create / edit / delete books and patrons, remove visit
     // entries, cancel reservations. Declared before the read routes so /books/create wins.
     Route::middleware('role:admin,librarian')->group(function () {
+        // Bulk add books from an Excel / CSV sheet (declared before the books resource so /books/import wins).
+        Route::get('/books/import', [BookImportController::class, 'create'])->name('books.import');
+        Route::post('/books/import', [BookImportController::class, 'store'])->middleware('throttle:10,1')->name('books.import.store');
         Route::resource('books', BookController::class)->except(['index', 'show']);
         Route::get('/patrons/import', [PatronImportController::class, 'create'])->name('patrons.import');
         Route::post('/patrons/import', [PatronImportController::class, 'store'])->middleware('throttle:10,1')->name('patrons.import.store');

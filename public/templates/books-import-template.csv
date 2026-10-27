@@ -1,0 +1,4 @@
+﻿accession_number,title,author,isbn,category,total_copies,available_copies,subtitle,publisher,year_of_publication,place_of_publication,edition_statement,call_number,subjects,genre,language,summary,location,price,date_acquired,dealer_donor,notes
+ACC-00001,Noli Me Tangere,José Rizal,,Filipiniana,3,3,,,,,,FIL 899.2113 R59,Philippines -- Fiction; Colonial period,Novel,Filipino,,,,2024-06-15,,
+ACC-00002,Introduction to Algorithms,Thomas H. Cormen et al.,,Computer Science,2,,,,,,3rd edition,005.1 C81,Computer algorithms; Data structures,Textbook,English,,,1850.00,,,
+ACC-00003,The Little Prince,Antoine de Saint-Exupéry,,Fiction,,,,,,,,FIC S14,,,English,,,,,Donated,

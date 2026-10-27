@@ -9,9 +9,14 @@
             <p class="text-slate-500 text-sm">Manage and track library book inventory</p>
         </div>
         @if(auth()->user()->canManage())
-            <a href="{{ route('books.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition text-center">
-                + Add New Book
-            </a>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <a href="{{ route('books.import') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition text-center">
+                    Import from Excel
+                </a>
+                <a href="{{ route('books.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition text-center">
+                    + Add New Book
+                </a>
+            </div>
         @endif
     </div>
 
