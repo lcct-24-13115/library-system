@@ -19,37 +19,36 @@ class PatronAccountController extends Controller
             return back()->with('error', 'Only active students, faculty and staff can have a portal account.');
         }
 
-        $data = $request->validate([
-            'password' => ['required', 'confirmed', Password::defaults()],
-        ]);
+        if ($request->boolean('use_id_number')) {
+            // One click: the patron's ID number becomes the password (the librarian's choice).
+            $password = trim($patron->id_number);
+
+            if (strlen($password) < 4) {
+                return back()->with('error', 'This ID number is too short to use as a password. Type a password instead.');
+            }
+
+            $data = ['password' => $password];
+        } else {
+            $data = $request->validate([
+                'password' => ['required', 'confirmed', Password::defaults()],
+            ]);
+        }
 
         $account = $patron->account;
 
         if ($account) {
             $account->update(['password' => $data['password']]);
 
-            return back()->with('success', 'Portal password was reset.');
+            return back()->with('success', $request->boolean('use_id_number') ? 'Portal password was reset to the ID number.' : 'Portal password was reset.');
         }
 
-        $email = filled($patron->email)
-            ? strtolower(trim($patron->email))
-            : strtolower(preg_replace('/\s+/', '', $patron->id_number)) . '@patron.local';
+        $account = $patron->provisionAccount($data['password']);
 
-        if (User::where('email', $email)->exists()) {
+        if (! $account) {
             return back()->with('error', 'That email is already used by another account. Change the patron\'s email first.');
         }
 
-        $account = User::create([
-            'name'      => $patron->name,
-            'email'     => $email,
-            'password'  => $data['password'],
-            'role'      => User::PATRON_ROLE,
-            'patron_id' => $patron->id,
-            'is_active' => true,
-        ]);
-        $account->forceFill(['email_verified_at' => now()])->save();
-
-        return back()->with('success', 'Portal account created. They can sign in with their ID number or email.');
+        return back()->with('success', $request->boolean('use_id_number') ? 'Portal login created. The password is the ID number.' : 'Portal account created. They can sign in with their ID number or email.');
     }
 
     public function toggle(Patron $patron)

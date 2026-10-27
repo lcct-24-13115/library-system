@@ -30,6 +30,43 @@ class Patron extends Model
         return $this->hasOne(User::class, 'patron_id');
     }
 
+    /** Student / Faculty / Staff cards may have a portal login. Outside Users and inactive cards may not. */
+    public function canHavePortalAccount(): bool
+    {
+        return $this->isActive() && $this->patron_type !== 'Outside User';
+    }
+
+    /**
+     * Create the portal login (role 'patron') for this patron with the given password.
+     * Returns null when not allowed, when one already exists, or when the email is taken by someone else.
+     */
+    public function provisionAccount(string $password): ?User
+    {
+        if (! $this->canHavePortalAccount() || $this->account()->exists()) {
+            return null;
+        }
+
+        $email = filled($this->email)
+            ? strtolower(trim($this->email))
+            : strtolower(preg_replace('/\s+/', '', $this->id_number)) . '@patron.local';
+
+        if (User::where('email', $email)->exists()) {
+            return null;
+        }
+
+        $account = User::create([
+            'name'      => $this->name,
+            'email'     => $email,
+            'password'  => $password,
+            'role'      => User::PATRON_ROLE,
+            'patron_id' => $this->id,
+            'is_active' => true,
+        ]);
+        $account->forceFill(['email_verified_at' => now()])->save();
+
+        return $account;
+    }
+
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);

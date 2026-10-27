@@ -45,6 +45,8 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        $this->provisionPortalAccountIfNeeded();
+
         $credentials = ['email' => $this->resolveLogin(), 'password' => $this->input('password')];
 
         if (! Auth::attempt($credentials, $this->boolean('remember'))) {
@@ -74,6 +76,26 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
+     * Automatic portal login: a student / faculty who signs in for the first time with their
+     * ID number as BOTH username and password gets their portal account created on the spot.
+     * Only when no account exists yet, only for an active card, and only when the password equals the ID number.
+     */
+    private function provisionPortalAccountIfNeeded(): void
+    {
+        $login = trim((string) $this->input('email'));
+
+        if ($login === '' || str_contains($login, '@') || ! hash_equals($login, (string) $this->input('password'))) {
+            return;
+        }
+
+        $patron = Patron::where('id_number', $login)->first();
+
+        if ($patron && $patron->canHavePortalAccount() && ! $patron->account()->exists()) {
+            $patron->provisionAccount($login);
+        }
     }
 
     /** An ID number (no "@") is translated to the email of that patron's portal account. */

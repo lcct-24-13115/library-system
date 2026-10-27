@@ -20,3 +20,15 @@ NO migration. Uses the existing `reservations` table. Nothing existing is change
 - Overdue never blocks a request. No fines, amounts or payments. No generated files.
 - Duplicate pending request or a book already on loan to the same student is refused.
 - A student can cancel only their OWN pending request. Staff and guests cannot use these routes.
+
+## ID number as password
+- Patron profile > Portal Login: new green button "Create login (password = ID number)" / "Reset password to ID number".
+- Username and password are both the patron's ID number. The old "set your own password" form is still there.
+- Files: PatronAccountController.php, patrons/show.blade.php, StudentReserveTest.php (new test).
+
+## Automatic login (no setup per student)
+- First sign-in with ID number as username AND password creates the portal login on the spot (LoginRequest::provisionPortalAccountIfNeeded -> Patron::provisionAccount).
+- Only when: no account yet, card active, not an Outside User, password equals the ID number. A wrong password never creates anything.
+- An existing account (e.g. custom password set by the librarian) is never touched.
+- The Patron profile now says "Automatic"; the manual buttons moved into "Advanced" for resets / custom passwords.
+- No migration. Files: Patron.php, LoginRequest.php, PatronAccountController.php, patrons/show.blade.php, StudentReserveTest.php.

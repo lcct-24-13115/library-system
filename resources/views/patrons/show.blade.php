@@ -48,9 +48,20 @@
                         @endif
                     </p>
                 @else
-                    <p class="text-sm text-slate-500 mb-3">No portal login yet. They can see their own loans, due dates and reservations (read only).</p>
+                    <p class="text-sm text-slate-600 mb-3">Automatic. At the first sign-in, the login is created when the student types their ID number <strong>{{ $patron->id_number }}</strong> as both username and password. Nothing to set up here.</p>
                 @endif
 
+                <details class="mt-2">
+                    <summary class="cursor-pointer text-xs font-bold uppercase text-slate-500">Advanced: create now or set a custom password</summary>
+                    <div class="mt-3">
+                <form action="{{ route('patrons.account.store', $patron) }}" method="POST" class="mb-4">
+                    @csrf
+                    <input type="hidden" name="use_id_number" value="1">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2 rounded-lg text-sm transition">{{ $account ? 'Reset password to ID number' : 'Create login (password = ID number)' }}</button>
+                    <p class="text-xs text-slate-500 mt-1">Username and password will both be <strong>{{ $patron->id_number }}</strong>.</p>
+                </form>
+
+                <p class="text-xs font-bold uppercase text-slate-500 mb-2">Or set your own password</p>
                 <form action="{{ route('patrons.account.store', $patron) }}" method="POST" class="flex flex-col md:flex-row gap-3 md:items-end">
                     @csrf
                     <div>
@@ -63,6 +74,8 @@
                     </div>
                     <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2 rounded-lg text-sm transition">{{ $account ? 'Reset password' : 'Create login' }}</button>
                 </form>
+                    </div>
+                </details>
 
                 @if($account)
                     <form action="{{ route('patrons.account.toggle', $patron) }}" method="POST" class="mt-3">

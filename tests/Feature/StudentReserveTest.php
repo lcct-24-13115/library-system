@@ -125,4 +125,49 @@ class StudentReserveTest extends TestCase
         $this->get(route('catalog.index'))->assertOk()->assertDontSee(route('portal.reserve.confirm', $book->id), false);
         $this->actingAs($account)->get(route('catalog.index'))->assertOk()->assertSee(route('portal.reserve.confirm', $book->id), false);
     }
+
+    public function test_the_librarian_can_create_a_login_whose_password_is_the_id_number(): void
+    {
+        $patron = Patron::create(['id_number' => '24-13115', 'name' => 'Id Pass', 'patron_type' => 'Student', 'status' => 'active']);
+        $librarian = User::factory()->create(['role' => 'librarian', 'user_type' => 'Non-Teaching Personnel', 'is_active' => true]);
+
+        $this->actingAs($librarian)->post(route('patrons.account.store', $patron), ['use_id_number' => 1])->assertSessionHas('success');
+        auth()->logout();
+
+        $this->post(route('login'), ['email' => '24-13115', 'password' => '24-13115'])->assertRedirect(route('portal.index'));
+    }
+
+    public function test_first_sign_in_with_the_id_number_as_password_creates_the_login_automatically(): void
+    {
+        $patron = Patron::create(['id_number' => '24-99999', 'name' => 'Auto Login', 'patron_type' => 'Student', 'status' => 'active']);
+        $this->assertNull($patron->account);
+
+        $this->post(route('login'), ['email' => '24-99999', 'password' => '24-99999'])->assertRedirect(route('portal.index'));
+
+        $this->assertSame('patron', $patron->fresh()->account->role);
+        $this->assertSame(1, User::where('patron_id', $patron->id)->count());
+    }
+
+    public function test_a_wrong_password_inactive_card_or_outside_user_does_not_create_a_login(): void
+    {
+        $a = Patron::create(['id_number' => 'A-1', 'name' => 'A', 'patron_type' => 'Student', 'status' => 'active']);
+        $b = Patron::create(['id_number' => 'B-1', 'name' => 'B', 'patron_type' => 'Student', 'status' => 'inactive']);
+        $c = Patron::create(['id_number' => 'C-1', 'name' => 'C', 'patron_type' => 'Outside User', 'status' => 'active']);
+
+        $this->post(route('login'), ['email' => 'A-1', 'password' => 'guess'])->assertSessionHasErrors('email');
+        $this->post(route('login'), ['email' => 'B-1', 'password' => 'B-1'])->assertSessionHasErrors('email');
+        $this->post(route('login'), ['email' => 'C-1', 'password' => 'C-1'])->assertSessionHasErrors('email');
+
+        $this->assertNull($a->fresh()->account);
+        $this->assertNull($b->fresh()->account);
+        $this->assertNull($c->fresh()->account);
+    }
+
+    public function test_a_custom_password_set_by_the_librarian_is_never_overwritten_by_the_automatic_login(): void
+    {
+        $account = $this->patronAccount('S-77', 'Custom Pass');
+
+        $this->post(route('login'), ['email' => 'S-77', 'password' => 'S-77'])->assertSessionHasErrors('email');
+        $this->post(route('login'), ['email' => 'S-77', 'password' => 'password123'])->assertRedirect(route('portal.index'));
+    }
 }
