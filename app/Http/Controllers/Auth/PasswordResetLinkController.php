@@ -34,7 +34,7 @@ class PasswordResetLinkController extends Controller
 
         if (str_contains($idNumber, '@')) {
             throw ValidationException::withMessages([
-                'id_number' => 'Staff accounts cannot be reset here. Please ask the library administrator to reset your password.',
+                'id_number' => 'Please enter your ID number, not an email.',
             ]);
         }
 
@@ -44,7 +44,7 @@ class PasswordResetLinkController extends Controller
             $minutes = ceil(RateLimiter::availableIn($key) / 60);
 
             throw ValidationException::withMessages([
-                'id_number' => "Too many attempts. Please try again in {$minutes} minute(s) or see the librarian.",
+                'id_number' => "Too many attempts. Please try again in {$minutes} minute(s).",
             ]);
         }
 
@@ -54,7 +54,7 @@ class PasswordResetLinkController extends Controller
             RateLimiter::hit($key, 900);
 
             throw ValidationException::withMessages([
-                'id_number' => 'We could not find an active library card with that ID number. Check it and try again, or see the librarian.',
+                'id_number' => 'We could not find an active library card with that ID number. Check it and try again.',
             ]);
         }
 

@@ -18,10 +18,5 @@
         <button type="submit" class="lf-submit">Continue</button>
     </form>
 
-    <p class="lf-hint" style="margin:16px 0 0;font-size:13px">
-        <strong>Library staff:</strong> please ask the library administrator to reset your password.
-        Can't get in? See the librarian.
-    </p>
-
     <p class="login-links"><a href="{{ route('login') }}">&larr; Back to sign in</a></p>
 </x-auth-poster>

@@ -40,12 +40,12 @@ class NewPasswordController extends Controller
 
         if ($account) {
             if (! $account->is_active) {
-                throw ValidationException::withMessages(['password' => 'This account has been deactivated. Please see the librarian.']);
+                throw ValidationException::withMessages(['password' => 'This account has been deactivated.']);
             }
 
             $account->forceFill(['password' => $data['password'], 'remember_token' => \Illuminate\Support\Str::random(60)])->save();
         } elseif (! $patron->provisionAccount($data['password'])) {
-            throw ValidationException::withMessages(['password' => 'Could not set up your account. Please see the librarian.']);
+            throw ValidationException::withMessages(['password' => 'Could not set up your account.']);
         }
 
         $request->session()->forget('pwreset');
