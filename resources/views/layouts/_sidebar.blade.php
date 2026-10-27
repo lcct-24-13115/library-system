@@ -16,7 +16,7 @@
             ['Patrons', 'users', route('patrons.index'), request()->routeIs('patrons.*')],
         ]],
         ['Library', [
-            ['Attendance', 'attendance', route('attendance.index'), request()->routeIs('attendance.*')],
+            ['Visitor Log', 'attendance', route('attendance.history'), request()->routeIs('attendance.stats', 'attendance.history')],
             ['Reports', 'reports', route('reports.index'), request()->routeIs('reports.*')],
         ]],
     ];

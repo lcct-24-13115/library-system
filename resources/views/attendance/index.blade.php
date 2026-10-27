@@ -19,12 +19,19 @@
 <body class="salrc">
 <div class="att-bg flex flex-col">
 
-    {{-- Staff shortcuts (this page sits behind the staff login) --}}
-    <nav class="flex items-center justify-end gap-4 px-5 py-3 text-xs font-semibold text-slate-500 print:hidden">
-        <a href="{{ route('dashboard') }}" class="hover:text-indigo-700">Dashboard</a>
-        <a href="{{ route('attendance.stats') }}" class="hover:text-indigo-700">Statistics</a>
-        <a href="{{ route('attendance.history') }}" class="hover:text-indigo-700">Visitor history</a>
-    </nav>
+    @if (auth()->check() && auth()->user()->hasRole('admin', 'librarian', 'staff'))
+        {{-- Staff shortcuts (only shown when a librarian / staff is signed in in this browser) --}}
+        <nav class="flex items-center justify-end gap-4 px-5 py-3 text-xs font-semibold text-slate-500 print:hidden">
+            <a href="{{ route('dashboard') }}" class="hover:text-indigo-700">Dashboard</a>
+            <a href="{{ route('attendance.stats') }}" class="hover:text-indigo-700">Statistics</a>
+            <a href="{{ route('attendance.history') }}" class="hover:text-indigo-700">Visitor history</a>
+        </nav>
+    @else
+        {{-- Public student view: the only way out is back to the sign-in page. --}}
+        <nav class="flex items-center justify-start px-5 py-3 text-xs font-semibold text-slate-500 print:hidden">
+            <a href="{{ route('login') }}" class="hover:text-indigo-700">&larr; Back to sign in</a>
+        </nav>
+    @endif
 
     <main class="flex-1 flex flex-col items-center px-4 pb-10">
 
@@ -46,7 +53,7 @@
                 <label for="att-id" class="sr-only">Student ID</label>
                 <input type="text" id="att-id" name="patron_id_number" autofocus autocomplete="off" autocapitalize="characters" spellcheck="false"
                        data-lookup-url="{{ route('attendance.lookup') }}"
-                       placeholder="STUDENT ID (E.G. P-1024-1001)"
+                       placeholder="STUDENT ID (E.G. 24-13115)"
                        class="w-full rounded-xl border-2 border-slate-300 bg-white px-4 py-3.5 text-base font-semibold tracking-wide text-slate-900 placeholder:text-xs placeholder:font-bold placeholder:tracking-[.14em] placeholder:text-slate-400 focus:outline-none focus:border-indigo-600">
 
                 {{-- Identity confirmation (photo appears here) --}}
@@ -262,7 +269,9 @@
                 return;
             }
             if (res.status === 419) {
-                showMessage('bad', 'Session expired', 'Reload this page and log in again.');
+                // Page was left open for a long time: refresh it so the next student can check in.
+                showMessage('bad', 'Refreshing…', 'Please try again in a moment.');
+                setTimeout(function () { window.location.reload(); }, 800);
                 return;
             }
             if (!res.ok) {

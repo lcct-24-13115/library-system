@@ -31,6 +31,15 @@ Route::middleware(['auth', 'role:patron'])->prefix('my-library')->name('portal.'
 
 Route::get('/dashboard', DashboardController::class)->middleware(['auth', 'verified', 'role:admin,librarian,staff'])->name('dashboard');
 
+// Student check-in (PUBLIC, opened from the login page; no account needed).
+// Only these four routes are public. Statistics, Visitor history and removing entries stay staff-only.
+Route::prefix('attendance')->name('attendance.')->group(function () {
+    Route::get('/', [AttendanceController::class, 'index'])->middleware('throttle:60,1')->name('index');
+    Route::post('/', [AttendanceController::class, 'store'])->middleware('throttle:40,1')->name('store');
+    Route::get('/lookup', [AttendanceController::class, 'lookup'])->middleware('throttle:120,1')->name('lookup');
+    Route::get('/summary', [AttendanceController::class, 'summaryJson'])->middleware('throttle:120,1')->name('summary');
+});
+
 // Roles: admin = everything + Users; librarian = books, patrons, loans, reservations,
 // attendance, reports; staff = view books/patrons, circulation, reservations, scan, reports.
 Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
@@ -96,11 +105,7 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
     Route::get('/lookup/patron', [LookupController::class, 'patron'])->name('lookup.patron');
     Route::get('/lookup/book', [LookupController::class, 'book'])->name('lookup.book');
 
-    // v3: Attendance (daily visitor log)
-    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
-    Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
-    Route::get('/attendance/lookup', [AttendanceController::class, 'lookup'])->name('attendance.lookup');
-    Route::get('/attendance/summary', [AttendanceController::class, 'summaryJson'])->name('attendance.summary');
+    // v3: Attendance reports (staff only; the student check-in screen is declared above)
     Route::get('/attendance/stats', [AttendanceController::class, 'stats'])->name('attendance.stats');
     Route::get('/attendance/history', [AttendanceController::class, 'history'])->name('attendance.history');
 

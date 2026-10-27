@@ -128,7 +128,7 @@ class AttendanceController extends Controller
 
         if (! $patron) {
             throw ValidationException::withMessages([
-                'patron_id_number' => 'No patron found with that ID number. Register the patron first.',
+                'patron_id_number' => 'No student found with that ID number. Please check your ID or ask the librarian.',
             ]);
         }
 

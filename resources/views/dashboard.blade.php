@@ -12,7 +12,6 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         @foreach([
             ['Titles in catalog', $stats['titles'], 'books', ['#2563eb', '#60a5fa', '#1e40af', 'rgba(37,99,235,.35)'], route('books.index')],
-            ['Copies available', $stats['available'] . ' / ' . $stats['copies'], 'library', ['#0284c7', '#38bdf8', '#075985', 'rgba(14,165,233,.35)'], route('books.index')],
             ['Books on loan', $stats['on_loan'], 'issue', ['#4f46e5', '#818cf8', '#3730a3', 'rgba(79,70,229,.33)'], route('loans.index', ['status' => 'active'])],
             ['Overdue (info only)', $stats['overdue'], 'loans', ['#d97706', '#fbbf24', '#92400e', 'rgba(245,158,11,.38)'], route('loans.index', ['status' => 'overdue'])],
             ['Issued today', $stats['issued_today'], 'arrow', ['#1d4ed8', '#60a5fa', '#172554', 'rgba(29,78,216,.33)'], route('loans.index')],
@@ -26,7 +25,7 @@
             </a>
         @endforeach
 
-        <div class="bg-indigo-900 p-5 rounded-xl flex flex-col justify-center gap-3" data-tilt="5">
+        <div class="col-span-2 bg-indigo-900 p-5 rounded-xl flex flex-col justify-center gap-3" data-tilt="5">
             <a href="{{ route('loans.create') }}" class="bg-white text-indigo-900 text-center font-semibold text-sm py-2 rounded-lg hover:bg-indigo-50" style="box-shadow:0 5px 0 #b9c9e8,0 12px 16px -6px rgba(0,0,0,.4)">Issue Book</a>
             <a href="{{ route('loans.return.form') }}" class="bg-indigo-700 text-white text-center font-semibold text-sm py-2 rounded-lg hover:bg-indigo-600">Return Book</a>
         </div>

@@ -130,6 +130,10 @@
                                 </form>
 
                                 <p class="login-links">
+                                    <a href="{{ route('attendance.index') }}">Student? Record your library attendance</a>
+                                </p>
+
+                                <p class="login-links">
                                     <a href="{{ route('catalog.index') }}">Search the catalog without an account</a>
                                 </p>
 
