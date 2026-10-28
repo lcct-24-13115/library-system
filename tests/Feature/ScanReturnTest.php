@@ -194,7 +194,7 @@ class ScanReturnTest extends TestCase
         $this->actingAs($user)->get(route('loans.return.form'))
             ->assertOk()
             ->assertSee('Scan accession number')
-            ->assertSee('Returned today')
+            ->assertSee('Checked in today')
             ->assertSee('Title ACC-10');
     }
 

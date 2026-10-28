@@ -13,6 +13,8 @@
         'attendance.*'      => 'Attendance',
         'reports.*'         => 'Reports',
         'users.*'           => 'Users',
+        'utilities.*'       => 'Utilities',
+        'settings.*'        => 'Settings',
         'profile.*'         => 'My profile',
     ];
     $current = 'Library workspace';

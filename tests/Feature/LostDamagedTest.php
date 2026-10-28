@@ -262,7 +262,7 @@ class LostDamagedTest extends TestCase
             ->assertOk()
             ->assertSee('>Lost</span>', false)
             ->assertSee('>Damaged</span>', false)
-            ->assertSee('>Returned</span>', false);
+            ->assertSee('>Checked in</span>', false);
 
         $this->actingAs($user)->get(route('books.show', $book))
             ->assertOk()

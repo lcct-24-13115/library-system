@@ -62,7 +62,7 @@ class PortalAndCatalogTest extends TestCase
         Loan::create(['book_id' => $book->id, 'patron_id' => $patron->id, 'issued_at' => now(), 'due_date' => today()->addDays(7)]);
 
         $this->get(route('catalog.index'))->assertOk()
-            ->assertSee('Available: 1 of 2')
+            ->assertSee('&quot;available&quot;:1,&quot;total&quot;:2', false)
             ->assertDontSee('Secret Reader')
             ->assertDontSee('B-SECRET');
     }

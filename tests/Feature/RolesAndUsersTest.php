@@ -256,10 +256,10 @@ class RolesAndUsersTest extends TestCase
     public function test_users_link_is_visible_to_admins_only(): void
     {
         $this->actingAs(User::factory()->admin()->create())
-            ->get(route('patrons.index'))->assertSee(route('users.index'));
+            ->get(route('patrons.index'))->assertSee(route('utilities.index'));
 
         $this->actingAs(User::factory()->librarian()->create())
-            ->get(route('patrons.index'))->assertDontSee(route('users.index'));
+            ->get(route('patrons.index'))->assertDontSee(route('utilities.index'));
     }
 
     public function test_a_deactivated_user_cannot_log_in(): void

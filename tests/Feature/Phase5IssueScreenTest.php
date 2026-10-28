@@ -76,8 +76,8 @@ class Phase5IssueScreenTest extends TestCase
 
         $this->actingAs($user)->get(route('loans.create'))
             ->assertOk()
-            ->assertSee('Issued this session')
-            ->assertSee('Nothing issued yet')
+            ->assertSee('Checked out this session')
+            ->assertSee('Nothing checked out yet')
             ->assertSee(route('loans.issue.done'), false)
             ->assertSee('Done');
     }
@@ -159,7 +159,7 @@ class Phase5IssueScreenTest extends TestCase
         $this->issue($user, $patron, $gone)->assertSessionHasErrors('accession_number');
 
         $this->actingAs($user)->get(route('loans.create'))
-            ->assertSee('Nothing issued yet');
+            ->assertSee('Nothing checked out yet');
     }
 
     public function test_done_clears_the_patron_and_the_list_but_changes_no_loan(): void
@@ -177,7 +177,7 @@ class Phase5IssueScreenTest extends TestCase
 
         $this->assertStringNotContainsString('value="P-001"', $this->inputTag($html, 'patron_id_number'));
         $this->assertStringContainsString('autofocus', $this->inputTag($html, 'patron_id_number'));
-        $this->assertStringContainsString('Nothing issued yet', $html);
+        $this->assertStringContainsString('Nothing checked out yet', $html);
 
         // Done is screen-only: the loan and the copy count are untouched.
         $this->assertSame(1, Loan::active()->where('patron_id', $patron->id)->count());
@@ -203,7 +203,7 @@ class Phase5IssueScreenTest extends TestCase
             ]])
             ->get(route('loans.create'))
             ->assertOk()
-            ->assertSee('Nothing issued yet');
+            ->assertSee('Nothing checked out yet');
     }
 
     public function test_the_side_list_only_shows_loans_of_the_session_patron(): void
