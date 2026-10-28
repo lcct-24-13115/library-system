@@ -73,6 +73,12 @@ class LibrarySettings
             ->all();
     }
 
+    /** Folder of the ID pictures (legacy "Picture path" setting). Reference only. */
+    public function picturePath(): ?string
+    {
+        return $this->get('picture_path');
+    }
+
     public function reportHeading(): ?string
     {
         return $this->get('report_heading');

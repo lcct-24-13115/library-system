@@ -81,6 +81,7 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
         Route::put('/', [SettingsController::class, 'update'])->name('update');
         Route::post('/holidays', [SettingsController::class, 'holidayStore'])->name('holidays.store');
+        Route::put('/holidays/{holiday}', [SettingsController::class, 'holidayUpdate'])->name('holidays.update');
         Route::post('/holidays/empty', [SettingsController::class, 'holidayEmpty'])->name('holidays.empty');
         Route::delete('/holidays/{holiday}', [SettingsController::class, 'holidayDestroy'])->name('holidays.destroy');
         Route::get('/policy', [SettingsController::class, 'policy'])->name('policy');

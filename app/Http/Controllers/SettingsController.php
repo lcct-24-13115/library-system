@@ -31,12 +31,18 @@ class SettingsController extends Controller
             'excluded_days'   => ['nullable', 'array'],
             'excluded_days.*' => ['integer', 'between:0,6'],
             'report_heading'  => ['nullable', 'string', 'max:150'],
+            'picture_path'    => ['nullable', 'string', 'max:255', 'not_regex:/\.\./', 'not_regex:/[\x00-\x1F]/'],
         ]);
 
         $settings->set('excluded_days', json_encode(array_values(array_map('intval', $data['excluded_days'] ?? []))));
         $settings->set('report_heading', filled($data['report_heading'] ?? null) ? trim($data['report_heading']) : null);
 
-        return redirect()->route('settings.index')->with('success', 'Settings saved.');
+        // Picture path is only saved when the field is sent (the old Settings page does not have it).
+        if ($request->has('picture_path')) {
+            $settings->set('picture_path', filled($data['picture_path'] ?? null) ? trim($data['picture_path']) : null);
+        }
+
+        return $this->settingsRedirect()->with('success', 'Settings saved.');
     }
 
     public function holidayStore(Request $request, LibrarySettings $settings)
@@ -51,7 +57,7 @@ class SettingsController extends Controller
         Holiday::create($data);
         $settings->refresh();
 
-        return redirect()->route('settings.index')->with('success', 'Holiday / suspension added.');
+        return $this->settingsRedirect()->with('success', 'Holiday / suspension added.');
     }
 
     public function holidayDestroy(Holiday $holiday, LibrarySettings $settings)
@@ -59,7 +65,7 @@ class SettingsController extends Controller
         $holiday->delete();
         $settings->refresh();
 
-        return redirect()->route('settings.index')->with('success', 'Holiday / suspension removed.');
+        return $this->settingsRedirect()->with('success', 'Holiday / suspension removed.');
     }
 
     public function holidayEmpty(LibrarySettings $settings)
@@ -67,7 +73,31 @@ class SettingsController extends Controller
         Holiday::query()->delete();
         $settings->refresh();
 
-        return redirect()->route('settings.index')->with('success', 'Holiday / suspension list emptied.');
+        return $this->settingsRedirect()->with('success', 'Holiday / suspension list emptied.');
+    }
+
+    /** Edit one holiday / suspension date (and its reason). */
+    public function holidayUpdate(Request $request, Holiday $holiday, LibrarySettings $settings)
+    {
+        $data = $request->validate([
+            'date'   => ['required', 'date_format:Y-m-d', Rule::unique('holidays', 'date')->ignore($holiday->id)],
+            'reason' => ['nullable', 'string', 'max:150'],
+        ], [
+            'date.unique' => 'That date is already in the holiday / suspension list.',
+        ]);
+
+        $holiday->update($data);
+        $settings->refresh();
+
+        return $this->settingsRedirect()->with('success', 'Holiday / suspension updated.');
+    }
+
+    /** After saving: back to the Utilities Settings tab when the form came from there, else the old page. */
+    private function settingsRedirect()
+    {
+        return request()->input('from') === 'utilities'
+            ? redirect()->route('utilities.index', ['tab' => 'settings'])
+            : redirect()->route('settings.index');
     }
 
     /** "Group / Policy": default loan days and borrow limit per patron group (type). */

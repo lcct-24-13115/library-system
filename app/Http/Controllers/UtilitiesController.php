@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Holiday;
 use App\Models\User;
+use App\Support\LibrarySettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Admin-only "Utilities" hub (legacy screen): one page with three tabs.
  * Phase 2: Administration (add / edit a user) and Users List.
+ * Phase 3: Settings (excluded days, report heading, picture path, holidays / suspensions).
  * The forms post to the existing UserController routes (same validation, same rules).
  * Accounts are deactivated, never deleted.
  */
@@ -28,7 +31,7 @@ class UtilitiesController extends Controller
         'staff'     => 'Staff',
     ];
 
-    public function index(Request $request)
+    public function index(Request $request, LibrarySettings $settings)
     {
         $tab = (string) $request->query('tab', 'administration');
 
@@ -52,7 +55,30 @@ class UtilitiesController extends Controller
             $data += $this->usersData($request);
         }
 
+        if ($tab === 'settings') {
+            $data += $this->settingsData($request, $settings);
+        }
+
         return view('utilities.index', $data);
+    }
+
+    private function settingsData(Request $request, LibrarySettings $settings): array
+    {
+        // ?edit_holiday={id} loads one holiday / suspension date into the form.
+        $editHoliday = null;
+        $id = $request->query('edit_holiday');
+        if (is_scalar($id) && ctype_digit((string) $id)) {
+            $editHoliday = Holiday::find((int) $id);
+        }
+
+        return [
+            'days'        => LibrarySettings::DAYS,
+            'excluded'    => $settings->excludedDays(),
+            'heading'     => $settings->reportHeading(),
+            'picturePath' => $settings->picturePath(),
+            'holidays'    => Holiday::orderBy('date')->get(),
+            'editHoliday' => $editHoliday,
+        ];
     }
 
     /** The staff account chosen with ?edit={id}. Portal (patron) accounts and unknown ids are ignored. */
