@@ -28,16 +28,8 @@ return [
     // key of the library that is selected first in the dropdown
     'default' => 'philippine-elib',
 
+    // Same names and order as the old system's dropdown.
     'libraries' => [
-
-        [
-            'key' => 'philippine-elib',
-            'name' => 'Philippine E-Lib',
-            'url_template' => 'https://www.elib.gov.ph/bsearch.php',
-            'verified' => true,
-            'note' => 'Opens the Basic Search page (confirmed in the old system). '
-                .'TODO: find out if it accepts a search text in the address; if yes, add ?...={query}.',
-        ],
 
         [
             'key' => 'ateneo-de-manila',
@@ -90,9 +82,9 @@ return [
         [
             'key' => 'librarylink',
             'name' => 'LibraryLink Catalog',
-            'url_template' => 'https://librarylink.com',
+            'url_template' => 'https://www.google.com/search?q=LibraryLink+catalog+{query}',
             'verified' => false,
-            'note' => 'TODO: ask the teacher/librarian for the exact LibraryLink catalog address.',
+            'note' => 'TEMPORARY: the exact LibraryLink address is not known, so this runs a Google search. TODO: replace with the real catalog address (ask the librarian).',
         ],
 
         [
@@ -101,6 +93,54 @@ return [
             'url_template' => 'https://www.miriam.edu.ph',
             'verified' => false,
             'note' => 'TODO: verify the library catalog address.',
+        ],
+
+        [
+            'key' => 'national-library-ph',
+            'name' => 'National Library of the Philippines',
+            'url_template' => 'https://www.nlp.gov.ph',
+            'verified' => false,
+            'note' => 'TODO: verify the online catalog address and search pattern.',
+        ],
+
+        [
+            'key' => 'oasis',
+            'name' => 'OASIS Library Catalog',
+            'url_template' => 'https://www.google.com/search?q=OASIS+library+catalog+{query}',
+            'verified' => false,
+            'note' => 'TEMPORARY: the exact OASIS address is not known, so this runs a Google search. TODO: replace with the real catalog address (ask the librarian).',
+        ],
+
+        [
+            'key' => 'ohiolink',
+            'name' => 'OhioLink',
+            'url_template' => 'https://www.ohiolink.edu',
+            'verified' => false,
+            'note' => 'TODO: verify the OhioLink catalog address and search pattern.',
+        ],
+
+        [
+            'key' => 'philippine-elib',
+            'name' => 'Philippine E-Lib',
+            'url_template' => 'https://www.elib.gov.ph/bsearch.php',
+            'verified' => true,
+            'note' => 'Opens the Basic Search page (confirmed in the old system). TODO: find out if it accepts a search text in the address; if yes, add ?...={query}.',
+        ],
+
+        [
+            'key' => 'up-diliman',
+            'name' => 'UP Diliman Library',
+            'url_template' => 'https://mainlib.upd.edu.ph',
+            'verified' => false,
+            'note' => 'TODO: verify the address and the catalog search pattern.',
+        ],
+
+        [
+            'key' => 'ust',
+            'name' => 'UST Library',
+            'url_template' => 'https://library.ust.edu.ph',
+            'verified' => false,
+            'note' => 'TODO: verify the address and the catalog search pattern.',
         ],
 
     ],

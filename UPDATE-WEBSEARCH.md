@@ -16,6 +16,10 @@ No database change. Staff only (admin, librarian, staff).
 | 3 | Button and modal | `partials/web-search.blade.php`, `_sidebar`, `library` layout, `globe` icon, `WebSearchModalTest` |
 | 4 | Remember last library, "Search this title online", docs | `books/show.blade.php`, modal script, `WebSearchPhase4Test` |
 
+## Libraries (14, same as the old system's dropdown)
+Ateneo De Manila, Ateneo De Naga, Australian National University, IRRI, La Salle Taft, Library of Congress, LibraryLink Catalog, Miriam College, National Library of the Philippines, OASIS Library Catalog, OhioLink, Philippine E-Lib (default), UP Diliman, UST.
+LibraryLink and OASIS use a temporary Google search until their real catalog address is known.
+
 ## Safety
 - The user never sends a URL, only a library key. Unknown keys are rejected (422).
 - Search text is encoded, limited to 200 characters, never saved or logged.

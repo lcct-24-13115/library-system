@@ -63,6 +63,11 @@ class WebSearchConfigTest extends TestCase
             'Library of Congress',
             'LibraryLink Catalog',
             'Miriam College Library',
+            'National Library of the Philippines',
+            'OASIS Library Catalog',
+            'OhioLink',
+            'UP Diliman Library',
+            'UST Library',
         ] as $expected) {
             $this->assertContains($expected, $names);
         }
