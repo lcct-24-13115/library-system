@@ -64,7 +64,7 @@ class WebSearchTest extends TestCase
         $this->actingAs($this->staff())
             ->postJson(route('websearch.go'), ['library' => 'philippine-elib', 'query' => 'history'])
             ->assertOk()
-            ->assertJsonPath('url', 'https://elib.gov.ph/bsearch.php');
+            ->assertJsonPath('url', 'https://www.elib.gov.ph/bsearch.php');
     }
 
     public function test_unknown_library_is_rejected(): void

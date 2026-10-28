@@ -33,7 +33,7 @@ return [
         [
             'key' => 'philippine-elib',
             'name' => 'Philippine E-Lib',
-            'url_template' => 'https://elib.gov.ph/bsearch.php',
+            'url_template' => 'https://www.elib.gov.ph/bsearch.php',
             'verified' => true,
             'note' => 'Opens the Basic Search page (confirmed in the old system). '
                 .'TODO: find out if it accepts a search text in the address; if yes, add ?...={query}.',
