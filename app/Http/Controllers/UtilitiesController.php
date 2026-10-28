@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Holiday;
+use App\Models\Patron;
 use App\Models\User;
 use App\Support\LibrarySettings;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\DB;
  * Admin-only "Utilities" hub (legacy screen): one page with three tabs.
  * Phase 2: Administration (add / edit a user) and Users List.
  * Phase 3: Settings (excluded days, report heading, picture path, holidays / suspensions).
+ * Phase 4: Group and Policy/Services panels inside the Settings tab (?panel=group|policy).
  * The forms post to the existing UserController routes (same validation, same rules).
  * Accounts are deactivated, never deleted.
  */
@@ -71,14 +73,55 @@ class UtilitiesController extends Controller
             $editHoliday = Holiday::find((int) $id);
         }
 
-        return [
+        $panel = (string) $request->query('panel', '');
+        $panel = in_array($panel, ['group', 'policy'], true) ? $panel : null;
+
+        $data = [
             'days'        => LibrarySettings::DAYS,
             'excluded'    => $settings->excludedDays(),
             'heading'     => $settings->reportHeading(),
             'picturePath' => $settings->picturePath(),
             'holidays'    => Holiday::orderBy('date')->get(),
             'editHoliday' => $editHoliday,
+            'panel'       => $panel,
         ];
+
+        if ($panel === 'policy') {
+            $data['loanDays'] = $settings->loanDays();
+            $data['limits'] = [];
+            foreach (Patron::TYPES as $type) {
+                $data['limits'][$type] = $settings->maxLoans($type);
+            }
+        }
+
+        if ($panel === 'group') {
+            $data['groups'] = $this->groups($settings);
+        }
+
+        return $data;
+    }
+
+    /** One row per patron group (read only): patron counts plus the loan policy that applies. */
+    private function groups(LibrarySettings $settings): array
+    {
+        $counts = Patron::query()
+            ->selectRaw("patron_type, count(*) as total, sum(case when status = 'active' then 1 else 0 end) as active")
+            ->groupBy('patron_type')
+            ->get()
+            ->keyBy('patron_type');
+
+        $rows = [];
+        foreach (Patron::TYPES as $type) {
+            $rows[] = [
+                'type'      => $type,
+                'total'     => (int) ($counts[$type]->total ?? 0),
+                'active'    => (int) ($counts[$type]->active ?? 0),
+                'loan_days' => $settings->loanDays(),
+                'max_loans' => $settings->maxLoans($type),
+            ];
+        }
+
+        return $rows;
     }
 
     /** The staff account chosen with ?edit={id}. Portal (patron) accounts and unknown ids are ignored. */

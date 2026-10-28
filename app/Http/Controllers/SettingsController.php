@@ -130,6 +130,8 @@ class SettingsController extends Controller
             }
         }
 
-        return redirect()->route('settings.policy')->with('success', 'Policy saved.');
+        return (request()->input('from') === 'utilities'
+            ? redirect()->route('utilities.index', ['tab' => 'settings', 'panel' => 'policy'])
+            : redirect()->route('settings.policy'))->with('success', 'Policy saved.');
     }
 }
