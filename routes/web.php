@@ -102,7 +102,7 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
     Route::resource('books', BookController::class)->only(['index', 'show']);
     Route::resource('patrons', PatronController::class)->only(['index']);
 
-    // Circulation: Issue Book & Return Book
+    // Circulation: Check Out & Check In
     Route::get('/circulation/return', [LoanController::class, 'returnForm'])->name('loans.return.form');
     Route::post('/circulation/return/scan', [LoanController::class, 'scanReturn'])->name('loans.return.scan');
     Route::post('/loans/{loan}/return', [LoanController::class, 'markReturned'])->name('loans.return');
@@ -117,7 +117,7 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
     // v3: Patron profile (defined after the patrons resource so /patrons/create still wins)
     Route::get('/patrons/{patron}', [PatronProfileController::class, 'show'])->whereNumber('patron')->name('patrons.show');
 
-    // v3: Live preview lookups (JSON) used by the Issue Book / Reserve forms
+    // v3: Live preview lookups (JSON) used by the Check Out / Reserve forms
     Route::get('/lookup/patron', [LookupController::class, 'patron'])->name('lookup.patron');
     Route::get('/lookup/book', [LookupController::class, 'book'])->name('lookup.book');
 

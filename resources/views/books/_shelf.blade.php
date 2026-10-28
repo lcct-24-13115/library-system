@@ -25,7 +25,7 @@
                 $actions[] = ['label' => 'View details', 'url' => route('books.show', $book->id)];
                 $actions[] = ['label' => 'Reserve', 'url' => route('reservations.create', ['accession_number' => $book->accession_number]), 'ghost' => true];
                 if ($canManage) {
-                    $actions[] = ['label' => 'Issue', 'url' => route('loans.create', ['accession_number' => $book->accession_number]), 'ghost' => true];
+                    $actions[] = ['label' => 'Check Out', 'url' => route('loans.create', ['accession_number' => $book->accession_number]), 'ghost' => true];
                 }
             } elseif (! auth()->check()) {
                 $actions[] = ['label' => 'Sign in to borrow', 'url' => route('login')];

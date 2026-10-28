@@ -65,7 +65,7 @@
                 <x-icon name="clipboard" :size="21" class="strip-icon" />
                 <div>
                     <strong>Circulation at the desk</strong>
-                    <span>Issue, renew and return books, with overdue loans flagged for follow-up.</span>
+                    <span>Check out, renew and check in books, with overdue loans flagged for follow-up.</span>
                 </div>
             </div>
             <div class="strip-item">

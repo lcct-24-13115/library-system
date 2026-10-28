@@ -30,7 +30,7 @@
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto mb-8">
         <table class="w-full text-left border-collapse text-sm">
             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase text-xs font-bold tracking-wider">
-                <tr><th class="p-3">Title</th><th class="p-3">Borrowed</th><th class="p-3">Due</th><th class="p-3">Status</th></tr>
+                <tr><th class="p-3">Title</th><th class="p-3">Checked out</th><th class="p-3">Due</th><th class="p-3">Status</th></tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse($active as $loan)
@@ -41,7 +41,7 @@
                         <td class="p-3">
                             @if($loan->isOverdue())
                                 <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">Overdue {{ $loan->daysOverdue() }} {{ \Illuminate\Support\Str::plural('day', $loan->daysOverdue()) }}</span>
-                                <div class="text-xs text-slate-500 mt-1">Please return it to the library.</div>
+                                <div class="text-xs text-slate-500 mt-1">Please check it in at the library.</div>
                             @else
                                 @php $left = (int) today()->diffInDays($loan->due_date, false); @endphp
                                 <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">{{ $left === 0 ? 'Due today' : 'Due in ' . $left . ' ' . \Illuminate\Support\Str::plural('day', $left) }}</span>
@@ -73,11 +73,11 @@
         </ul>
     @endif
 
-    <h2 class="text-lg font-bold text-slate-900 mb-2">Recently returned</h2>
+    <h2 class="text-lg font-bold text-slate-900 mb-2">Recently checked in</h2>
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
         <table class="w-full text-left border-collapse text-sm">
             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase text-xs font-bold tracking-wider">
-                <tr><th class="p-3">Title</th><th class="p-3">Borrowed</th><th class="p-3">Returned</th></tr>
+                <tr><th class="p-3">Title</th><th class="p-3">Checked out</th><th class="p-3">Checked in</th></tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse($history as $loan)
@@ -87,7 +87,7 @@
                         <td class="p-3 whitespace-nowrap">{{ $loan->returned_at->format('M d, Y') }}@if($loan->outcomeKey() !== 'returned') <span class="text-xs text-slate-500">({{ $loan->outcome_label }})</span>@endif</td>
                     </tr>
                 @empty
-                    <tr><td colspan="3" class="p-8 text-center text-slate-400">Nothing returned yet.</td></tr>
+                    <tr><td colspan="3" class="p-8 text-center text-slate-400">Nothing checked in yet.</td></tr>
                 @endforelse
             </tbody>
         </table>

@@ -4,8 +4,8 @@
     // First matching route pattern wins, so specific routes sit above their wildcards.
     $crumbs = [
         'dashboard'         => 'Dashboard',
-        'loans.create'      => 'Issue Book',
-        'loans.return.form' => 'Return Book',
+        'loans.create'      => 'Check Out',
+        'loans.return.form' => 'Check In',
         'loans.*'           => 'Loans',
         'books.*'           => 'Books Catalog',
         'patrons.*'         => 'Patrons',

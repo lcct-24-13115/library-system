@@ -6,8 +6,8 @@
             ['Dashboard', 'dashboard', route('dashboard'), request()->routeIs('dashboard')],
         ]],
         ['Circulation', [
-            ['Issue Book', 'issue', route('loans.create'), request()->routeIs('loans.create')],
-            ['Return Book', 'return', route('loans.return.form'), request()->routeIs('loans.return.form')],
+            ['Check Out', 'issue', route('loans.create'), request()->routeIs('loans.create')],
+            ['Check In', 'return', route('loans.return.form'), request()->routeIs('loans.return.form')],
             ['Loans', 'loans', route('loans.index'), request()->routeIs('loans.index')],
             ['Reservations', 'bookmark', route('reservations.index'), request()->routeIs('reservations.*')],
         ]],

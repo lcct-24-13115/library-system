@@ -16,12 +16,12 @@
             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase text-xs font-bold tracking-wider">
                 <tr>
                     <th class="p-3">#</th>
-                    <th class="p-3">Issued</th>
+                    <th class="p-3">Checked out</th>
                     <th class="p-3">Patron</th>
                     <th class="p-3">Accession No.</th>
                     <th class="p-3">Title</th>
                     <th class="p-3">Due</th>
-                    <th class="p-3">Returned</th>
+                    <th class="p-3">Checked in</th>
                     <th class="p-3">Renewals</th>
                     <th class="p-3">Status</th>
                     <th class="p-3">Remarks</th>

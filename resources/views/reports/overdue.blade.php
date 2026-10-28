@@ -33,7 +33,7 @@
                     <th class="p-3">Contact</th>
                     <th class="p-3">Accession No.</th>
                     <th class="p-3">Title</th>
-                    <th class="p-3">Issued</th>
+                    <th class="p-3">Checked out</th>
                     <th class="p-3">Due</th>
                     <th class="p-3">Days overdue</th>
                     <th class="p-3">Remarks</th>

@@ -1,14 +1,14 @@
 @extends('layouts.library')
 
-@section('title', 'Return Book - SALRC Library')
+@section('title', 'Check In - SALRC Library')
 
 @section('content')
     <div class="mb-6">
-        <h2 class="text-3xl font-extrabold text-slate-900">Return Book</h2>
-        <p class="text-slate-500 text-sm">Scan the book's accession number to return it right away, or search below.</p>
+        <h2 class="text-3xl font-extrabold text-slate-900">Check In</h2>
+        <p class="text-slate-500 text-sm">Scan the book's accession number to check it in right away, or search below.</p>
     </div>
 
-    {{-- Scan-first return: the cursor always starts here; a scanner's trailing Enter submits. --}}
+    {{-- Scan-first check-in: the cursor always starts here; a scanner's trailing Enter submits. --}}
     <div class="bg-white p-5 rounded-xl shadow-sm border-2 border-emerald-300 mb-4">
         <form action="{{ route('loans.return.scan') }}" method="POST" class="flex flex-col md:flex-row gap-2">
             @csrf
@@ -19,7 +19,7 @@
                    placeholder="Remarks (optional)"
                    class="md:w-72 border border-slate-300 rounded-lg px-3 py-3 text-sm focus:outline-none focus:border-emerald-500">
             <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-lg text-sm transition whitespace-nowrap">
-                Return
+                Check In
             </button>
         </form>
     </div>
@@ -83,7 +83,7 @@
                                        placeholder="e.g. fine collected offline"
                                        class="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-indigo-500">
                                 <button type="submit" class="bg-emerald-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold hover:bg-emerald-700 shadow-sm transition whitespace-nowrap">
-                                    Return
+                                    Check In
                                 </button>
                             </form>
                             <form action="{{ route('loans.renew', $loan) }}" method="POST" class="flex gap-2 items-center mt-2">
@@ -142,7 +142,7 @@
 
     <div class="mt-4">{{ $loans->links() }}</div>
 
-    <h3 class="text-lg font-bold text-slate-900 mt-10 mb-3">Returned today</h3>
+    <h3 class="text-lg font-bold text-slate-900 mt-10 mb-3">Checked in today</h3>
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
         <table class="w-full text-left border-collapse">
             <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase text-xs font-bold tracking-wider">
@@ -175,7 +175,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" class="p-6 text-center text-slate-400">Nothing returned yet today.</td></tr>
+                    <tr><td colspan="4" class="p-6 text-center text-slate-400">Nothing checked in yet today.</td></tr>
                 @endforelse
             </tbody>
         </table>

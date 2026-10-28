@@ -87,7 +87,7 @@
                         <td class="p-4 text-center whitespace-nowrap">
                             @if($r->isPending())
                                 <a href="{{ route('loans.create', ['patron_id_number' => $r->patron->id_number, 'accession_number' => $r->book->accession_number]) }}"
-                                   class="inline-block bg-indigo-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-indigo-700 shadow-sm transition">Issue</a>
+                                   class="inline-block bg-indigo-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-indigo-700 shadow-sm transition">Check Out</a>
                                 <form action="{{ route('reservations.fulfill', $r) }}" method="POST" class="inline-block">
                                     @csrf
                                     <button type="submit" class="bg-emerald-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-emerald-700 shadow-sm transition">Mark Fulfilled</button>

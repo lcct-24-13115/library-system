@@ -55,7 +55,7 @@
         <div>
             <label class="{{ $lbl }}">Available Copies</label>
             <input type="number" name="available_copies" min="0" value="{{ old('available_copies', $b->available_copies) }}" required class="{{ $in }}">
-            <p class="text-xs text-slate-400 mt-1">Adjusted automatically when books are issued or returned.</p>
+            <p class="text-xs text-slate-400 mt-1">Adjusted automatically when books are checked out or in.</p>
         </div>
     </div>
 @endif

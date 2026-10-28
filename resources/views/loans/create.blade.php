@@ -1,12 +1,12 @@
 @extends('layouts.library')
 
-@section('title', 'Issue Book - SALRC Library')
+@section('title', 'Check Out - SALRC Library')
 @section('width', 'max-w-6xl')
 
 @section('content')
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h2 class="text-2xl font-extrabold text-slate-900">Issue Book</h2>
+            <h2 class="text-2xl font-extrabold text-slate-900">Check Out</h2>
             <p class="text-slate-500 text-sm">Type or scan the patron's ID number and the book's accession number.</p>
         </div>
         <a href="{{ route('loans.index') }}" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
@@ -15,7 +15,7 @@
     </div>
 
     @php
-        // Phase 5: after an issue the patron stays; the cursor goes back to the book box.
+        // Phase 5: after a check-out the patron stays; the cursor goes back to the book box.
         // Focus the patron box only when it is empty or the patron was the problem.
         $patronValue = old('patron_id_number', request('patron_id_number', $sessionPatron?->id_number));
         $focusPatron = blank($patronValue) || $errors->has('patron_id_number');
@@ -79,7 +79,7 @@
                         Done
                     </button>
                     <button type="submit" class="px-5 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 shadow-sm transition whitespace-nowrap">
-                        Issue Book
+                        Check Out
                     </button>
                 </div>
             </div>
@@ -87,10 +87,10 @@
         <form id="issue-done-form" action="{{ route('loans.issue.done') }}" method="POST" class="hidden">@csrf</form>
     </div>
 
-    {{-- Phase 5: books issued to this patron in this session --}}
+    {{-- Phase 5: books checked out to this patron in this session --}}
     <aside id="issued-session" class="bg-white rounded-xl shadow-sm border border-slate-200 p-5"
            data-patron="{{ $sessionPatron?->id_number }}">
-        <h3 class="text-sm font-bold uppercase text-slate-600 tracking-wide">Issued this session</h3>
+        <h3 class="text-sm font-bold uppercase text-slate-600 tracking-wide">Checked out this session</h3>
 
         @if($sessionPatron)
             <p class="mt-2 font-semibold text-slate-900">{{ $sessionPatron->name }}</p>
@@ -111,7 +111,7 @@
                 @endforeach
             </ul>
         @else
-            <p class="mt-2 text-sm text-slate-400">Nothing issued yet. Books you issue to a patron will be listed here until you click Done.</p>
+            <p class="mt-2 text-sm text-slate-400">Nothing checked out yet. Books you check out to a patron will be listed here until you click Done.</p>
         @endif
     </aside>
     </div>

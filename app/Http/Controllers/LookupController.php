@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Read-only JSON lookups that power the live preview on the Issue Book
+ * Read-only JSON lookups that power the live preview on the Check Out
  * (and Reserve) forms. Uses the same exact-match rules as the store actions,
  * so what the librarian sees is what will be matched on submit.
  *

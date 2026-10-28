@@ -6,7 +6,7 @@
 @elseif($s === 'returned' && $loan->outcome === 'damaged')
     <span class="bg-orange-100 text-orange-800 px-2.5 py-1 rounded-full text-xs font-semibold">Damaged</span>
 @elseif($s === 'returned')
-    <span class="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full text-xs font-semibold">Returned</span>
+    <span class="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full text-xs font-semibold">Checked in</span>
 @elseif($s === 'overdue')
     <span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-semibold">
         Overdue {{ $loan->daysOverdue() }} {{ \Illuminate\Support\Str::plural('day', $loan->daysOverdue()) }}

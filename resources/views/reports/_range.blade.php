@@ -13,7 +13,7 @@
             <div>
                 <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Status</label>
                 <select name="status" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
-                    @foreach(['all' => 'All', 'active' => 'On loan', 'overdue' => 'Overdue', 'returned' => 'Returned', 'voided' => 'Voided'] as $value => $label)
+                    @foreach(['all' => 'All', 'active' => 'On loan', 'overdue' => 'Overdue', 'returned' => 'Checked in', 'voided' => 'Voided'] as $value => $label)
                         <option value="{{ $value }}" @selected(($status ?? 'all') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>

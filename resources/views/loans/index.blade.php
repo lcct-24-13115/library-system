@@ -9,8 +9,8 @@
             <p class="text-slate-500 text-sm">Borrowing history and books currently on loan</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('loans.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition text-center">+ Issue Book</a>
-            <a href="{{ route('loans.return.form') }}" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition text-center">Return Book</a>
+            <a href="{{ route('loans.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition text-center">+ Check Out</a>
+            <a href="{{ route('loans.return.form') }}" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition text-center">Check In</a>
         </div>
     </div>
 
@@ -25,7 +25,7 @@
             <p class="text-2xl font-extrabold text-amber-600">{{ $stats['overdue'] }}</p>
         </div>
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-            <p class="text-xs uppercase font-bold text-slate-500">Returned today</p>
+            <p class="text-xs uppercase font-bold text-slate-500">Checked in today</p>
             <p class="text-2xl font-extrabold text-emerald-600">{{ $stats['returned_today'] }}</p>
         </div>
     </div>
@@ -37,7 +37,7 @@
                    placeholder="Search by patron name / ID, book title or accession no..."
                    class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
             <select name="status" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
-                @foreach(['all' => 'All', 'active' => 'On loan', 'overdue' => 'Overdue', 'returned' => 'Returned', 'voided' => 'Voided'] as $value => $label)
+                @foreach(['all' => 'All', 'active' => 'On loan', 'overdue' => 'Overdue', 'returned' => 'Checked in', 'voided' => 'Voided'] as $value => $label)
                     <option value="{{ $value }}" @selected($status === $value)>{{ $label }}</option>
                 @endforeach
             </select>
@@ -55,9 +55,9 @@
                 <tr>
                     <th class="p-4">Patron</th>
                     <th class="p-4">Book</th>
-                    <th class="p-4">Issued</th>
+                    <th class="p-4">Checked out</th>
                     <th class="p-4">Due</th>
-                    <th class="p-4">Returned</th>
+                    <th class="p-4">Checked in</th>
                     <th class="p-4">Status</th>
                     <th class="p-4">Remarks</th>
                     <th class="p-4 text-center">Action</th>
@@ -97,11 +97,11 @@
                                     <form action="{{ route('loans.return', $loan) }}" method="POST" onsubmit="return confirm('Mark this book as returned?');">
                                         @csrf
                                         <button type="submit" class="bg-emerald-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-emerald-700 shadow-sm transition">
-                                            Return
+                                            Check In
                                         </button>
                                     </form>
                                     @if(auth()->user()?->canManage())
-                                        {{-- Phase 4: void a loan issued by mistake (admin / librarian). Reason is required. --}}
+                                        {{-- Phase 4: void a loan checked out by mistake (admin / librarian). Reason is required. --}}
                                         <form action="{{ route('loans.void', $loan) }}" method="POST"
                                               onsubmit="var r = prompt('Reason for voiding this loan (required):'); if (!r || !r.trim()) { return false; } this.reason.value = r.trim(); return true;">
                                             @csrf
@@ -119,7 +119,7 @@
                     <tr>
                         <td colspan="8" class="p-10 text-center text-slate-400">
                             <p class="text-lg font-medium">No loan records found.</p>
-                            <p class="text-sm mt-1">Issue a book to get started.</p>
+                            <p class="text-sm mt-1">Check out a book to get started.</p>
                         </td>
                     </tr>
                 @endforelse

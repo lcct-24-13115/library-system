@@ -71,7 +71,7 @@
                     <tr>
                         <td colspan="6" class="p-10 text-center text-slate-400">
                             <p class="text-lg font-medium">No patrons found.</p>
-                            <p class="text-sm mt-1">Add a patron before issuing books.</p>
+                            <p class="text-sm mt-1">Add a patron before checking out books.</p>
                         </td>
                     </tr>
                 @endforelse

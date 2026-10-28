@@ -20,7 +20,7 @@
         </div>
         <div class="flex flex-wrap gap-2 print:hidden">
             <a href="{{ route('patrons.index') }}" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm hover:bg-slate-50 font-medium">&larr; Patrons</a>
-            <a href="{{ route('loans.create', ['patron_id_number' => $patron->id_number]) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 shadow-sm">Issue Book</a>
+            <a href="{{ route('loans.create', ['patron_id_number' => $patron->id_number]) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 shadow-sm">Check Out</a>
             <a href="{{ route('reservations.create', ['patron_id_number' => $patron->id_number]) }}" class="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-lg text-sm font-semibold hover:bg-indigo-200 shadow-sm">Reserve Book</a>
             @if(auth()->user()->canManage())
                 <a href="{{ route('patrons.edit', $patron) }}" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-semibold hover:bg-amber-600 shadow-sm">Edit</a>
@@ -159,11 +159,11 @@
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="px-6 pt-5 pb-2 flex items-center justify-between">
                     <h3 class="text-sm font-extrabold text-indigo-900 uppercase tracking-wider">Active Loans</h3>
-                    <a href="{{ route('loans.return.form', ['search' => $patron->id_number]) }}" class="text-indigo-600 hover:text-indigo-800 font-medium text-xs print:hidden">Return / renew &rarr;</a>
+                    <a href="{{ route('loans.return.form', ['search' => $patron->id_number]) }}" class="text-indigo-600 hover:text-indigo-800 font-medium text-xs print:hidden">Check in / renew &rarr;</a>
                 </div>
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-50 border-y border-slate-200 text-slate-600 uppercase text-xs font-bold tracking-wider">
-                        <tr><th class="p-3">Book</th><th class="p-3">Issued</th><th class="p-3">Due</th><th class="p-3">Status</th></tr>
+                        <tr><th class="p-3">Book</th><th class="p-3">Checked out</th><th class="p-3">Due</th><th class="p-3">Status</th></tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm">
                         @forelse($activeLoans as $loan)
@@ -191,7 +191,7 @@
                 </div>
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-50 border-y border-slate-200 text-slate-600 uppercase text-xs font-bold tracking-wider">
-                        <tr><th class="p-3">Book</th><th class="p-3">Issued</th><th class="p-3">Returned</th></tr>
+                        <tr><th class="p-3">Book</th><th class="p-3">Checked out</th><th class="p-3">Checked in</th></tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm">
                         @forelse($history as $loan)

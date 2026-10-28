@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Circulation: Issue Book & Return Book.
+ * Circulation: Check Out & Check In.
  *
  * Business rules (per client):
  *  - NO automatic fines / penalties / receipts / generated files.
@@ -49,7 +49,7 @@ class LoanController extends Controller
         return view('loans.index', compact('loans', 'search', 'status', 'stats'));
     }
 
-    /** Issue Book form. */
+    /** Check Out form. */
     public function create()
     {
         $recent = Loan::with(['book', 'patron'])
@@ -201,7 +201,7 @@ class LoanController extends Controller
 
         return redirect()
             ->route('loans.create')
-            ->with('success', "Issued \"{$loan->book->title}\" to {$loan->patron->name}. Due on {$loan->due_date->format('M d, Y')}.");
+            ->with('success', "Checked out \"{$loan->book->title}\" to {$loan->patron->name}. Due on {$loan->due_date->format('M d, Y')}.");
     }
 
     /** Phase 5: session key and how long an idle multi-book session is kept (minutes). */
@@ -263,7 +263,7 @@ class LoanController extends Controller
         return [$patron, $loans];
     }
 
-    /** Return Book screen: lists books currently on loan, searchable. */
+    /** Check In screen: lists books currently on loan, searchable. */
     public function returnForm(Request $request)
     {
         $search = trim((string) $request->input('search'));
@@ -418,14 +418,14 @@ class LoanController extends Controller
 
         if ($loans->isEmpty()) {
             throw ValidationException::withMessages([
-                'accession_number' => "\"{$book->title}\" has no active loan, so there is nothing to return.",
+                'accession_number' => "\"{$book->title}\" has no active loan, so there is nothing to check in.",
             ]);
         }
 
         if ($loans->count() > 1) {
             return redirect()
                 ->route('loans.return.form', ['search' => $accession])
-                ->with('error', "More than one patron has \"{$book->title}\" on loan. Pick the right one below and click Return.");
+                ->with('error', "More than one patron has \"{$book->title}\" on loan. Pick the right one below and click Check In.");
         }
 
         [$loan, $daysLate] = $this->closeLoan($loans->first(), $data, $request);
@@ -457,13 +457,13 @@ class LoanController extends Controller
 
             if ($loan->isVoided()) {
                 throw ValidationException::withMessages([
-                    'loan' => 'This loan was voided, so it cannot be returned.',
+                    'loan' => 'This loan was voided, so it cannot be checked in.',
                 ]);
             }
 
             if ($loan->isReturned()) {
                 throw ValidationException::withMessages([
-                    'loan' => 'This book was already returned.',
+                    'loan' => 'This book was already checked in.',
                 ]);
             }
 
@@ -535,7 +535,7 @@ class LoanController extends Controller
                 $outcome === Loan::OUTCOME_DAMAGED
                     => "Marked \"{$title}\" ({$patron}) as DAMAGED and withdrawn. One copy was removed from the collection.",
                 default
-                    => "Returned \"{$title}\" from {$patron}.",
+                    => "Checked in \"{$title}\" from {$patron}.",
             },
         ];
 
@@ -587,7 +587,7 @@ class LoanController extends Controller
 
             if ($loan->isReturned()) {
                 throw ValidationException::withMessages([
-                    'loan' => 'This book was already returned and cannot be renewed.',
+                    'loan' => 'This book was already checked in and cannot be renewed.',
                 ]);
             }
 

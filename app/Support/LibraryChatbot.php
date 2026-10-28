@@ -403,8 +403,8 @@ class LibraryChatbot
         $days = $this->settings->loanDays();
 
         return $this->out($this->t(
-            "Books are normally lent for {$days} days. The librarian may set a different period when issuing a book.",
-            "Karaniwang {$days} araw ang hiram ng libro. Maaaring magtakda ang librarian ng ibang bilang ng araw kapag ini-issue ang libro."
+            "Books are normally lent for {$days} days. The librarian may set a different period when checking out a book.",
+            "Karaniwang {$days} araw ang hiram ng libro. Maaaring magtakda ang librarian ng ibang bilang ng araw kapag nagche-check out ng libro."
         ));
     }
 

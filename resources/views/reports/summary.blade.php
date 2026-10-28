@@ -11,7 +11,7 @@
     @include('reports._range')
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        @foreach(['Books issued' => $totals['issued'], 'Books returned' => $totals['returned'], 'Renewals' => $totals['renewals'], 'Distinct borrowers' => $totals['patrons']] as $label => $value)
+        @foreach(['Books checked out' => $totals['issued'], 'Books checked in' => $totals['returned'], 'Renewals' => $totals['renewals'], 'Distinct borrowers' => $totals['patrons']] as $label => $value)
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 print:shadow-none">
                 <p class="text-xs uppercase font-bold text-slate-500">{{ $label }}</p>
                 <p class="text-2xl font-extrabold text-indigo-900">{{ $value }}</p>

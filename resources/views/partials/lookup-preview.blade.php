@@ -96,7 +96,7 @@
             nodes.push(el('p', 'text-xs font-semibold text-rose-700 mt-2', 'Marked inactive: cannot ' + (mode === 'issue' ? 'borrow' : 'reserve') + ' until set to active.'));
         }
         if (atLimit) {
-            nodes.push(el('p', 'text-xs font-semibold text-amber-800 mt-2', 'At the borrow limit. A librarian/admin must tick "Override limit" (with a remark) to issue another book.'));
+            nodes.push(el('p', 'text-xs font-semibold text-amber-800 mt-2', 'At the borrow limit. A librarian/admin must tick "Override limit" (with a remark) to check out another book.'));
         }
         if (d.overdue_count > 0) {
             nodes.push(el('p', 'text-xs text-amber-800 mt-2', 'Has overdue item(s). For information only; borrowing is not blocked.'));
@@ -147,10 +147,10 @@
         if (meta) nodes.push(el('p', 'text-xs text-slate-500 mt-2', meta));
 
         if (mode === 'issue' && !d.is_available) {
-            nodes.push(el('p', 'text-xs font-semibold text-rose-700 mt-2', 'No copy on the shelf: it cannot be issued right now.'));
+            nodes.push(el('p', 'text-xs font-semibold text-rose-700 mt-2', 'No copy on the shelf: it cannot be checked out right now.'));
         }
         if (mode === 'reserve' && d.is_available) {
-            nodes.push(el('p', 'text-xs text-emerald-800 mt-2', 'A copy is on the shelf right now; you can issue it directly instead.'));
+            nodes.push(el('p', 'text-xs text-emerald-800 mt-2', 'A copy is on the shelf right now; you can check it out directly instead.'));
         }
         if (mode === 'reserve' && !d.is_available) {
             nodes.push(el('p', 'text-xs text-amber-800 mt-2', 'All copies are on loan; the reservation will wait in the queue.'));
@@ -167,7 +167,7 @@
         }
         if (d.patron_reservation_position) {
             const p = el('p', 'text-xs text-indigo-800 mt-1', 'This patron is #' + d.patron_reservation_position + ' in the reservation queue.');
-            if (mode === 'issue') p.append(' Mark it Fulfilled after issuing.');
+            if (mode === 'issue') p.append(' Mark it Fulfilled after checking out.');
             nodes.push(p);
         }
 
@@ -179,7 +179,7 @@
             actions.append(link('Reserve this book instead →', root.dataset.reserveUrl + '?' + q, false));
         }
         if (mode === 'reserve' && d.is_available) {
-            actions.append(link('Issue it now →', root.dataset.issueUrl + '?' + q, false));
+            actions.append(link('Check out now →', root.dataset.issueUrl + '?' + q, false));
         }
         nodes.push(actions);
 
