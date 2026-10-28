@@ -22,7 +22,7 @@
         ]],
     ];
 
-    if ($user && $user->isAdmin()) {
+    if ($user && $user->hasRole('admin', 'librarian')) {
         $groups[] = ['Admin', [
             ['Utilities', 'utilities', route('utilities.index'), request()->routeIs('utilities.*', 'users.*', 'settings.*')],
 

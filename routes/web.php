@@ -60,7 +60,7 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Admin only: user management (never hard-deletes; accounts are deactivated)
-    Route::middleware('role:admin')->prefix('users')->name('users.')->group(function () {
+    Route::middleware('role:admin,librarian')->prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
         Route::get('/create', [UserController::class, 'create'])->name('create');
         Route::post('/', [UserController::class, 'store'])->name('store');
@@ -72,12 +72,12 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
     });
 
     // Admin only: Utilities hub (Administration | Users List | Settings tabs). Phase 1 = shell only.
-    Route::middleware('role:admin')->prefix('utilities')->name('utilities.')->group(function () {
+    Route::middleware('role:admin,librarian')->prefix('utilities')->name('utilities.')->group(function () {
         Route::get('/', [UtilitiesController::class, 'index'])->name('index');
     });
 
     // Admin only: Settings (excluded days, report heading, holidays / suspensions, loan policy)
-    Route::middleware('role:admin')->prefix('settings')->name('settings.')->group(function () {
+    Route::middleware('role:admin,librarian')->prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
         Route::put('/', [SettingsController::class, 'update'])->name('update');
         Route::post('/holidays', [SettingsController::class, 'holidayStore'])->name('holidays.store');
