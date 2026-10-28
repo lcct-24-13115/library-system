@@ -20,6 +20,7 @@
             @if(auth()->user()->canManage())
                 <a href="{{ route('books.edit', $book->id) }}" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-semibold hover:bg-amber-600 shadow-sm">Edit</a>
             @endif
+            <button type="button" data-websearch-open data-websearch-query="{{ \Illuminate\Support\Str::limit($book->title, 200, '') }}" class="px-4 py-2 border border-indigo-300 text-indigo-700 rounded-lg text-sm font-semibold hover:bg-indigo-50">Search this title online</button>
             <button onclick="window.print()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-900 shadow-sm">Print</button>
         </div>
     </div>

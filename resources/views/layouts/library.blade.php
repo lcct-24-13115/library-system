@@ -42,5 +42,7 @@
         </div>
     </div>
 
+    @include('partials.web-search')
+
 </body>
 </html>

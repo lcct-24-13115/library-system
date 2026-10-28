@@ -18,6 +18,7 @@
         ['Library', [
             ['Visitor Log', 'attendance', route('attendance.history'), request()->routeIs('attendance.stats', 'attendance.history')],
             ['Reports', 'reports', route('reports.index'), request()->routeIs('reports.*')],
+            ['Web Search', 'globe', '#web-search', false],
         ]],
     ];
 
@@ -45,6 +46,13 @@
                     <div class="nav-label">{{ $label }}</div>
                 @endif
                 @foreach($items as [$text, $icon, $href, $active])
+                    @if($href === '#web-search')
+                        {{-- Opens the Web Search modal (partials/web-search.blade.php) --}}
+                        <button type="button" class="nav-link ws-trigger" data-websearch-open aria-haspopup="dialog">
+                            <x-icon :name="$icon" :size="16" />{{ $text }}
+                        </button>
+                        @continue
+                    @endif
                     <a href="{{ $href }}" class="nav-link {{ $active ? 'active' : '' }}" @if($active) aria-current="page" @endif>
                         <x-icon :name="$icon" :size="16" />{{ $text }}
                     </a>
