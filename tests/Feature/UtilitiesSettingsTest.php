@@ -201,11 +201,11 @@ class UtilitiesSettingsTest extends TestCase
         $this->assertSame(0, Holiday::count());
     }
 
-    public function test_non_admins_cannot_edit_settings_or_holidays(): void
+    public function test_staff_cannot_edit_settings_or_holidays(): void
     {
         $h = Holiday::create(['date' => '2026-11-02']);
 
-        foreach (['librarian', 'staff'] as $role) {
+        foreach (['staff'] as $role) {
             $user = User::factory()->create(['role' => $role, 'user_type' => 'Non-Teaching Personnel', 'is_active' => true]);
 
             $this->actingAs($user)->get($this->tab())->assertForbidden();

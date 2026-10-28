@@ -57,4 +57,22 @@ return [
     */
     'attendance_duplicate_minutes' => (int) env('LIBRARY_ATTENDANCE_DUPLICATE_MINUTES', 5),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Libraries
+    |--------------------------------------------------------------------------
+    |
+    | The three libraries of the school (same as the legacy system). This is the
+    | ONE list used by the book form, the user forms, validation and the public
+    | catalog. 'name' is what is stored in books.library / users.library,
+    | 'label' is the short text shown on tabs and badges, 'slug' is for URLs.
+    | Read it through App\Support\Libraries, not directly.
+    |
+    */
+    'libraries' => [
+        ['name' => 'College Library',      'label' => 'College',      'slug' => 'college'],
+        ['name' => 'Grade School Library', 'label' => 'Grade School', 'slug' => 'grade-school'],
+        ['name' => 'High School Library',  'label' => 'High School',  'slug' => 'high-school'],
+    ],
+
 ];

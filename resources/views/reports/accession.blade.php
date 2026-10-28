@@ -21,7 +21,8 @@
                     <label class="block text-xs font-bold uppercase text-slate-600 mb-1">{{ $label }}</label>
                     <select name="{{ $field }}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
                         <option value="">All</option>
-                        @foreach(config("rda.$key") as $opt)
+                        @php($options = $key === 'libraries' ? \App\Support\Libraries::names() : config("rda.$key"))
+                        @foreach($options as $opt)
                             <option value="{{ $opt }}" @selected(($filters[$field] ?? '') === $opt)>{{ $opt }}</option>
                         @endforeach
                     </select>

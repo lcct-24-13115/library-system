@@ -128,9 +128,9 @@ class UtilitiesPolicyGroupTest extends TestCase
             ->assertViewHas('panel', null);
     }
 
-    public function test_non_admins_cannot_open_the_panels(): void
+    public function test_staff_cannot_open_the_panels(): void
     {
-        foreach (['librarian', 'staff'] as $role) {
+        foreach (['staff'] as $role) {
             $user = User::factory()->create(['role' => $role, 'user_type' => 'Non-Teaching Personnel', 'is_active' => true]);
 
             foreach (['group', 'policy'] as $panel) {

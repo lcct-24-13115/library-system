@@ -32,13 +32,7 @@ class User extends Authenticatable
         'Non-Teaching Personnel',
     ];
 
-    /** Libraries an account can be assigned to. Blank (NULL) = all libraries. */
-    public const LIBRARIES = [
-        'Grade School Library',
-        'Junior High School Library',
-        'Senior High School Library',
-        'College Library',
-    ];
+    // Libraries an account can be assigned to: see App\Support\Libraries. Blank (NULL) = all libraries.
 
     protected $attributes = [
         'role'      => 'staff',

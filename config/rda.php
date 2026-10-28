@@ -133,12 +133,7 @@ return [
         'Special collection',
     ],
 
-    'libraries' => [
-        'All libraries',
-        'College Library',
-        'High School Library',
-        'Grade School Library',
-    ],
+    // The list of libraries now lives in config/library.php (App\Support\Libraries).
 
     'genres' => [
         'abstract or summary',

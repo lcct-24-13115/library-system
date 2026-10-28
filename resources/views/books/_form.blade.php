@@ -177,7 +177,7 @@
         <label class="{{ $lbl }}">Library</label>
         <select name="library" class="{{ $in }}">
             <option value="">— Select —</option>
-            @foreach(config('rda.libraries') as $opt)
+            @foreach(\App\Support\Libraries::names() as $opt)
                 <option value="{{ $opt }}" @selected($val('library') === $opt)>{{ $opt }}</option>
             @endforeach
         </select>

@@ -61,9 +61,9 @@ class UtilitiesHubTest extends TestCase
             ->assertViewHas('tab', 'administration');
     }
 
-    public function test_librarian_and_staff_are_forbidden(): void
+    public function test_librarian_can_open_utilities_but_staff_is_forbidden(): void
     {
-        $this->actingAs($this->user('librarian'))->get(route('utilities.index'))->assertForbidden();
+        $this->actingAs($this->user('librarian'))->get(route('utilities.index'))->assertOk();
         $this->actingAs($this->user('staff'))->get(route('utilities.index'))->assertForbidden();
     }
 
@@ -72,12 +72,15 @@ class UtilitiesHubTest extends TestCase
         $this->get(route('utilities.index'))->assertRedirect(route('login'));
     }
 
-    public function test_only_admins_see_the_sidebar_link(): void
+    public function test_admins_and_librarians_see_the_sidebar_link_but_staff_do_not(): void
     {
         $this->actingAs($this->user('admin'))->get(route('dashboard'))
             ->assertSee(route('utilities.index'), false);
 
         $this->actingAs($this->user('librarian'))->get(route('dashboard'))
+            ->assertSee(route('utilities.index'), false);
+
+        $this->actingAs($this->user('staff'))->get(route('dashboard'))
             ->assertDontSee(route('utilities.index'), false);
     }
 }

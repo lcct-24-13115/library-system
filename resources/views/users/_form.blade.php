@@ -41,7 +41,7 @@
     <label class="block text-sm font-semibold text-slate-700 mb-1">Library</label>
     <select name="library" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-500">
         <option value="">All libraries</option>
-        @foreach(\App\Models\User::LIBRARIES as $lib)
+        @foreach(\App\Support\Libraries::names() as $lib)
             <option value="{{ $lib }}" @selected(old('library', $user->library ?? '') === $lib)>{{ $lib }}</option>
         @endforeach
     </select>

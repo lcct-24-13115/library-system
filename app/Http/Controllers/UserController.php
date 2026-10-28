@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\Libraries;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -55,7 +56,7 @@ class UserController extends Controller
             'password'  => ['required', 'confirmed', Password::defaults()],
             'role'      => ['required', Rule::in(User::ROLES)],
             'user_type' => ['required', Rule::in(User::USER_TYPES)],
-            'library'   => ['nullable', Rule::in(User::LIBRARIES)],
+            'library'   => ['nullable', Rule::in(Libraries::names())],
         ]);
 
         $data['library'] = $data['library'] ?? null;
@@ -83,7 +84,7 @@ class UserController extends Controller
             'password'  => ['nullable', 'confirmed', Password::defaults()],
             'role'      => ['required', Rule::in(User::ROLES)],
             'user_type' => ['required', Rule::in(User::USER_TYPES)],
-            'library'   => ['nullable', Rule::in(User::LIBRARIES)],
+            'library'   => ['nullable', Rule::in(Libraries::names())],
         ]);
 
         if ($user->is($request->user()) && $data['role'] !== $user->role) {

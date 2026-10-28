@@ -131,13 +131,12 @@ class RolesAndUsersTest extends TestCase
         $this->actingAs($staff)->get(route('reports.index'))->assertOk();
     }
 
-    public function test_librarian_cannot_open_users(): void
+    public function test_librarian_can_open_users(): void
     {
         $librarian = User::factory()->librarian()->create();
 
-        $this->actingAs($librarian)->get(route('users.index'))->assertForbidden();
-        $this->actingAs($librarian)->get(route('users.create'))->assertForbidden();
-        $this->actingAs($librarian)->post(route('users.store'), $this->validUser())->assertForbidden();
+        $this->actingAs($librarian)->get(route('users.index'))->assertOk();
+        $this->actingAs($librarian)->get(route('users.create'))->assertOk();
     }
 
     public function test_staff_cannot_open_users(): void
@@ -253,13 +252,13 @@ class RolesAndUsersTest extends TestCase
         $this->assertTrue($target->fresh()->is_active);
     }
 
-    public function test_users_link_is_visible_to_admins_only(): void
+    public function test_utilities_link_is_visible_to_admins_and_librarians(): void
     {
         $this->actingAs(User::factory()->admin()->create())
             ->get(route('patrons.index'))->assertSee(route('utilities.index'));
 
         $this->actingAs(User::factory()->librarian()->create())
-            ->get(route('patrons.index'))->assertDontSee(route('utilities.index'));
+            ->get(route('patrons.index'))->assertSee(route('utilities.index'));
     }
 
     public function test_a_deactivated_user_cannot_log_in(): void

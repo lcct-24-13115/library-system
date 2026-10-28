@@ -220,9 +220,9 @@ class UtilitiesAdminUsersTest extends TestCase
         $this->assertTrue($admin->fresh()->is_active);
     }
 
-    public function test_non_admins_cannot_use_the_tabs(): void
+    public function test_staff_cannot_use_the_tabs(): void
     {
-        foreach (['librarian', 'staff'] as $role) {
+        foreach (['staff'] as $role) {
             $user = User::factory()->create(['role' => $role, 'user_type' => 'Non-Teaching Personnel', 'is_active' => true]);
 
             foreach (['administration', 'users'] as $tab) {

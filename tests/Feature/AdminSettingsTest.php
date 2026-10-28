@@ -47,10 +47,10 @@ class AdminSettingsTest extends TestCase
             'name' => 'Ems', 'email' => 'ems@example.com',
             'password' => 'password123', 'password_confirmation' => 'password123',
             'role' => 'librarian', 'user_type' => 'Senior High School Faculty',
-            'library' => 'Senior High School Library',
+            'library' => 'High School Library',
         ])->assertRedirect(route('users.index'));
 
-        $this->assertSame('Senior High School Library', User::where('email', 'ems@example.com')->first()->library);
+        $this->assertSame('High School Library', User::where('email', 'ems@example.com')->first()->library);
         $this->assertSame('All libraries', $admin->fresh()->libraryLabel());
     }
 
@@ -72,9 +72,9 @@ class AdminSettingsTest extends TestCase
             ->assertOk()->assertSee('College Library')->assertSee('All libraries');
     }
 
-    public function test_only_admin_can_open_settings(): void
+    public function test_admin_and_librarian_can_open_settings_but_staff_cannot(): void
     {
-        $this->actingAs($this->user('librarian'))->get(route('settings.index'))->assertForbidden();
+        $this->actingAs($this->user('librarian'))->get(route('settings.index'))->assertOk();
         $this->actingAs($this->user('staff'))->get(route('settings.policy'))->assertForbidden();
         $this->actingAs($this->user('admin'))->get(route('settings.index'))->assertOk();
         $this->actingAs($this->user('admin'))->get(route('settings.policy'))->assertOk();

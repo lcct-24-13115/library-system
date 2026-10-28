@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Book;
+use App\Support\Libraries;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 
 class BookController extends Controller
@@ -110,7 +112,7 @@ class BookController extends Controller
             'genre'                       => 'nullable|string|max:255',
             'summary'                     => 'nullable|string|max:5000',
             'notes'                       => 'nullable|string|max:5000',
-            'library'                     => 'nullable|string|max:255',
+            'library'                     => ['nullable', 'string', 'max:255', Rule::in(Libraries::names())],
             'location'                    => 'nullable|string|max:255',
             'date_acquired'               => 'nullable|date',
             'dealer_donor'                => 'nullable|string|max:255',

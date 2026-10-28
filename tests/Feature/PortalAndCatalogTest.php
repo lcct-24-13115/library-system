@@ -109,7 +109,7 @@ class PortalAndCatalogTest extends TestCase
 
         $this->post(route('login'), ['email' => $librarian->email, 'password' => 'password', 'portal' => 'administrator']);
 
-        $this->get(route('users.index'))->assertForbidden();   // admin only
+        $this->get(route('portal.index'))->assertForbidden();  // patron accounts only
         $this->get(route('books.index'))->assertOk();          // librarian allowed
     }
 

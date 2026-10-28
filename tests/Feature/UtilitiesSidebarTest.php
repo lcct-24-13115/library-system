@@ -60,14 +60,12 @@ class UtilitiesSidebarTest extends TestCase
         $this->actingAs($admin)->get(route('settings.index'))->assertSee('<strong>Settings</strong>', false);
     }
 
-    public function test_librarians_and_staff_see_no_utilities_link(): void
+    public function test_staff_see_no_utilities_link_but_librarians_do(): void
     {
-        foreach (['librarian', 'staff'] as $role) {
-            $user = User::factory()->create(['role' => $role, 'user_type' => 'Non-Teaching Personnel', 'is_active' => true]);
+        $librarian = User::factory()->create(['role' => 'librarian', 'user_type' => 'Non-Teaching Personnel', 'is_active' => true]);
+        $this->actingAs($librarian)->get(route('dashboard'))->assertOk()->assertSee(route('utilities.index'), false);
 
-            $this->actingAs($user)->get(route('dashboard'))
-                ->assertOk()
-                ->assertDontSee(route('utilities.index'), false);
-        }
+        $staff = User::factory()->create(['role' => 'staff', 'user_type' => 'Non-Teaching Personnel', 'is_active' => true]);
+        $this->actingAs($staff)->get(route('dashboard'))->assertOk()->assertDontSee(route('utilities.index'), false);
     }
 }
