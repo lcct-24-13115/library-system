@@ -16,6 +16,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\UtilitiesController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebSearchController;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +69,11 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
         Route::post('/{user}/deactivate', [UserController::class, 'deactivate'])->name('deactivate');
         Route::post('/{user}/activate', [UserController::class, 'activate'])->name('activate');
         Route::post('/{user}/reset-password', [UserController::class, 'resetPassword'])->name('reset-password');
+    });
+
+    // Admin only: Utilities hub (Administration | Users List | Settings tabs). Phase 1 = shell only.
+    Route::middleware('role:admin')->prefix('utilities')->name('utilities.')->group(function () {
+        Route::get('/', [UtilitiesController::class, 'index'])->name('index');
     });
 
     // Admin only: Settings (excluded days, report heading, holidays / suspensions, loan policy)
