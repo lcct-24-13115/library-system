@@ -189,7 +189,7 @@
                 var win = window.open(res.data.url, '_blank');
                 if (win) {
                     try { win.opener = null; } catch (err) { /* ignore */ }
-                    close();
+                    // The modal stays open on purpose, so the user can search again or try another library.
                 } else {
                     // Pop-up blocker: let the user open it with one click.
                     showMessage('Your browser blocked the new tab.', res.data.url);
