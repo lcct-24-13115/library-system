@@ -17,6 +17,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WebSearchController;
 use Illuminate\Support\Facades\Route;
 
 // Splash screen (the book opens, then the sign-in page). Signed-in users go straight to their home.
@@ -120,6 +121,10 @@ Route::middleware(['auth', 'role:admin,librarian,staff'])->group(function () {
     // v3: Live preview lookups (JSON) used by the Check Out / Reserve forms
     Route::get('/lookup/patron', [LookupController::class, 'patron'])->name('lookup.patron');
     Route::get('/lookup/book', [LookupController::class, 'book'])->name('lookup.book');
+
+    // Web Search: open an external library site (addresses come only from config/web_search.php)
+    Route::get('/web-search/libraries', [WebSearchController::class, 'libraries'])->name('websearch.libraries');
+    Route::post('/web-search/go', [WebSearchController::class, 'go'])->middleware('throttle:30,1')->name('websearch.go');
 
     // v3: Attendance reports (staff only; the student check-in screen is declared above)
     Route::get('/attendance/stats', [AttendanceController::class, 'stats'])->name('attendance.stats');
