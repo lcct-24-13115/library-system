@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Admin-only "Utilities" hub (legacy screen): one page with three tabs.
- * Phase 1 is only the shell (tab switching). The tab contents are filled in later phases.
+ * Phase 2: Administration (add / edit a user) and Users List.
+ * The forms post to the existing UserController routes (same validation, same rules).
+ * Accounts are deactivated, never deleted.
  */
 class UtilitiesController extends Controller
 {
@@ -15,6 +19,13 @@ class UtilitiesController extends Controller
         'administration' => 'Administration',
         'users'          => 'Users List',
         'settings'       => 'Settings',
+    ];
+
+    /** role value => label shown as "Access Right". */
+    public const ROLE_LABELS = [
+        'admin'     => 'Administrator',
+        'librarian' => 'Librarian',
+        'staff'     => 'Staff',
     ];
 
     public function index(Request $request)
@@ -26,9 +37,61 @@ class UtilitiesController extends Controller
             $tab = 'administration';
         }
 
-        return view('utilities.index', [
-            'tabs' => self::TABS,
-            'tab'  => $tab,
-        ]);
+        $data = [
+            'tabs'       => self::TABS,
+            'tab'        => $tab,
+            'roleLabels' => self::ROLE_LABELS,
+            'editUser'   => null,
+        ];
+
+        if ($tab === 'administration') {
+            $data['editUser'] = $this->editUser($request);
+        }
+
+        if ($tab === 'users') {
+            $data += $this->usersData($request);
+        }
+
+        return view('utilities.index', $data);
+    }
+
+    /** The staff account chosen with ?edit={id}. Portal (patron) accounts and unknown ids are ignored. */
+    private function editUser(Request $request): ?User
+    {
+        $id = $request->query('edit');
+
+        if (! is_scalar($id) || ! ctype_digit((string) $id)) {
+            return null;
+        }
+
+        return User::query()
+            ->where('role', '!=', User::PATRON_ROLE)
+            ->find((int) $id);
+    }
+
+    private function usersData(Request $request): array
+    {
+        $userType = (string) $request->query('user_type', '');
+
+        $users = User::query()
+            ->where('role', '!=', User::PATRON_ROLE)
+            ->when(in_array($userType, User::USER_TYPES, true), fn ($q) => $q->where('user_type', $userType))
+            ->orderBy('name')
+            ->paginate(20)
+            ->withQueryString();
+
+        // "Current user" = has an active session in the last 5 minutes (needs SESSION_DRIVER=database).
+        $onlineIds = [];
+        if (config('session.driver') === 'database') {
+            $onlineIds = DB::table(config('session.table', 'sessions'))
+                ->whereNotNull('user_id')
+                ->where('last_activity', '>=', now()->subMinutes(5)->timestamp)
+                ->pluck('user_id')
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->all();
+        }
+
+        return compact('users', 'userType', 'onlineIds');
     }
 }

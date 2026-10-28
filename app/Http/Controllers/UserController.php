@@ -63,7 +63,7 @@ class UserController extends Controller
 
         User::create($data);
 
-        return redirect()->route('users.index')->with('success', 'User created.');
+        return redirect()->to($request->input('from') === 'utilities' ? route('utilities.index', ['tab' => 'users']) : route('users.index'))->with('success', 'User created.');
     }
 
     public function edit(User $user)
@@ -98,7 +98,7 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('users.index')->with('success', 'User updated.');
+        return redirect()->to($request->input('from') === 'utilities' ? route('utilities.index', ['tab' => 'users']) : route('users.index'))->with('success', 'User updated.');
     }
 
     public function deactivate(Request $request, User $user)
