@@ -184,8 +184,11 @@
                     throw new Error(first || 'Request failed');
                 }
                 remember(select.value);
-                var win = window.open(res.data.url, '_blank', 'noopener,noreferrer');
+                // Note: window.open() with the 'noopener' feature ALWAYS returns null, even when the tab
+                // opens, so it cannot be used to detect a pop-up blocker. Open normally, then cut the link.
+                var win = window.open(res.data.url, '_blank');
                 if (win) {
+                    try { win.opener = null; } catch (err) { /* ignore */ }
                     close();
                 } else {
                     // Pop-up blocker: let the user open it with one click.

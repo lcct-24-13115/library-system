@@ -5,7 +5,7 @@ No database change. Staff layout only (admin, librarian, staff). Patrons and the
 ## What the user sees
 - Sidebar, group "Library": new **Web Search** button (globe icon).
 - It opens a modal: search expression, library dropdown (default Philippine E-Lib), **WEB NAVIGATION** button.
-- On click: POST `websearch.go`, then the returned address opens in a NEW tab (`noopener,noreferrer`). No iframe.
+- On click: POST `websearch.go`, then the returned address opens in a NEW tab (opener link cut). No iframe.
 - Enter submits; Esc, the X button or a click outside closes it. Loading state on the button, clear error messages.
 - If the browser blocks the new tab, an "Open it here" link appears.
 

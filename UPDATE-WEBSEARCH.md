@@ -21,7 +21,7 @@ No database change. Staff only (admin, librarian, staff).
 - Search text is encoded, limited to 200 characters, never saved or logged.
 - Library addresses are not sent to the browser (only key and name).
 - Routes are inside the staff group (patrons 403, guests go to login), throttled 30/min.
-- The new tab opens with `noopener,noreferrer`. No iframe (library sites block it).
+- The new tab is opened and its opener link is cut (`win.opener = null`). No iframe (library sites block it).
 
 ## Add or fix a library
 Edit `config/web_search.php`:
