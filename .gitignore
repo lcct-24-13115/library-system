@@ -31,3 +31,7 @@ Thumbs.db
 
 /database/*.sqlite
 *.xlsx
+
+*.csv
+
+BED_students-*.csv

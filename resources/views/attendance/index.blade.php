@@ -36,7 +36,7 @@
     <main class="flex-1 flex flex-col items-center px-4 pb-10">
 
         {{-- 1. Header --}}
-        <header class="text-center mt-2 mb-8">
+        <header class="brand-hero brand-hero--center w-full max-w-3xl text-center mt-2 mb-8">
             <img src="{{ asset('images/salrc-logo-full.png') }}" alt="Saint Augustine Learning Center"
                  class="mx-auto w-20 h-20 object-contain mb-3">
             <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Saint Augustine Learning Center</h1>

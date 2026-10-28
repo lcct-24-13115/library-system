@@ -88,4 +88,5 @@
 </script>
 <link rel="stylesheet" href="{{ asset('css/salrc.css') }}?v={{ file_exists(public_path('css/salrc.css')) ? filemtime(public_path('css/salrc.css')) : 1 }}">
 <link rel="stylesheet" href="{{ asset('css/salrc-3d.css') }}?v={{ file_exists(public_path('css/salrc-3d.css')) ? filemtime(public_path('css/salrc-3d.css')) : 1 }}">
+<link rel="stylesheet" href="{{ asset('css/salrc-brand.css') }}?v={{ file_exists(public_path('css/salrc-brand.css')) ? filemtime(public_path('css/salrc-brand.css')) : 1 }}">
 <script src="{{ asset('js/salrc-3d.js') }}?v={{ file_exists(public_path('js/salrc-3d.js')) ? filemtime(public_path('js/salrc-3d.js')) : 1 }}" defer></script>

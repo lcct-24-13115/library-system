@@ -1,0 +1,70 @@
+/* ==========================================================================
+   SALRC brand theme: Saint Augustine painting as the background.
+   One image, one look, used the same way everywhere:
+   - dark navy panels (sidebar, hero banners): painting under a navy wash
+   - light bars (topbar, portal header): painting under a white wash
+   - landing / auth pages: painting on the right, fading into the page colour
+   To change the picture, replace public/images/st-augustine.jpg.
+   ========================================================================== */
+:root { --sa-img: url('../images/st-augustine.jpg'); }
+
+/* ---------- Sidebar ---------- */
+body.salrc .sidebar {
+  background:
+    linear-gradient(180deg, rgba(10,26,64,.90) 0%, rgba(15,37,87,.78) 45%, rgba(10,26,64,.88) 100%),
+    var(--sa-img) 58% 0 / cover no-repeat,
+    #0f2557;
+}
+
+/* ---------- Top bar ---------- */
+body.salrc .topbar {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,.86) 45%, rgba(236,243,255,.55) 100%),
+    var(--sa-img) 60% 20% / cover no-repeat,
+    #fff;
+}
+
+/* ---------- Hero banners (dashboard header, attendance header) ---------- */
+.brand-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 22px 28px;
+  background:
+    linear-gradient(90deg, #0f2557 0%, rgba(15,37,87,.92) 38%, rgba(15,37,87,.30) 100%),
+    var(--sa-img) 100% 18% / cover no-repeat,
+    #0f2557;
+  box-shadow: 0 2px 4px rgba(15,37,87,.10), 0 18px 34px -12px rgba(15,37,87,.45);
+  color: #fff;
+}
+.brand-hero h1, .brand-hero h2, .brand-hero p, .brand-hero #live-time { color: #fff !important; }
+.brand-hero h2, .brand-hero h1 { text-shadow: 0 2px 12px rgba(0,0,0,.35) !important; }
+.brand-hero .text-slate-500, .brand-hero .text-slate-400, .brand-hero .text-indigo-600 { color: #c7d8ff !important; }
+
+/* centred variant (attendance kiosk): even navy wash so the centred text stays readable */
+.brand-hero--center {
+  text-align: center;
+  padding: 26px 24px 28px;
+  background:
+    linear-gradient(180deg, rgba(10,26,64,.84) 0%, rgba(15,37,87,.72) 100%),
+    var(--sa-img) 60% 20% / cover no-repeat,
+    #0f2557;
+}
+
+/* ---------- Landing, welcome and auth pages ---------- */
+body.salrc .landing {
+  background:
+    linear-gradient(90deg, #eef3fc 0%, rgba(238,243,252,.93) 38%, rgba(238,243,252,.55) 100%),
+    var(--sa-img) right top / auto 100dvh no-repeat,
+    #eef3fc;
+}
+
+/* ---------- Patron portal header ---------- */
+body.salrc-portal > header {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.96) 0%, rgba(255,255,255,.86) 45%, rgba(236,243,255,.55) 100%),
+    var(--sa-img) 60% 20% / cover no-repeat,
+    #fff;
+}
+
+@media print { .brand-hero { background: #fff; color: #000; box-shadow: none; } }

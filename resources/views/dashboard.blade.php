@@ -3,7 +3,7 @@
 @section('title', 'Dashboard - SALRC Library')
 
 @section('content')
-    <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div class="brand-hero mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
             <h2 class="text-3xl font-extrabold text-slate-900">Dashboard</h2>
             <p id="live-date" class="text-slate-500 text-sm">{{ now()->format('l, F j, Y') }}</p>
